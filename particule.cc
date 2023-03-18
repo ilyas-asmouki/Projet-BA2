@@ -1,4 +1,5 @@
 #include "particule.h"
+#include <cmath>
 
 //~ #ifndef MESSAGE_H_INCLUDED
 //~ #define MESSAGE_H_INCLUDED
@@ -14,8 +15,8 @@ using namespace std;
 
 Particule::Particule(double x, double y, double cote) : forme({{x,y},cote})
 {
-    detect_particle_outside(x, y, cote);
-    detect_particle_too_small(x, y, cote);
+    detect_particle_outside();
+    detect_particle_too_small();
     tab_particule.push_back(*this);
 }
 
@@ -24,20 +25,21 @@ Carre Particule::getForme() const
 	return forme;
 }
 
-void detect_particle_outside(double x, double y, double s)
+void Particule::detect_particle_outside()
 {
-	if (abs(x) + s / 2 > dmax or abs(y) + s / 2 > dmax)
+	if (abs(forme.centre.x) + forme.cote / 2 > dmax
+	or abs(forme.centre.y) + forme.cote / 2 > dmax)
     {
-        cout << message::particle_outside(x, y, s);
+        cout << message::particle_outside(forme.centre.x, forme.centre.y, forme.cote);
         exit(EXIT_FAILURE);
     }
 }
 
-void detect_particle_too_small(double x, double y, double s)
+void Particule::detect_particle_too_small()
 {
-	 if (s < d_particule_min)
+	 if (forme.cote < d_particule_min)
     {
-        cout << message::particle_too_small(x, y, s);
+        cout << message::particle_too_small(forme.centre.x,forme.centre.y, forme.cote);
         exit(EXIT_FAILURE);
     }
 }
@@ -54,3 +56,4 @@ void Particule::detect_particle_superposition()
 		}
 	}
 }
+
