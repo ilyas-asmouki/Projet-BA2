@@ -12,11 +12,11 @@ double norme(S2d vect)
 	return sqrt(pow(vect.x, 2) + pow(vect.y, 2));
 }
 
-bool superposition_carres(Carre s1, Carre s2, MODE mode)
+bool superposition_carres(const Carre s1, const Carre s2, MODE mode)
 {
 	double d1 = s1.cote, d2 = s2.cote;
 	return (abs(s2.centre.x - s1.centre.x) < d1 / 2 + d2 / 2 + epsil_zero*mode)
-		and (abs(s2.centre.y - s1.centre.x) < d1 / 2 + d2 / 2 + epsil_zero*mode);
+		and (abs(s2.centre.y - s1.centre.y) < d1 / 2 + d2 / 2 + epsil_zero*mode);
 }
 
 bool superposition_cercles(Cercle c1, Cercle  c2, MODE mode)
@@ -24,7 +24,7 @@ bool superposition_cercles(Cercle c1, Cercle  c2, MODE mode)
     return ((c1.rayon + c2.rayon + epsil_zero*mode) > distance(c1.centre, c2.centre));
 }
 
-bool superposition_cerclecarre(Cercle c2, Carre c1, MODE mode)
+bool superposition_cerclecarre(Carre c1, Cercle c2, MODE mode)
 {
 	double x1 = c1.centre.x, y1 = c1.centre.y, d1 = c1.cote;
 	double x2 = c2.centre.x, y2 = c2.centre.y, r2 = c2.rayon;
