@@ -7,8 +7,9 @@ void erreur_fichier(int argc);
 int main(int argc, char* argv[])
 {	
 	erreur_fichier(argc);
-	Simulation Propre_en_Ordre;
-	Propre_en_Ordre.lecture(argv[2]);
+	//~ Simulation Propre_en_Ordre;
+	//~ Propre_en_Ordre.
+	lecture(argv[1]);
 	return 0;
 }
 
