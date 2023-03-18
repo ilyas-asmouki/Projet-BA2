@@ -12,7 +12,7 @@ class Robot {
 	 Cercle forme;
 	public :
 	 Robot(double x, double y);
-};
+}
 
 class Spatial : public Robot {
 	private :
