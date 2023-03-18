@@ -93,3 +93,4 @@ void Robot::TestCollision() {
 	return;
 }	
 		
+void decodage_robot(std::string v){	
