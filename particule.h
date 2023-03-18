@@ -11,7 +11,6 @@ class Particule
 {
     private:
     Carre forme;
-    static std::vector<Particule> tab_particule;
     public:
     Particule(double x, double y, double cote);
     Carre getForme() const;
@@ -20,4 +19,7 @@ class Particule
     void detect_particle_superposition(); 
 };
 
+static std::vector<Particule> tab_particule;
+
 #endif
+
