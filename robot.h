@@ -15,7 +15,7 @@ class Robot {
 	public :
 	 Robot(double x, double y);
 	 Cercle getforme();
-	 void TestCollision();
+	 void test_robot_superposition();
 	 void test_particle_robot_superposition();
 };
 
