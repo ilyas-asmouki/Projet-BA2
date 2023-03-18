@@ -19,6 +19,7 @@
 
 using namespace std;
 static vector<Robot> tab_robot;
+enum{SPATIAL=2, REPARATEUR, NEUTRALISEUR};
 
 Robot::Robot(double x = 0, double y = 0) : forme({{x, y}, 0})
 {}
