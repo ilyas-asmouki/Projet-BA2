@@ -1,5 +1,6 @@
 #include "particule.h"
 #include <cmath>
+#include <iostream>
 
 //~ #ifndef MESSAGE_H_INCLUDED
 //~ #define MESSAGE_H_INCLUDED
@@ -13,10 +14,14 @@
 
 using namespace std;
 
-Particule::Particule(double x, double y, double cote) : forme({{x,y},cote})
+Particule::Particule(double x, double y, double cote)
 {
+	forme.centre.x = x;
+	forme.centre.y = y;
+	forme.cote = cote;
     detect_particle_outside();
     detect_particle_too_small();
+    detect_particle_superposition();
     tab_particule.push_back(*this);
 }
 
@@ -58,11 +63,9 @@ void Particule::detect_particle_superposition()
 }
 
 void decodage_particule(istringstream& data){
-	double x;
-	double y;
-	double d;
-	data>>x>>y>>d;
+	double x, y, d;
+	data >> x >> y >> d;
 	Particule particule(x, y, d);
-	return;
 }
+
 
