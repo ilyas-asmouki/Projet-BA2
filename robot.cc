@@ -123,10 +123,10 @@ unsigned decodage_spatial(istringstream& data, int& compteur1, int& compteur2){
 	unsigned nbNd;
 	unsigned nbRr;
 	unsigned nbRs;
+	data>>x>>y>>nbUpdate>>nbNr>>nbNs>>nbNd>>nbRr>>nbRs;
 	compteur1 = nbNr + nbNd + nbNs;
 	compteur2 = nbRr + nbRs;
-	data>>x>>y>>nbUpdate>>nbNr>>nbNd>>nbRr>>nbRs;
-	Spatial robot_spatial(x,y,nbUpdate,nbNr,nbNd,nbRr,nbRs);
+	Spatial robot_spatial(x,y,nbUpdate,nbNr,nbNd,nbNs, nbRr,nbRs);
 	return nbUpdate;
 }
 	
