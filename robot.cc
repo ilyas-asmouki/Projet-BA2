@@ -1,6 +1,7 @@
 #include "robot.h"
 #include <vector>
 #include <iostream>
+#include <sstream>
 
 #ifndef PARTICULE_H
 #define PARTICULE_H
@@ -33,6 +34,7 @@ unsigned nbRr, unsigned nbRs): Robot(x, y), nbUpdate(nbUpdate), nbNr(nbNr),
 nbNd(nbNd), nbRr(nbRr), nbRs(nbRs)
 {
 	forme.rayon = r_spatial;
+	test_particle_robot_superposition();
 	error_outside();
 }
 	
@@ -45,21 +47,15 @@ void Spatial::error_outside() {
 	return;
 }
 
-Reparateur::Reparateur(double x, double y): Robot(x, y)
-{
-	forme.rayon = r_reparateur; 
-	TestCollision();
-	tab_robot.push_back(*this);
-}
-		
 Neutraliseur::Neutraliseur(double x, double y, int orientation, unsigned type,
 						   bool panne,  unsigned k_update, unsigned nbUpdate)
 : Robot(x, y), orientation(orientation), type(type), panne(panne), 
 k_update_panne(k_update) 
 {
 	forme.rayon = r_neutraliseur;
+	test_robot_superposition();
+	test_particle_robot_superposition();
 	error_k_update(nbUpdate);
-	TestCollision();
 	tab_robot.push_back(*this);
 }
 	
@@ -72,9 +68,16 @@ void Neutraliseur::error_k_update(unsigned nbUpdate){
 	}
 	return;
 }
+
+Reparateur::Reparateur(double x, double y): Robot(x, y)
+{
+	forme.rayon = r_reparateur; 
+	test_robot_superposition();
+	test_particle_robot_superposition();
+	tab_robot.push_back(*this);
+}
 	
-	
-void Robot::TestCollision() {
+void Robot::test_robot_superposition() {
 	for (size_t i = 0; i < tab_robot.size(); ++i) {
 		if (superposition_cercles(forme, tab_robot[i].getforme(),LECTURE)){
 			if (forme.rayon == tab_robot[i].getforme().rayon) {
@@ -159,5 +162,3 @@ void decodage_robot(string& line, int n){
 	}
 	return;
 }
-
-
