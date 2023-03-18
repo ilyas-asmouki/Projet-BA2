@@ -25,8 +25,12 @@ using namespace std;
 static vector<Robot> tab_robot;
 enum{SPATIAL=2, REPARATEUR, NEUTRALISEUR};
 
-Robot::Robot(double x1=0, double y1=0) : forme({{x1,y1}, 0})
-{}
+Robot::Robot(double x1=0, double y1=0)
+{
+	forme.centre.x = x1;
+	forme.centre.y = y1;
+	forme.rayon = 0;
+}
 
 Cercle Robot::getforme(){
 	return forme;
@@ -56,9 +60,8 @@ Reparateur::Reparateur(double x, double y): Robot(x, y)
 	tab_robot.push_back(*this);
 }
 		
-Neutraliseur::Neutraliseur(double x, double y, int a, unsigned b, bool c, 
-                           unsigned d, unsigned nbUpdate)
- : Robot(x, y), orientation(a), type(b), panne(c), k_update_panne(d=0) 
+Neutraliseur::Neutraliseur(double x, double y, double a, unsigned b, bool c, unsigned nbUpdate, unsigned d=0)
+ : Robot(x, y), orientation(a), type(b), panne(c), k_update_panne(d) 
 {
 	forme.rayon=r_neutraliseur;
 	error_k_update(nbUpdate);
@@ -80,31 +83,35 @@ void Neutraliseur::error_k_update(unsigned nbUpdate){
 void Robot::TestCollision() {
 	for (size_t i(0); i < tab_robot.size(); ++i) {
 		if (superposition_cercles(forme, tab_robot[i].getforme(),LECTURE)){
-			if (forme.rayon == tab_robot[i].getforme().rayon) {
-				if (forme.rayon == r_reparateur) {
-					cout<<message::repairers_superposition(forme.centre.x , 	
-					tab_robot[i].getforme().centre.x, forme.centre.y ,
-					tab_robot[i].getforme().centre.y);
+			if (forme.rayon == r_reparateur) {
+				if (forme.rayon == tab_robot[i].getforme().rayon) {
+					cout<<message::repairers_superposition(forme.centre.x, forme.centre.y ,	
+					tab_robot[i].getforme().centre.x, tab_robot[i].getforme().centre.y);
 				} else { 
-					cout<<message::neutralizers_superposition(
-					forme.centre.x, tab_robot[i].getforme().centre.x, 
-					forme.centre.y , tab_robot[i].forme.centre.y);	
+					cout<<message::repairer_neutralizer_superposition(
+					forme.centre.x, forme.centre.y, tab_robot[i].getforme().centre.x,
+					tab_robot[i].getforme().centre.y);	
 				}
 			} else {
-				cout<<message::repairer_neutralizer_superposition(
-				forme.centre.x , tab_robot[i].getforme().centre.x, 
-				forme.centre.y ,tab_robot[i].getforme().centre.y);
+				if (forme.rayon == tab_robot[i].getforme().rayon) {
+					cout<<message::neutralizers_superposition(forme.centre.x, forme.centre.y ,	
+					tab_robot[i].getforme().centre.x, tab_robot[i].getforme().centre.y);
+				} else { 
+					cout<<message::repairer_neutralizer_superposition(tab_robot[i].
+					getforme().centre.x, tab_robot[i].getforme().centre.y,
+					forme.centre.x, forme.centre.y);	
+				}	
 			}
 			exit(EXIT_FAILURE);
 		}
-	}
+	}	
 	return;
-}	
+}
 
 void Robot::test_particle_robot_superposition() {
 	for (size_t i = 0; i < tab_particule.size(); ++i)
 	{
-		if (superposition_cerclecarre(forme, tab_particule[i].getForme(), LECTURE))
+		if (superposition_cerclecarre(tab_particule[i].getForme(), forme, LECTURE))
 		{
 			cout << message::particle_robot_superposition(tab_particule[i].getForme().
 			centre.x,tab_particule[i].getForme().centre.y,tab_particule[i].getForme().
@@ -124,8 +131,8 @@ unsigned decodage_spatial(istringstream& data, int& compteur1, int& compteur2){
 	unsigned nbRr;
 	unsigned nbRs;
 	data>>x>>y>>nbUpdate>>nbNr>>nbNs>>nbNd>>nbRr>>nbRs;
-	compteur1 = nbNr + nbNd + nbNs;
-	compteur2 = nbRr + nbRs;
+	compteur1 = nbNs;
+	compteur2 = nbRs;
 	Spatial robot_spatial(x,y,nbUpdate,nbNr,nbNd,nbNs, nbRr,nbRs);
 	return nbUpdate;
 }
@@ -133,12 +140,14 @@ unsigned decodage_spatial(istringstream& data, int& compteur1, int& compteur2){
 void decodage_neutraliseur(istringstream& data, unsigned nbUpdate){
 	double x;
 	double y;
-	int orienta;
+	double  orienta;
 	unsigned type;
 	bool panne;
 	unsigned k_update_panne;
-	data>>x>>y>>orienta>>type>>panne>>k_update_panne;
-	Neutraliseur robot_neutraliseur(x,y,orienta,type,panne,k_update_panne, nbUpdate);
+	data>>x>>y>>orienta>>type>>panne;
+	data>>k_update_panne;
+	cout <<x << y << orienta << type << panne <<  k_update_panne << endl;
+	Neutraliseur robot_neutraliseur(x,y,orienta,type,panne,nbUpdate, k_update_panne);
 	return;
 }
 	 
@@ -156,10 +165,13 @@ void decodage_robot(istringstream& data, int n, int& compteur1, int& compteur2){
 	{
 	case SPATIAL :
 		nbUpdate=decodage_spatial(data, compteur1, compteur2);	
+	break;
 	case REPARATEUR :
 		decodage_reparateur(data);
+	break;
 	case NEUTRALISEUR :
 		decodage_neutraliseur(data, nbUpdate);
+	break;
 	}
 	return;
 }
