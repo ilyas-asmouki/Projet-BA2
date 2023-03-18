@@ -1,17 +1,14 @@
-##ifndef SIMULATION_H
-#define SIMULATION_H
 #include "simulation.h"
-#endif
 
-#ifndef ROBOT_H
-#define ROBOT_H
+//~ #ifndef ROBOT_H
+//~ #define ROBOT_H
 #include "robot.h"
-#endif
+//~ #endif
 
-#ifndef PARTICULE_H
-#define PARTICULE_H
+//~ #ifndef PARTICULE_H
+//~ #define PARTICULE_H
 #include "particule.h"
-#endif
+//~ #endif
 
 #ifndef SHAPE_H
 #define SHAPE_H
@@ -25,26 +22,10 @@
 
 using namespace std;
 
-void Simulation::lecture(char* monfichier){
-	ifstream fichier(monfichier);
-	string line;
-	if (!fichier.fail()){
-		while (getline(fichier>>ws,line)){
-			if (line[0]=='#'){
-				continue;
-			}
-			decodage_ligne(line);
-		}
-	} else {
-		exit(EXIT_FAILURE);
-	}
-	return;
-}
-
 void decodage_ligne(std::string line){
 	enum ETAT{NBP, PARTICULE, SPATIAL, REPARATEUR, NEUTRALISEUR};
 	static int etat(NBP);
-	istringstream data(line);
+	std::istringstream data(line);
 	static int compteur1(0);
 	static int compteur2(0);
 	static int i(0);
@@ -61,7 +42,7 @@ void decodage_ligne(std::string line){
 	case PARTICULE :
 	decodage_particule(data);
 	++i;
-	if (compteur==i){
+	if (compteur1==i){
 		etat = SPATIAL;
 	}
 	break;
@@ -91,4 +72,21 @@ void decodage_ligne(std::string line){
 	}
 	return;
 }	
+		
+void Simulation::lecture(char* monfichier){
+	ifstream fichier(monfichier);
+	string line;
+	if (!fichier.fail()){
+		while (getline(fichier>>ws,line)){
+			if (line[0]=='#'){
+				continue;
+			}
+			decodage_ligne(line);
+		}
+	} else {
+		exit(EXIT_FAILURE);
+	}
+	return;
+}
+	
 
