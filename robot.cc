@@ -111,5 +111,52 @@ void Robot::test_particle_robot_superposition()
 	}
 }
 
+unsigned decodage_spatial(istringstream& data){
+	double x;
+	double y;
+	unsigned nbUpdate;
+	unsigned nbNr;
+	unsigned nbNd;
+	unsigned nbRr;
+	unsigned nbRs;
+	data>>x>>y>>nbUpdate>>nbNr>>nbNd>>nbRr>>nbRs;
+	Spatial robot_spatial(x,y,nbUpdate,nbNr,nbNd,nbRr,nbRs);
+	return nbUpdate;
+}
+	
+void decodage_neutraliseur(istringstream& data, unsigned nbUpdate){
+	double x;
+	double y;
+	int orienta;
+	unsigned type;
+	bool panne;
+	unsigned k_update_panne;
+	data>>x>>y>>orienta>>type>>panne>>k_update_panne;
+	Neutraliseur robot_neutraliseur(x,y,orienta,type,panne,k_update_panne, nbUpdate);
+	return;
+}
+	 
+void decodage_reparateur(istringstream& data){
+	double x;
+	double y;
+	data>>x>>y;
+	Reparateur robot_reparateur(x,y);
+	return;
+}
+
+void decodage_robot(string& line, int n){
+	istringstream data(line);
+	static unsigned nbUpdate(0);
+	switch(n)
+	{
+	case SPATIAL :
+		nbUpdate=decodage_spatial(data);	
+	case REPARATEUR :
+		decodage_reparateur(data);
+	case NEUTRALISEUR :
+		decodage_neutraliseur(data, nbUpdate);
+	}
+	return;
+}
 
 
