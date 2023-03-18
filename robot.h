@@ -42,12 +42,12 @@ class Reparateur : public Robot {
 
 class Neutraliseur : public Robot {
 	private :
-	 int orientation;
+	 double  orientation;
 	 unsigned type;
 	 bool panne;
-	 unsigned k_update_panne = 0;
+	 unsigned k_update_panne;
 	public :
-	 Neutraliseur(double x, double y, int a, unsigned b, bool c, unsigned d, unsigned nbUpdate);
+	 Neutraliseur(double x, double y, double a, unsigned b, bool c, unsigned nbUpdate, unsigned  d);
 	 void error_k_update(unsigned nbUpdate);
 };
 
