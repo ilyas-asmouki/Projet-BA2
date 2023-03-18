@@ -57,3 +57,12 @@ void Particule::detect_particle_superposition()
 	}
 }
 
+void decodage_particule(istringstream& data){
+	double x;
+	double y;
+	double d;
+	data>>x>>y>>d;
+	Particule particule(x, y, d);
+	return;
+}
+
