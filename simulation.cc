@@ -88,5 +88,3 @@ void Simulation::lecture(char* monfichier){
 	}
 	return;
 }
-	
-
