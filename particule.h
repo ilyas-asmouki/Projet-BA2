@@ -15,12 +15,9 @@ class Particule
     public:
     Particule(double x, double y, double cote);
     Carre getForme() const;
+    void detect_particle_outside();
+    void detect_particle_too_small();
     void detect_particle_superposition(); 
 };
 
-void detect_particle_outside(double x, double y, double s);
-
-void detect_particle_too_small(double x, double y, double s);
-
 #endif
-
