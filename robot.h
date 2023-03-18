@@ -3,11 +3,11 @@
 
 #include <string>
 #include "shape.h"
+#include "particule.h"
 
 constexpr double r_spatial(16.);
 constexpr double r_reparateur(2.);
 constexpr double r_neutraliseur(4.);
-constexpr double dmax(128.);
 
 class Robot {
 	protected : 
@@ -16,6 +16,7 @@ class Robot {
 	 Robot(double x, double y);
 	 Cercle getforme();
 	 void TestCollision();
+	 void test_particle_robot_superposition();
 };
 
 class Spatial : public Robot {
@@ -51,5 +52,3 @@ class Neutraliseur : public Robot {
 void decodage_robot(std::string v);
 
 #endif
-
-
