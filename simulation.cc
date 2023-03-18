@@ -5,10 +5,10 @@
 #include "robot.h"
 //~ #endif
 
-//~ #ifndef PARTICULE_H
-//~ #define PARTICULE_H
+#ifndef PARTICULE_H
+#define PARTICULE_H
 #include "particule.h"
-//~ #endif
+#endif
 
 #ifndef SHAPE_H
 #define SHAPE_H
@@ -18,6 +18,7 @@
 #include <iostream>
 #include <string>
 #include <fstream>
+#include <sstream>
 #include "message.h"
 
 using namespace std;
@@ -39,6 +40,7 @@ void decodage_ligne(std::string line){
 	} else {
 		etat = PARTICULE;
 	}
+	break;
 	case PARTICULE :
 	decodage_particule(data);
 	++i;
@@ -73,7 +75,7 @@ void decodage_ligne(std::string line){
 	return;
 }	
 		
-void Simulation::lecture(char* monfichier){
+void lecture(char* monfichier){
 	ifstream fichier(monfichier);
 	string line;
 	if (!fichier.fail()){
