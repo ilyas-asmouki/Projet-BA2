@@ -1,17 +1,21 @@
 #ifndef ROBOT_H
 #define ROBOT_H
 
+#include <string>
 #include "shape.h"
 
 constexpr double r_spatial(16.);
 constexpr double r_reparateur(2.);
 constexpr double r_neutraliseur(4.);
+constexpr double dmax(128.);
 
 class Robot {
 	protected : 
 	 Cercle forme;
 	public :
 	 Robot(double x, double y);
+	 Cercle getforme();
+	 void TestCollision();
 };
 
 class Spatial : public Robot {
@@ -24,6 +28,7 @@ class Spatial : public Robot {
 	public:
 	 Spatial(double x, double y, unsigned nbUpdate ,unsigned nbNr, unsigned nbNd,
 	  unsigned nbRr ,unsigned nbRs);
+	 void error_outside();
 };
 
 class Reparateur : public Robot {
@@ -39,8 +44,11 @@ class Neutraliseur : public Robot {
 	 bool panne;
 	 unsigned k_update_panne = 0;
 	public :
-	 Neutraliseur(double x, double y, int a, unsigned b, bool c, unsigned d);
+	 Neutraliseur(double x, double y, int a, unsigned b, bool c, unsigned d, unsigned nbUpdate);
+	 void error_k_update(unsigned nbUpdate);
 };
+
+void decodage_robot(std::string v);
 
 #endif
 
