@@ -1,12 +1,15 @@
 #include "robot.h"
 #include <vector>
 #include <iostream>
-#include <sstream>
 
 #ifndef PARTICULE_H
 #define PARTICULE_H
 #include "particule.h"
 #endif
+
+
+#include <string>
+#include <sstream>
 
 //~ #ifndef MESSAGE_H_INCLUDED
 //~ #define MESSAGE_H_INCLUDED
@@ -22,48 +25,24 @@ using namespace std;
 static vector<Robot> tab_robot;
 enum{SPATIAL=2, REPARATEUR, NEUTRALISEUR};
 
-Robot::Robot(double x = 0, double y = 0) : forme({{x, y}, 0})
+Robot::Robot(double x1=0, double y1=0) : forme({{x1,y1}, 0})
 {}
 
 Cercle Robot::getforme(){
 	return forme;
 }
  
-Spatial::Spatial(double x, double y, unsigned nbUpdate, unsigned nbNr, unsigned nbNd, 
-unsigned nbRr, unsigned nbRs): Robot(x, y), nbUpdate(nbUpdate), nbNr(nbNr),
-nbNd(nbNd), nbRr(nbRr), nbRs(nbRs)
+Spatial::Spatial(double x, double y, unsigned nbUpdate ,unsigned nbNr, unsigned nbNs,
+	  unsigned nbNd, unsigned nbRr ,unsigned nbRs): Robot(x, y), nbUpdate(nbUpdate), 
+	  nbNr(nbNr), nbNs(nbNs), nbNd(nbNd), nbRr(nbRr), nbRs(nbRs)
 {
-	forme.rayon = r_spatial;
-	test_particle_robot_superposition();
+	forme.rayon=r_spatial;
 	error_outside();
 }
 	
 void Spatial::error_outside() {
-	if ((abs(forme.centre.x+r_spatial)>dmax)or(abs(forme.centre.y+r_spatial)>dmax))
-	{
-		cout << message::spatial_robot_ouside(forme.centre.x, forme.centre.y);
-		exit(EXIT_FAILURE);
-	}
-	return;
-}
-
-Neutraliseur::Neutraliseur(double x, double y, int orientation, unsigned type,
-						   bool panne,  unsigned k_update, unsigned nbUpdate)
-: Robot(x, y), orientation(orientation), type(type), panne(panne), 
-k_update_panne(k_update) 
-{
-	forme.rayon = r_neutraliseur;
-	test_robot_superposition();
-	test_particle_robot_superposition();
-	error_k_update(nbUpdate);
-	tab_robot.push_back(*this);
-}
-	
-void Neutraliseur::error_k_update(unsigned nbUpdate){
-	if (k_update_panne > nbUpdate)
-	{
-		cout << message::invalid_k_update(forme.centre.x, forme.centre.y, 
-		                                k_update_panne, nbUpdate);
+	if ((abs(forme.centre.x+r_spatial)>dmax)or(abs(forme.centre.y+r_spatial)>dmax)){
+		cout<<message::spatial_robot_ouside(forme.centre.x, forme.centre.y);
 		exit(EXIT_FAILURE);
 	}
 	return;
@@ -71,27 +50,48 @@ void Neutraliseur::error_k_update(unsigned nbUpdate){
 
 Reparateur::Reparateur(double x, double y): Robot(x, y)
 {
-	forme.rayon = r_reparateur; 
-	test_robot_superposition();
+	forme.rayon=r_reparateur; 
+	TestCollision();
+	test_particle_robot_superposition();
+	tab_robot.push_back(*this);
+}
+		
+Neutraliseur::Neutraliseur(double x, double y, int a, unsigned b, bool c, 
+                           unsigned d, unsigned nbUpdate)
+ : Robot(x, y), orientation(a), type(b), panne(c), k_update_panne(d=0) 
+{
+	forme.rayon=r_neutraliseur;
+	error_k_update(nbUpdate);
+	TestCollision();
 	test_particle_robot_superposition();
 	tab_robot.push_back(*this);
 }
 	
-void Robot::test_robot_superposition() {
-	for (size_t i = 0; i < tab_robot.size(); ++i) {
+void Neutraliseur::error_k_update(unsigned nbUpdate){
+	if (k_update_panne > nbUpdate){
+		cout<<message::invalid_k_update(forme.centre.x, forme.centre.y, 
+		                                k_update_panne, nbUpdate);
+		exit(EXIT_FAILURE);
+	}
+	return;
+}
+	
+	
+void Robot::TestCollision() {
+	for (size_t i(0); i < tab_robot.size(); ++i) {
 		if (superposition_cercles(forme, tab_robot[i].getforme(),LECTURE)){
 			if (forme.rayon == tab_robot[i].getforme().rayon) {
 				if (forme.rayon == r_reparateur) {
-					cout << message::repairers_superposition(forme.centre.x , 	
+					cout<<message::repairers_superposition(forme.centre.x , 	
 					tab_robot[i].getforme().centre.x, forme.centre.y ,
 					tab_robot[i].getforme().centre.y);
 				} else { 
-					cout << message::neutralizers_superposition(
+					cout<<message::neutralizers_superposition(
 					forme.centre.x, tab_robot[i].getforme().centre.x, 
 					forme.centre.y , tab_robot[i].forme.centre.y);	
 				}
 			} else {
-				cout << message::repairer_neutralizer_superposition(
+				cout<<message::repairer_neutralizer_superposition(
 				forme.centre.x , tab_robot[i].getforme().centre.x, 
 				forme.centre.y ,tab_robot[i].getforme().centre.y);
 			}
@@ -101,8 +101,7 @@ void Robot::test_robot_superposition() {
 	return;
 }	
 
-void Robot::test_particle_robot_superposition()
-{
+void Robot::test_particle_robot_superposition() {
 	for (size_t i = 0; i < tab_particule.size(); ++i)
 	{
 		if (superposition_cerclecarre(forme, tab_particule[i].getForme(), LECTURE))
@@ -114,15 +113,18 @@ void Robot::test_particle_robot_superposition()
 		}
 	}
 }
-
-unsigned decodage_spatial(istringstream& data){
+		
+unsigned decodage_spatial(istringstream& data, int& compteur1, int& compteur2){
 	double x;
 	double y;
 	unsigned nbUpdate;
 	unsigned nbNr;
+	unsigned nbNs;
 	unsigned nbNd;
 	unsigned nbRr;
 	unsigned nbRs;
+	compteur1 = nbNr + nbNd + nbNs;
+	compteur2 = nbRr + nbRs;
 	data>>x>>y>>nbUpdate>>nbNr>>nbNd>>nbRr>>nbRs;
 	Spatial robot_spatial(x,y,nbUpdate,nbNr,nbNd,nbRr,nbRs);
 	return nbUpdate;
@@ -148,13 +150,12 @@ void decodage_reparateur(istringstream& data){
 	return;
 }
 
-void decodage_robot(string& line, int n){
-	istringstream data(line);
+void decodage_robot(istringstream& data, int n, int& compteur1, int& compteur2){
 	static unsigned nbUpdate(0);
 	switch(n)
 	{
 	case SPATIAL :
-		nbUpdate=decodage_spatial(data);	
+		nbUpdate=decodage_spatial(data, compteur1, compteur2);	
 	case REPARATEUR :
 		decodage_reparateur(data);
 	case NEUTRALISEUR :
