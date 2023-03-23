@@ -2,10 +2,12 @@
 #define SIMULATION_H
 #include <fstream>
 	
-//~ class Simulation {
-	//~ public :
-	 //~ void lecture(char* ficher);
-//~ };
+class Simulation {
+	public :
+	 void lecture();
+	Simulation(char* fichier);
+	private :
+	std::ifstream file;
+};
 
-void lecture(char* ficher);
 #endif
