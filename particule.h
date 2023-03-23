@@ -20,6 +20,8 @@ class Particule
     void detect_particle_superposition();
 };
 
+void test_particle_robot_superposition(Cercle robot);
+
 static std::vector<Particule> tab_particule;
 
 void decodage_particule(std::istringstream& data);
