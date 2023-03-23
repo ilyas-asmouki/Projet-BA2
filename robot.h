@@ -21,14 +21,14 @@ class Robot {
 
 class Spatial : public Robot {
 	private :
-	 unsigned nbUpdate;
+	 int nbUpdate;
 	 unsigned nbNr;
 	 unsigned nbNs;
 	 unsigned nbNd;
 	 unsigned nbRr;
 	 unsigned nbRs;
 	public:
-	 Spatial(double x, double y, unsigned nbUpdate ,unsigned nbNr, unsigned nbNs,
+	 Spatial(double x, double y, int nbUpdate ,unsigned nbNr, unsigned nbNs,
 	  unsigned nbNd, unsigned nbRr ,unsigned nbRs);
 	 void error_outside();
 };
@@ -44,10 +44,10 @@ class Neutraliseur : public Robot {
 	 double  orientation;
 	 unsigned type;
 	 bool panne;
-	 unsigned k_update_panne;
+	 int k_update_panne;
 	public :
-	 Neutraliseur(double x, double y, double a, unsigned b, bool c, unsigned nbUpdate, unsigned  d);
-	 void error_k_update(unsigned nbUpdate);
+	 Neutraliseur(double x, double y, double a, unsigned b, std::string c, int nbUpdate, int  d);
+	 void error_k_update(int nbUpdate);
 };
 
 void decodage_robot(std::istringstream& v, int n, int& compteur1, int& compteur2);
