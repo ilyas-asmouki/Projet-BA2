@@ -68,4 +68,15 @@ void decodage_particule(istringstream& data){
 	Particule particule(x, y, d);
 }
 
-
+void test_particle_robot_superposition(Cercle robot) {
+	for (size_t i = 0; i < tab_particule.size(); ++i)
+	{
+		if (superposition_cerclecarre(tab_particule[i].getForme(), robot, LECTURE))
+		{
+			cout << message::particle_robot_superposition(tab_particule[i].getForme().
+			centre.x,tab_particule[i].getForme().centre.y,tab_particule[i].getForme().
+			cote, robot.centre.x, robot.centre.y, robot.rayon);
+			exit(EXIT_FAILURE);
+		}
+	}
+}
