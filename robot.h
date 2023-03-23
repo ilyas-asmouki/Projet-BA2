@@ -13,7 +13,6 @@ constexpr double r_neutraliseur(4.);
 class Robot {
 	protected : 
 	 Cercle forme;
-	 void test_particle_robot_superposition();
 	public :
 	 Robot(double x, double y);
 	 Cercle getforme();
