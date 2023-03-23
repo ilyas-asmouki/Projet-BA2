@@ -36,12 +36,13 @@ Cercle Robot::getforme(){
 	return forme;
 }
  
-Spatial::Spatial(double x, double y, unsigned nbUpdate ,unsigned nbNr, unsigned nbNs,
+Spatial::Spatial(double x, double y, int nbUpdate ,unsigned nbNr, unsigned nbNs,
 	  unsigned nbNd, unsigned nbRr ,unsigned nbRs): Robot(x, y), nbUpdate(nbUpdate), 
 	  nbNr(nbNr), nbNs(nbNs), nbNd(nbNd), nbRr(nbRr), nbRs(nbRs)
 {
 	forme.rayon=r_spatial;
 	error_outside();
+	test_particle_robot_superposition(forme);
 }
 	
 void Spatial::error_outside() {
@@ -60,9 +61,10 @@ Reparateur::Reparateur(double x, double y): Robot(x, y)
 	tab_robot.push_back(*this);
 }
 		
-Neutraliseur::Neutraliseur(double x, double y, double a, unsigned b, bool c, unsigned nbUpdate, unsigned d)
- : Robot(x, y), orientation(a), type(b), panne(c), k_update_panne(d) 
+Neutraliseur::Neutraliseur(double x, double y, double a, unsigned b, string c, int nbUpdate, int d)
+ : Robot(x, y), orientation(a), type(b),  k_update_panne(d) 
 {
+	panne = ((c == "false") ? false : true);
 	forme.rayon=r_neutraliseur;
 	error_k_update(nbUpdate);
 	TestCollision();
@@ -70,7 +72,7 @@ Neutraliseur::Neutraliseur(double x, double y, double a, unsigned b, bool c, uns
 	tab_robot.push_back(*this);
 }
 	
-void Neutraliseur::error_k_update(unsigned nbUpdate){
+void Neutraliseur::error_k_update(int nbUpdate){
 	if (k_update_panne > nbUpdate){
 		cout<<message::invalid_k_update(forme.centre.x, forme.centre.y, 
 		                                k_update_panne, nbUpdate);
@@ -108,10 +110,10 @@ void Robot::TestCollision() {
 	return;
 }
 		
-unsigned decodage_spatial(istringstream& data, int& compteur1, int& compteur2){
+int decodage_spatial(istringstream& data, int& compteur1, int& compteur2){
 	double x;
 	double y;
-	unsigned nbUpdate;
+	int nbUpdate;
 	unsigned nbNr;
 	unsigned nbNs;
 	unsigned nbNd;
@@ -124,15 +126,14 @@ unsigned decodage_spatial(istringstream& data, int& compteur1, int& compteur2){
 	return nbUpdate;
 }
 	
-void decodage_neutraliseur(istringstream& data, unsigned nbUpdate){
+void decodage_neutraliseur(istringstream& data, int nbUpdate){
 	double x;
 	double y;
 	double  orienta;
 	unsigned type;
-	bool panne;
-	unsigned k_update_panne;
+	string panne;
+	int k_update_panne;
 	data>>x>>y>>orienta>>type>>panne>>k_update_panne;
-	cout <<x << y << orienta << type << panne <<  k_update_panne << endl;
 	Neutraliseur robot_neutraliseur(x,y,orienta,type,panne,nbUpdate, k_update_panne);
 	return;
 }
@@ -146,7 +147,7 @@ void decodage_reparateur(istringstream& data){
 }
 
 void decodage_robot(istringstream& data, int n, int& compteur1, int& compteur2){
-	static unsigned nbUpdate(0);
+	static int nbUpdate(0);
 	switch(n)
 	{
 	case SPATIAL :
