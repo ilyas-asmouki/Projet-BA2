@@ -74,12 +74,16 @@ void decodage_ligne(std::string line){
 	}
 	return;
 }	
-		
-void lecture(char* monfichier){
-	ifstream fichier(monfichier);
+
+Simulation::Simulation(char* fichier) : file(fichier)
+{
+	lecture();
+}
+
+void Simulation::lecture(){
 	string line;
-	if (!fichier.fail()){
-		while (getline(fichier>>ws,line)){
+	if (!file.fail()){
+		while (getline(file>>ws,line)){
 			if (line[0]=='#'){
 				continue;
 			}
