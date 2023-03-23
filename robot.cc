@@ -56,17 +56,17 @@ Reparateur::Reparateur(double x, double y): Robot(x, y)
 {
 	forme.rayon=r_reparateur; 
 	TestCollision();
-	test_particle_robot_superposition();
+	test_particle_robot_superposition(forme);
 	tab_robot.push_back(*this);
 }
 		
-Neutraliseur::Neutraliseur(double x, double y, double a, unsigned b, bool c, unsigned nbUpdate, unsigned d=0)
+Neutraliseur::Neutraliseur(double x, double y, double a, unsigned b, bool c, unsigned nbUpdate, unsigned d)
  : Robot(x, y), orientation(a), type(b), panne(c), k_update_panne(d) 
 {
 	forme.rayon=r_neutraliseur;
 	error_k_update(nbUpdate);
 	TestCollision();
-	test_particle_robot_superposition();
+	test_particle_robot_superposition(forme);
 	tab_robot.push_back(*this);
 }
 	
@@ -107,19 +107,6 @@ void Robot::TestCollision() {
 	}	
 	return;
 }
-
-void Robot::test_particle_robot_superposition() {
-	for (size_t i = 0; i < tab_particule.size(); ++i)
-	{
-		if (superposition_cerclecarre(tab_particule[i].getForme(), forme, LECTURE))
-		{
-			cout << message::particle_robot_superposition(tab_particule[i].getForme().
-			centre.x,tab_particule[i].getForme().centre.y,tab_particule[i].getForme().
-			cote, forme.centre.x, forme.centre.y, forme.rayon);
-			exit(EXIT_FAILURE);
-		}
-	}
-}
 		
 unsigned decodage_spatial(istringstream& data, int& compteur1, int& compteur2){
 	double x;
@@ -144,8 +131,7 @@ void decodage_neutraliseur(istringstream& data, unsigned nbUpdate){
 	unsigned type;
 	bool panne;
 	unsigned k_update_panne;
-	data>>x>>y>>orienta>>type>>panne;
-	data>>k_update_panne;
+	data>>x>>y>>orienta>>type>>panne>>k_update_panne;
 	cout <<x << y << orienta << type << panne <<  k_update_panne << endl;
 	Neutraliseur robot_neutraliseur(x,y,orienta,type,panne,nbUpdate, k_update_panne);
 	return;
