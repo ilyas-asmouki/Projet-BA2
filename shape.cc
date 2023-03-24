@@ -13,13 +13,13 @@ double norme(S2d vect)
 bool superposition_carres(const Carre s1, const Carre s2, MODE mode)
 {
 	double d1 = s1.cote, d2 = s2.cote;
-	return (abs(s2.centre.x - s1.centre.x) < d1 / 2 + d2 / 2 + epsil_zero*mode)
-		and (abs(s2.centre.y - s1.centre.y) < d1 / 2 + d2 / 2 + epsil_zero*mode);
+	return (abs(s2.centre.x - s1.centre.x) < d1 / 2 + d2 / 2 + shape::epsil_zero*mode)
+		and (abs(s2.centre.y - s1.centre.y) < d1 / 2 + d2 / 2 + shape::epsil_zero*mode);
 }
 
 bool superposition_cercles(Cercle c1, Cercle  c2, MODE mode)
 {
-    return ((c1.rayon + c2.rayon + epsil_zero*mode) > distance(c1.centre, c2.centre));
+    return ((c1.rayon+c2.rayon+shape::epsil_zero*mode)>distance(c1.centre, c2.centre));
 }
 
 bool superposition_cerclecarre(Carre c1, Cercle c2, MODE mode)
@@ -31,9 +31,11 @@ bool superposition_cerclecarre(Carre c1, Cercle c2, MODE mode)
 	vect.y = (abs(y2 - y1) - d1 / 2);
     double L = norme(vect);
     
-    if ((abs(x2 - x1) > d1 / 2) and (abs(y2 - y1) > d1 / 2) and (L > r2 + epsil_zero*mode))
+    if ((abs(x2 - x1) > d1 / 2) and (abs(y2 - y1) > d1 / 2)
+    and (L > r2 + shape::epsil_zero*mode))
 		return false;
-	else if ((abs(x2 - x1) < d1 / 2 + r2 + epsil_zero*mode) and (abs(y2 - y1) < d1 / 2 + r2 + epsil_zero*mode))
+	else if ((abs(x2 - x1) < d1 / 2 + r2 + shape::epsil_zero*mode)
+	and (abs(y2 - y1) < d1 / 2 + r2 + shape::epsil_zero*mode))
 		return true;
 	return false;
 }
