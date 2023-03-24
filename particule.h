@@ -27,4 +27,3 @@ static std::vector<Particule> tab_particule;
 void decodage_particule(std::istringstream& data);
 
 #endif
-
