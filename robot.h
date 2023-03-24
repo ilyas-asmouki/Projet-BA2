@@ -2,13 +2,8 @@
 #define ROBOT_H
 
 #include <string>
-#include "shape.h"
-#include "particule.h"
 #include <sstream>
-
-constexpr double r_spatial(16.);
-constexpr double r_reparateur(2.);
-constexpr double r_neutraliseur(4.);
+#include "shape.h"
 
 class Robot
 {
