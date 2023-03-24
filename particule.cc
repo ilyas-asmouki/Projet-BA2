@@ -1,18 +1,8 @@
 #include "particule.h"
 #include <cmath>
 #include <iostream>
-
-//~ #ifndef MESSAGE_H_INCLUDED
-//~ #define MESSAGE_H_INCLUDED
 #include "message.h"
-//~ #endif
-
-#ifndef SHAPE_H
-#define SHAPE_H
 #include "shape.h"
-#endif
-
-using namespace std;
 
 Particule::Particule(double x, double y, double cote)
 {
@@ -35,7 +25,8 @@ void Particule::detect_particle_outside()
 	if (abs(forme.centre.x) + forme.cote / 2 > dmax
 	or abs(forme.centre.y) + forme.cote / 2 > dmax)
     {
-        cout << message::particle_outside(forme.centre.x, forme.centre.y, forme.cote);
+        std::cout << message::particle_outside(forme.centre.x, forme.centre.y, 
+        forme.cote);
         exit(EXIT_FAILURE);
     }
 }
@@ -44,7 +35,8 @@ void Particule::detect_particle_too_small()
 {
 	 if (forme.cote < d_particule_min)
     {
-        cout << message::particle_too_small(forme.centre.x,forme.centre.y, forme.cote);
+        std::cout << message::particle_too_small(forme.centre.x,forme.centre.y,
+        forme.cote);
         exit(EXIT_FAILURE);
     }
 }
@@ -55,27 +47,29 @@ void Particule::detect_particle_superposition()
 	{
 		if (superposition_carres(forme, tab_particule[i].getForme(), LECTURE))
 		{
-			cout << message::particle_superposition(forme.centre.x, forme.centre.y,
+			std::cout << message::particle_superposition(forme.centre.x,forme.centre.y,
 			tab_particule[i].getForme().centre.x,tab_particule[i].getForme().centre.y);
 			exit(EXIT_FAILURE);
 		}
 	}
 }
 
-void decodage_particule(istringstream& data){
+void decodage_particule(std::istringstream& data)
+{
 	double x, y, d;
 	data >> x >> y >> d;
 	Particule particule(x, y, d);
 }
 
-void test_particle_robot_superposition(Cercle robot) {
+void test_particle_robot_superposition(Cercle robot)
+{
 	for (size_t i = 0; i < tab_particule.size(); ++i)
 	{
 		if (superposition_cerclecarre(tab_particule[i].getForme(), robot, LECTURE))
 		{
-			cout << message::particle_robot_superposition(tab_particule[i].getForme().
-			centre.x,tab_particule[i].getForme().centre.y,tab_particule[i].getForme().
-			cote, robot.centre.x, robot.centre.y, robot.rayon);
+			std::cout << message::particle_robot_superposition(tab_particule[i]
+			.getForme().centre.x,tab_particule[i].getForme().centre.y,tab_particule[i]
+			.getForme(). cote, robot.centre.x, robot.centre.y, robot.rayon);
 			exit(EXIT_FAILURE);
 		}
 	}
