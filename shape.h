@@ -32,5 +32,3 @@ bool superposition_cercles(Cercle c1, Cercle  c2, MODE mode);
 bool superposition_cerclecarre(Carre c1, Cercle c2, MODE mode);
 
 #endif
-
-
