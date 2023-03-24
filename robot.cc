@@ -1,13 +1,16 @@
-#include "robot.h"
 #include <vector>
 #include <iostream>
 #include <string>
 #include <sstream>
+#include "robot.h"
 #include "message.h"
+#include "constantes.h"
 #include "shape.h"
+#include "particule.h"
+
+enum {SPATIAL=2, REPARATEUR, NEUTRALISEUR};
 
 static std::vector<Robot> tab_robot;
-enum{SPATIAL=2, REPARATEUR, NEUTRALISEUR};
 
 Robot::Robot(double x1=0, double y1=0)
 {
