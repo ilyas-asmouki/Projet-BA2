@@ -1,7 +1,5 @@
 #include "shape.h"
 
-using namespace std;
-
 double distance(S2d p1, S2d p2)
 {
     return sqrt((p2.x-p1.x) * (p2.x-p1.x) + (p2.y-p1.y) * (p2.y-p1.y));
