@@ -1,6 +1,6 @@
-#include "particule.h"
 #include <cmath>
 #include <iostream>
+#include "particule.h"
 #include "message.h"
 #include "shape.h"
 
