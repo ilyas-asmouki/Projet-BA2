@@ -4,9 +4,7 @@
 #include "shape.h"
 #include <vector>
 #include <sstream>
-
-constexpr double d_particule_min(8*epsil_zero);
-constexpr double dmax(128.);
+#include "constantes.h"
 
 class Particule
 {
@@ -27,3 +25,4 @@ static std::vector<Particule> tab_particule;
 void decodage_particule(std::istringstream& data);
 
 #endif
+
