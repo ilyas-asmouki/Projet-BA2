@@ -1,6 +1,5 @@
 #include "simulation.h"
 #include <iostream>
-using namespace std;
 
 void erreur_fichier(int argc);
 
@@ -11,9 +10,10 @@ int main(int argc, char* argv[])
 	return 0;
 }
 
-void erreur_fichier(int argc){
-	if (argc == 1){
+void erreur_fichier(int argc)
+{
+	if (argc == 1)
+	{
 		exit(EXIT_FAILURE);
 	}
-	return;
 }
