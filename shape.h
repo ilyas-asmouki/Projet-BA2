@@ -5,8 +5,10 @@
 #include <cmath>
 
 enum MODE {LECTURE, SIMULATION};
-constexpr double epsil_zero(0.125);
 
+namespace shape {
+	constexpr double epsil_zero(0.125);
+}
 struct S2d
 {
 	double x;
