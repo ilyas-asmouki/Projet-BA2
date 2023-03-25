@@ -45,7 +45,7 @@ void Particule::detect_particle_superposition()
 {
 	for (size_t i = 0; i < tab_particule.size(); ++i)
 	{
-		if (superposition_carres(forme, tab_particule[i].getForme(), LECTURE))
+		if (superposition_carres(forme, tab_particule[i].getForme(), NO_MARGIN))
 		{
 			std::cout << message::particle_superposition(forme.centre.x,forme.centre.y,
 			tab_particule[i].getForme().centre.x,tab_particule[i].getForme().centre.y);
@@ -65,7 +65,7 @@ void test_particle_robot_superposition(Cercle robot)
 {
 	for (size_t i = 0; i < tab_particule.size(); ++i)
 	{
-		if (superposition_cerclecarre(tab_particule[i].getForme(), robot, LECTURE))
+		if (superposition_cerclecarre(tab_particule[i].getForme(), robot, NO_MARGIN))
 		{
 			std::cout << message::particle_robot_superposition(tab_particule[i]
 			.getForme().centre.x,tab_particule[i].getForme().centre.y,tab_particule[i]
