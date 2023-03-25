@@ -78,7 +78,7 @@ void Robot::TestCollision()
 {
 	for (size_t i(0); i < tab_robot.size(); ++i)
 	{
-		if (superposition_cercles(forme, tab_robot[i].getforme(),LECTURE))
+		if (superposition_cercles(forme, tab_robot[i].getforme(),NO_MARGIN))
 		{
 			if (forme.rayon == r_reparateur)
 			{
