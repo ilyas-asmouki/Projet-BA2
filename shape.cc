@@ -13,13 +13,14 @@ double norme(S2d vect)
 bool superposition_carres(const Carre s1, const Carre s2, MARGIN margin)
 {
 	double d1 = s1.cote, d2 = s2.cote;
-	return (abs(s2.centre.x - s1.centre.x) < d1 / 2 + d2 / 2 + shape::epsil_zero*margin)
-		and (abs(s2.centre.y - s1.centre.y) < d1 / 2 + d2 / 2 + shape::epsil_zero*margin);
+	return (abs(s2.centre.x - s1.centre.x) < d1/2 + d2/2 + shape::epsil_zero*margin)
+		and (abs(s2.centre.y - s1.centre.y) < d1/2 + d2/2 + shape::epsil_zero*margin);
 }
 
 bool superposition_cercles(Cercle c1, Cercle  c2, MARGIN margin)
 {
-    return ((c1.rayon+c2.rayon+shape::epsil_zero*margin)>distance(c1.centre, c2.centre));
+    return ((c1.rayon+c2.rayon+shape::epsil_zero*margin)>distance(c1.centre, c2.centre)
+                                                                                     );
 }
 
 bool superposition_cerclecarre(Carre c1, Cercle c2, MARGIN margin)
