@@ -1,3 +1,9 @@
+//LAHLOU SAAD 361150
+//ASMOUKI ILYAS 356263
+
+#ifndef CONSTANTE_H
+#define CONSTANTE_H
+
 #include "shape.h"
 enum Etat_neutralisateur{EN_PANNE, EN_MARCHE};
 
@@ -18,3 +24,5 @@ constexpr double d_particule_min(8*shape::epsil_zero);
 
 constexpr unsigned max_update(600);
 constexpr unsigned modulo_update(100);
+
+#endif
