@@ -1,3 +1,6 @@
+//LAHLOU SAAD 361150
+//ASMOUKI ILYAS 356263
+
 #ifndef ROBOT_H
 #define ROBOT_H
 
@@ -7,46 +10,46 @@
 
 class Robot
 {
-	protected : 
-	Cercle forme;
 	public :
-	Robot(double x, double y);
-	Cercle getforme();
-	void TestCollision();
+	 Robot(double x, double y);
+	 Cercle getForme() const;
+	 void TestCollision();
+	protected : 
+	 Cercle forme;
 };
 
 class Spatial : public Robot
 {
-	private :
-	int nbUpdate;
-	unsigned nbNr;
-	unsigned nbNs;
-	unsigned nbNd;
-	unsigned nbRr;
-	unsigned nbRs;
 	public:
-	Spatial(double x, double y, int nbUpdate ,unsigned nbNr, unsigned nbNs,
-	unsigned nbNd, unsigned nbRr ,unsigned nbRs);
-	void error_outside();
+	 Spatial(double x, double y, int nbUpdate ,unsigned nbNr, unsigned nbNs,
+	 unsigned nbNd, unsigned nbRr ,unsigned nbRs);
+	 void error_outside();
+	private :
+	 int nbUpdate;
+	 unsigned nbNr;
+	 unsigned nbNs;
+	 unsigned nbNd;
+	 unsigned nbRr;
+	 unsigned nbRs;
 };
 
 class Reparateur : public Robot
 {
-	private :
 	public :
 	Reparateur(double x, double y);
 };
 
 class Neutraliseur : public Robot
 {
-	private :
-	double  orientation;
-	unsigned type;
-	bool panne;
-	int k_update_panne;
 	public :
-	Neutraliseur(double x, double y, double a, unsigned b, std::string c, int nbUpdate, int  d);
-	void error_k_update(int nbUpdate);
+	 Neutraliseur(double x, double y, double a, unsigned b, std::string c, 
+	             int nbUpdate, int  d);
+	 void error_k_update(int nbUpdate);
+	private :
+	 double  orientation;
+	 unsigned type;
+	 bool panne;
+	 int k_update_panne;
 };
 
 void decodage_robot(std::istringstream& v, int n, int& compteur1, int& compteur2);
