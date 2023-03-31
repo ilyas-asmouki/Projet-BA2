@@ -1,3 +1,6 @@
+//LAHLOU SAAD 361150
+//ASMOUKI ILYAS 356263
+
 #include "shape.h"
 
 double distance(S2d p1, S2d p2)
@@ -14,7 +17,7 @@ bool superposition_carres(const Carre s1, const Carre s2, MARGIN margin)
 {
 	double d1 = s1.cote, d2 = s2.cote;
 	return (abs(s2.centre.x - s1.centre.x) < d1/2 + d2/2 + shape::epsil_zero*margin)
-		and (abs(s2.centre.y - s1.centre.y) < d1/2 + d2/2 + shape::epsil_zero*margin);
+	and (abs(s2.centre.y - s1.centre.y) < d1/2 + d2/2 + shape::epsil_zero*margin);
 }
 
 bool superposition_cercles(Cercle c1, Cercle  c2, MARGIN margin)
@@ -33,10 +36,14 @@ bool superposition_cerclecarre(Carre c1, Cercle c2, MARGIN margin)
     double L = norme(vect);
     
     if ((abs(x2 - x1) > d1 / 2) and (abs(y2 - y1) > d1 / 2)
-    and (L > r2 + shape::epsil_zero*margin))
+        and (L > r2 + shape::epsil_zero*margin))
+    {
 		return false;
+	}
 	else if ((abs(x2 - x1) < d1 / 2 + r2 + shape::epsil_zero*margin)
-	and (abs(y2 - y1) < d1 / 2 + r2 + shape::epsil_zero*margin))
+	        and (abs(y2 - y1) < d1 / 2 + r2 + shape::epsil_zero*margin))
+	{
 		return true;
+	}
 	return false;
 }
