@@ -1,8 +1,12 @@
+//LAHLOU SAAD 361150
+//ASMOUKI ILYAS 356263
+
 #include <cmath>
 #include <iostream>
 #include "particule.h"
 #include "message.h"
 #include "shape.h"
+#include "constantes.h"
 
 Particule::Particule(double x, double y, double cote)
 {
@@ -33,7 +37,7 @@ void Particule::detect_particle_outside()
 
 void Particule::detect_particle_too_small()
 {
-	 if (forme.cote < d_particule_min)
+	if (forme.cote < d_particule_min)
     {
         std::cout << message::particle_too_small(forme.centre.x,forme.centre.y,
         forme.cote);
