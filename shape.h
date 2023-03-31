@@ -1,3 +1,6 @@
+//LAHLOU SAAD 361150
+//ASMOUKI ILYAS 356263
+
 #ifndef SHAPE_H
 #define SHAPE_H
 
@@ -6,7 +9,8 @@
 
 enum MARGIN {NO_MARGIN, WITH_MARGIN};
 
-namespace shape {
+namespace shape 
+{
 	constexpr double epsil_zero(0.125);
 }
 struct S2d
@@ -34,3 +38,4 @@ bool superposition_cercles(Cercle c1, Cercle  c2, MARGIN margin);
 bool superposition_cerclecarre(Carre c1, Cercle c2, MARGIN margin);
 
 #endif
+
