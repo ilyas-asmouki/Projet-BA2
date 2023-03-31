@@ -1,3 +1,6 @@
+//LAHLOU SAAD 361150
+//ASMOUKI ILYAS 356263
+
 #include <vector>
 #include <iostream>
 #include <string>
@@ -19,7 +22,7 @@ Robot::Robot(double x1=0, double y1=0)
 	forme.rayon = 0;
 }
 
-Cercle Robot::getforme()
+Cercle Robot::getForme() const
 {
 	return forme;
 }
@@ -78,32 +81,35 @@ void Robot::TestCollision()
 {
 	for (size_t i(0); i < tab_robot.size(); ++i)
 	{
-		if (superposition_cercles(forme, tab_robot[i].getforme(),NO_MARGIN))
+		if (superposition_cercles(forme, tab_robot[i].getForme(),NO_MARGIN))
 		{
 			if (forme.rayon == r_reparateur)
 			{
-				if (forme.rayon == tab_robot[i].getforme().rayon)
+				if (forme.rayon == tab_robot[i].getForme().rayon)
 				{
 					std::cout << message::repairers_superposition(forme.centre.x,
-					forme.centre.y, tab_robot[i].getforme().centre.x,
-					tab_robot[i].getforme().centre.y);
-				} else
+					forme.centre.y, tab_robot[i].getForme().centre.x,
+					tab_robot[i].getForme().centre.y);
+				} 
+				else
 				{ 
 					std::cout << message::repairer_neutralizer_superposition(forme
-					.centre.x, forme.centre.y, tab_robot[i].getforme().centre.x,
-					tab_robot[i].getforme().centre.y);	
+					.centre.x, forme.centre.y, tab_robot[i].getForme().centre.x,
+					tab_robot[i].getForme().centre.y);	
 				}
-			} else
+			}
+			else
 			{
-				if (forme.rayon == tab_robot[i].getforme().rayon)
+				if (forme.rayon == tab_robot[i].getForme().rayon)
 				{
 					std::cout << message::neutralizers_superposition(forme.centre.x,
-					forme.centre.y,	tab_robot[i].getforme().centre.x,
-					tab_robot[i].getforme().centre.y);
-				} else
+					forme.centre.y,	tab_robot[i].getForme().centre.x,
+					tab_robot[i].getForme().centre.y);
+				}
+				else
 				{ 
 					std::cout<<message::repairer_neutralizer_superposition(tab_robot[i]
-					.getforme().centre.x, tab_robot[i].getforme().centre.y,
+					.getForme().centre.x, tab_robot[i].getForme().centre.y,
 					forme.centre.x, forme.centre.y);	
 				}	
 			}
