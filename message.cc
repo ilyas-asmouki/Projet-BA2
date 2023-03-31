@@ -1,3 +1,6 @@
+//LAHLOU SAAD 361150
+//ASMOUKI ILYAS 356263
+
 // message.cc : fonctions pour l'affichage des messages d'erreur
 // Version 1.2: fonctions supplémentaire pour indiquer le succès de la lecture 
 // Version 1.1: 9 fonctions de messages d'erreurs à utiliser pour le projet 
