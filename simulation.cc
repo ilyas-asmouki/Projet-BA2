@@ -1,29 +1,18 @@
-#include "simulation.h"
-
-//~ #ifndef ROBOT_H
-//~ #define ROBOT_H
-#include "robot.h"
-//~ #endif
-
-#ifndef PARTICULE_H
-#define PARTICULE_H
-#include "particule.h"
-#endif
-
-#ifndef SHAPE_H
-#define SHAPE_H
-#include "shape.h"
-#endif
+//LAHLOU SAAD 361150
+//ASMOUKI ILYAS 356263
 
 #include <iostream>
 #include <string>
 #include <fstream>
 #include <sstream>
+#include "simulation.h"
+#include "robot.h"
+#include "particule.h"
+#include "shape.h"
 #include "message.h"
 
-using namespace std;
-
-void decodage_ligne(std::string line){
+void decodage_ligne(std::string line)
+{
 	enum ETAT{NBP, PARTICULE, SPATIAL, REPARATEUR, NEUTRALISEUR};
 	static int etat(NBP);
 	std::istringstream data(line);
@@ -35,16 +24,20 @@ void decodage_ligne(std::string line){
 	{
 	case NBP : 
 	data>>compteur1;
-	if (compteur1==0){
+	if (compteur1==0)
+	{
 		etat = SPATIAL;
-	} else {
+	} 
+	else 
+	{
 		etat = PARTICULE;
 	}
 	break;
 	case PARTICULE :
 	decodage_particule(data);
 	++i;
-	if (compteur1==i){
+	if (compteur1==i)
+	{
 		etat = SPATIAL;
 	}
 	break;
@@ -58,7 +51,8 @@ void decodage_ligne(std::string line){
 	case REPARATEUR :
 	decodage_robot(data, REPARATEUR, compteur1, compteur2);
 	++i;
-	if (compteur2 == i){
+	if (compteur2 == i)
+	{
 		etat = NEUTRALISEUR;
 		i=0;
 	}
@@ -67,8 +61,9 @@ void decodage_ligne(std::string line){
 	case NEUTRALISEUR :
 	decodage_robot(data, NEUTRALISEUR, compteur1, compteur2);
 	++i;
-	if (compteur1 == i){
-		cout<<message::success();
+	if (compteur1 == i)
+	{
+		std::cout<<message::success();
 		exit(EXIT_SUCCESS);
 	}
 	}
@@ -80,16 +75,21 @@ Simulation::Simulation(char* fichier) : file(fichier)
 	lecture();
 }
 
-void Simulation::lecture(){
-	string line;
+void Simulation::lecture()
+{
+	std::string line;
 	if (!file.fail()){
-		while (getline(file>>ws,line)){
-			if (line[0]=='#'){
+		while (getline(file>>std::ws,line))
+		{
+			if (line[0]=='#')
+			{
 				continue;
 			}
 			decodage_ligne(line);
 		}
-	} else {
+	}
+	else
+	{
 		exit(EXIT_FAILURE);
 	}
 	return;
