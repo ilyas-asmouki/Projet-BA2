@@ -1,9 +1,6 @@
 #ifndef GUI_H
 #define GUI_H
 
-//~ #include "simulation.h"
-//~ #include "graphic.h"
-
 #include <gtkmm.h>
 
 class Monde : public Gtk::DrawingArea
@@ -36,11 +33,13 @@ class Fenetre : public Gtk::Window
 	 
 	 Monde monde;
 	 
-	 Gtk::Box m_Box_Top, m_Box_Inter, m_Box_Dessin, m_Box_Info, m_Box_Buttons;
+	 Gtk::Box m_Box_All, m_Box_Left, m_Box_Right, m_Box_maj, m_Box_prt, m_Box_rrs,
+	          m_Box_rrr, m_Box_rns, m_Box_rnp, m_Box_rnd, m_Box_rnr;
 	 
-	 Gtk::Label m_Label_general, m_Label_info, m_Label_maj, m_Label_particules;
+	 Gtk::Label m_Label_general, m_Label_info, m_Label_maj, m_Label_prt;
 	 Gtk::Label m_Label_rrs, m_Label_rrr, m_Label_rns, m_Label_rnp, m_Label_rnd;
-	 Gtk::Label m_Label_rnr;
+	 Gtk::Label m_Label_rnr, maj_data, prt_data, rrs_data, rrr_data, rns_data, 
+	            rnp_data, rnd_data, rnr_data; 
 	 
 	 Gtk::Button m_Button_exit, m_Button_open, m_Button_save, m_Button_startstop;
 	 Gtk::Button m_Button_step;
