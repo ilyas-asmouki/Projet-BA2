@@ -1,32 +1,39 @@
-# LAHLOU SAAD 361150
-# ASMOUKI ILYAS 356263
+OUT = projet
+CXX = g++
+CXXFLAGS = -Wall -std=c++17 
+LINKING = `pkg-config --cflags gtkmm-4.0`
+LDLIBS = `pkg-config --libs gtkmm-4.0`
+OFILES = projet.o simulation.o gui.o robot.o particule.o message.o shape.o graphic.o
 
-CXX     = g++
-CXXFLAGS = -g -Wall -std=c++11
-CXXFILES = projet.cc simulation.cc robot.cc particule.cc message.cc shape.cc
-OFILES = projet.o simulation.o robot.o particule.o message.o shape.o
+all: $(OUT)
 
+projet.o: projet.cc gui.h simulation.h
+	$(CXX) $(CXXFLAGS) $(LINKING) -c $< -o $@ $(LINKING)
+	
+gui.o: gui.cc gui.h simulation.h
+	$(CXX) $(CXXFLAGS) $(LINKING) -c $< -o $@ $(LINKING)
+	
+simulation.o: simulation.cc simulation.h robot.h shape.h particule.h message.h
+	$(CXX) $(CXXFLAGS) $(LINKING) -c $< -o $@ $(LINKING)
+	
+robot.o: robot.cc robot.h shape.h message.h constantes.h particule.h
+	$(CXX) $(CXXFLAGS) $(LINKING) -c $< -o $@ $(LINKING)
+	
+particule.o: particule.cc particule.h shape.h message.h constantes.h
+	$(CXX) $(CXXFLAGS) $(LINKING) -c $< -o $@ $(LINKING)
+	
+message.o: message.cc message.h
+	$(CXX) $(CXXFLAGS) $(LINKING) -c $< -o $@ $(LINKING)
+	
+shape.o: shape.cc shape.h
+	$(CXX) $(CXXFLAGS) $(LINKING) -c $< -o $@ $(LINKING)
+	
+graphic.o: graphic.cc graphic.h
+	$(CXX) $(CXXFLAGS) $(LINKING) -c $< -o $@ $(LINKING)
 
-projet: $(OFILES)
-	$(CXX) $(OFILES) -o projet
-
-depend:
-	@echo " *** MISE A JOUR DES DEPENDANCES ***"
-	@(sed '/^# DO NOT DELETE THIS LINE/q' Makefile && \
-	  $(CXX) -MM $(CXXFLAGS) $(CXXFILES) | \
-	  egrep -v "/usr/include" \
-	 ) >Makefile.new
-	@mv Makefile.new Makefile
+$(OUT): $(OFILES)
+	$(CXX) $(CXXFLAGS) $(LINKING) $(OFILES) -o $@ $(LDLIBS)
 
 clean:
-	@echo " *** EFFACE MODULES OBJET ET EXECUTABLE ***"
-	@/bin/rm -f *.o *.x *.cc~ *.h~ prog
-
-# DO NOT DELETE THIS LINE
-projet.o: projet.cc simulation.h
-simulation.o: simulation.cc simulation.h robot.h shape.h particule.h \
- message.h
-robot.o: robot.cc robot.h shape.h message.h constantes.h particule.h
-particule.o: particule.cc particule.h shape.h message.h constantes.h
-message.o: message.cc message.h
-shape.o: shape.cc shape.h
+	@echo "Cleaning compilation files"
+	@rm *.o $(OUT) *.cc~ *.h~
