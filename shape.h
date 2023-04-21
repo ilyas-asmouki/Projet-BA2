@@ -37,5 +37,6 @@ bool superposition_carres(const Carre s1, const Carre s2, MARGIN margin);
 bool superposition_cercles(Cercle c1, Cercle  c2, MARGIN margin);
 bool superposition_cerclecarre(Carre c1, Cercle c2, MARGIN margin);
 
+
 #endif
 

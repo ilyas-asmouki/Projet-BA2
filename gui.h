@@ -3,15 +3,30 @@
 
 #include <gtkmm.h>
 
+void graphic_set_context(const Cairo::RefPtr<Cairo::Context>& cr);
+
+struct Frame // Model Framing and window parameters
+{
+	double xMin; // frame parameters
+	double xMax;
+	double yMin;
+	double yMax;
+	double asp;  // frame aspect ratio
+	int width;   // window width
+	int height;  // window height
+};
+
 class Monde : public Gtk::DrawingArea
 {
-public:
-	Monde();
-	virtual ~Monde();
-	//~ void setFrame(Frame x); 
-	//~ void adjustFrame(int width, int height); 
-protected:
-  void on_draw(const Cairo::RefPtr<Cairo::Context>& cr, int width, int height);
+	public:
+		Monde();
+		virtual ~Monde();
+		void setFrame(Frame x); 
+		void adjustFrame(int width, int height); 
+	private:
+		Frame frame;
+	protected:
+		void on_draw(const Cairo::RefPtr<Cairo::Context>& cr, int width, int height);
 };
 
 
@@ -48,6 +63,7 @@ class Fenetre : public Gtk::Window
 	 bool disconnect; 
 	 const int timeout_value; 
 };
+
 
 
 

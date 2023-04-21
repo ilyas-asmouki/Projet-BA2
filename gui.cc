@@ -1,6 +1,13 @@
 #include "gui.h"
 #include <iostream>
 #include "simulation.h"
+#include "graphic.h"
+#include "constantes.h"
+
+static void draw_frame(const Cairo::RefPtr<Cairo::Context>& cr, Frame frame);
+static void orthographic_projection(const Cairo::RefPtr<Cairo::Context>& cr, 
+									const Frame& frame);
+static Frame default_frame = {-dmax, dmax, -dmax, dmax, 1., 500, 500}; 
 
 Monde::Monde()
 {
@@ -16,6 +23,10 @@ Monde::~Monde()
 
 void Monde::on_draw(const Cairo::RefPtr<Cairo::Context>& cr, int width, int height)
 {
+	graphic_set_context(cr);
+	adjustFrame(width,height);
+	draw_frame(cr, frame);
+	orthographic_projection(cr, frame); 
 }
 
 Fenetre::Fenetre() : 
@@ -201,4 +212,57 @@ void Fenetre::on_file_dialog_response(int response_id,
 		}
 	}
 	delete dialog;
+}
+
+void Monde::adjustFrame(int width, int height)
+{	
+	frame.width  = width;
+	frame.height = height;
+
+    double new_aspect_ratio((double)width/height);
+    if( new_aspect_ratio > default_frame.asp)
+    {
+	    frame.yMax = default_frame.yMax ;
+	    frame.yMin = default_frame.yMin ;	
+	  
+	    double delta(default_frame.xMax - default_frame.xMin);
+	    double mid((default_frame.xMax + default_frame.xMin)/2);
+	    frame.xMax = mid + 0.5*(new_aspect_ratio/default_frame.asp)*delta ;
+	    frame.xMin = mid - 0.5*(new_aspect_ratio/default_frame.asp)*delta ;		  	  
+    }
+    else
+    {
+	    frame.xMax = default_frame.xMax ;
+	    frame.xMin = default_frame.xMin ;
+	  	  
+ 	    double delta(default_frame.yMax - default_frame.yMin);
+	    double mid((default_frame.yMax + default_frame.yMin)/2);
+	    frame.yMax = mid + 0.5*(default_frame.asp/new_aspect_ratio)*delta ;
+	    frame.yMin = mid - 0.5*(default_frame.asp/new_aspect_ratio)*delta ;		  	  
+    }
+}
+
+static void draw_frame(const Cairo::RefPtr<Cairo::Context>& cr, Frame frame)
+{
+//display a rectangular frame around the drawing area
+cr->set_line_width(10.0);
+// draw greenish lines
+cr->set_source_rgb(0.5, 0.5, 0.5);
+cr->rectangle(0,0, frame.width, frame.height);
+cr->stroke();
+}
+
+static void orthographic_projection(const Cairo::RefPtr<Cairo::Context>& cr, 
+									const Frame& frame)
+{
+	// déplace l'origine au centre de la fenêtre
+	cr->translate(frame.width/2, frame.height/2);
+  
+	// normalise la largeur et hauteur aux valeurs fournies par le cadrage
+	// ET inverse la direction de l'axe Y
+	cr->scale(frame.width/(frame.xMax - frame.xMin), 
+             -frame.height/(frame.yMax - frame.yMin));
+  
+	// décalage au centre du cadrage
+	cr->translate(-(frame.xMin + frame.xMax)/2, -(frame.yMin + frame.yMax)/2);
 }
