@@ -134,8 +134,9 @@ unsigned Simulation::p_getnbP()
 	return getnbP();
 }
 
-void save(std::ofstream fichier)
+void sauvegarde(std::string file)
 {
+	std::ofstream fichier(file);
 	fichier<<getnbP()<<std::endl;
 	for (unsigned i(0); i < getnbP(); ++i)
 	{
@@ -162,6 +163,7 @@ void save(std::ofstream fichier)
 		}
 		fichier<<neutra_getk_update(i)<<std::endl;
 	}
+	return;
 }
 
 void draw_world()

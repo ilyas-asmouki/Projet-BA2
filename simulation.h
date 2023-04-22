@@ -6,6 +6,7 @@
 
 #include <fstream>
 #include "robot.h"
+#include <string>
 	
 class Simulation 
 {
@@ -20,7 +21,7 @@ class Simulation
 	 unsigned s_getnbRr();
 	 unsigned s_getnbRs();
 	 unsigned p_getnbP();
-	 void save(std::ofstream fichier);
+	 void sauvegarde(std::string file);
 	 void destroy_data();
 	private : 
 	 std::ifstream fichier;

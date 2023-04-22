@@ -53,7 +53,13 @@ Fenetre::Fenetre(char* file, int argc) :
 {
 	
 	Propre_en_Ordre = ((argc==1)? new Simulation(empty) : new Simulation(file));
-
+	prt_data.set_text(std::to_string(Propre_en_Ordre->p_getnbP()));
+	rrs_data.set_text(std::to_string(Propre_en_Ordre->s_getnbRs()));
+	rrr_data.set_text(std::to_string(Propre_en_Ordre->s_getnbRr()));
+	rns_data.set_text(std::to_string(Propre_en_Ordre->s_getnbNs()));
+	//~ rnp_data.set_text(std::to_string(Propre_en_Ordre->
+	rnd_data.set_text(std::to_string(Propre_en_Ordre->s_getnbNd()));
+	rnr_data.set_text(std::to_string(Propre_en_Ordre->s_getnbNr()));
 	set_resizable(true);
 	set_default_size(600, 500);
 	set_title("Propre en ordre");
@@ -226,16 +232,17 @@ void Fenetre::on_file_dialog_response(int response_id,
 		case Gtk::ResponseType::OK:
 		{
 		    auto filename = dialog->get_file()->get_path();
-		    //~ if (dialogue)
-		    //~ {
-				//~ Propre_en_Ordre->save(filename);
-			//~ }
-			//~ else 
-			//~ {
-				//~ Propre_en_Ordre->destroy_data();
-				//~ delete Propre_en_Ordre;
-				
-		    
+		    if (dialogue)
+		    {
+				Propre_en_Ordre->sauvegarde(filename);
+			}
+			else 
+			{
+				std::ifstream fichier(filename);
+				Propre_en_Ordre->destroy_data();
+				delete Propre_en_Ordre;
+				Propre_en_Ordre = new Simulation(fichier);
+			}
 		    break;
 		}
 		case Gtk::ResponseType::CANCEL:
