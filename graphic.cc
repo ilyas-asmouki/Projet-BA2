@@ -9,14 +9,14 @@ void set_context(const Cairo::RefPtr<Cairo::Context>& cr)
 	ptcr = &cr;
 }
 
-void set_world(const Cairo::RefPtr<Cairo::Context>& cr)
+void set_world()
 {
-	cr->set_source_rgb(1., 1., 1.);
-	cr->paint();
-	cr->set_line_width(2.0);
-	cr->set_source_rgb(0.5, 0.5, 0.5);
-	cr->rectangle(-dmax, -dmax, 2*dmax, 2*dmax);
-	cr->stroke();
+	(*ptcr)->set_source_rgb(1., 1., 1.);
+	(*ptcr)->paint();
+	(*ptcr)->set_line_width(2.0);
+	(*ptcr)->set_source_rgb(0.5, 0.5, 0.5);
+	(*ptcr)->rectangle(-dmax, -dmax, 2*dmax, 2*dmax);
+	(*ptcr)->stroke();
 }
 
 void draw_circle(double xc, double yc, double radius, std::string color)
