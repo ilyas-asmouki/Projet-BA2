@@ -2,38 +2,42 @@
 #define GUI_H
 
 #include <gtkmm.h>
+#include <fstream>
+#include "simulation.h"
+
+static std::ifstream file;
 
 void graphic_set_context(const Cairo::RefPtr<Cairo::Context>& cr);
 
-struct Frame
+struct Frame 
 {
-	double xMin;
+	double xMin; 
 	double xMax;
 	double yMin;
 	double yMax;
-	double asp;
-	int width;
-	int height;
+	double asp;  
+	int width;  
+	int height; 
 };
 
 class Monde : public Gtk::DrawingArea
 {
-	public:
-		Monde();
-		virtual ~Monde();
-		void setFrame(Frame x); 
-		void adjustFrame(int width, int height); 
-	private:
-		Frame frame;
-	protected:
-		void on_draw(const Cairo::RefPtr<Cairo::Context>& cr, int width, int height);
+public:
+	Monde();
+	virtual ~Monde();
+	void setFrame(Frame x); 
+	void adjustFrame(int width, int height); 
+protected:
+	void on_draw(const Cairo::RefPtr<Cairo::Context>& cr, int width, int height);
+  
+private:
+	Frame frame;
 };
-
 
 class Fenetre : public Gtk::Window
 {
 	public:
-	 Fenetre();
+	 Fenetre(char* file);
 	 virtual ~Fenetre();
 
 	protected:
@@ -45,9 +49,9 @@ class Fenetre : public Gtk::Window
 	 bool on_timeout();
 	 bool on_window_key_pressed(guint keyval, guint keycode, Gdk::ModifierType state);
 	 void on_file_dialog_response(int response_id, Gtk::FileChooserDialog* dialog);
-	 
+ 
+	 Simulation Propre_en_Ordre;
 	 Monde monde;
-	 
 	 Gtk::Box m_Box_All, m_Box_Left, m_Box_Right, m_Box_maj, m_Box_prt, m_Box_rrs,
 	          m_Box_rrr, m_Box_rns, m_Box_rnp, m_Box_rnd, m_Box_rnr;
 	 
@@ -63,8 +67,5 @@ class Fenetre : public Gtk::Window
 	 bool disconnect; 
 	 const int timeout_value; 
 };
-
-
-
 
 #endif
