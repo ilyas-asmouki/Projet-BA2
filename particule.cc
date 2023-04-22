@@ -20,7 +20,6 @@ Particule::Particule(double x, double y, double cote)
     detect_particle_too_small();
     detect_particle_superposition();
     tab_particule.push_back(*this);
-    dessin_carre(x, y, forme.cote);
 }
 
 Carre Particule::getForme() const
@@ -111,4 +110,9 @@ void desintegration()
 unsigned getnbP()
 {
 	return tab_particule.size();
+}
+
+Carre p_getforme(unsigned i)
+{
+	return tab_particule[i].getForme();
 }

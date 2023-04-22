@@ -14,16 +14,16 @@ class Robot
 	 Robot(double x, double y);
 	 Cercle getForme() const;
 	 void TestCollision();
-	 virtual unsigned getnbUpdate();
-	 virtual unsigned getnbNr();
-	 virtual unsigned getnbNs();
-	 virtual unsigned getnbNd();
-	 virtual unsigned getnbRr();
-	 virtual unsigned getnbRs();
-	 virtual double getorientation();
-	 virtual unsigned gettype();
-	 virtual bool getpanne();
-	 virtual int getk_update();
+	 virtual unsigned getnbUpdate(){return 0;}
+	 virtual unsigned getnbNr(){return 0;}
+	 virtual unsigned getnbNs(){return 0;}
+	 virtual unsigned getnbNd(){return 0;}
+	 virtual unsigned getnbRr(){return 0;}
+	 virtual unsigned getnbRs(){return 0;}
+	 virtual double getorientation(){return 0;}
+	 virtual unsigned gettype(){return 0;}
+	 virtual bool getpanne(){return 0;}
+	 virtual int getk_update(){return 0;}
 	protected : 
 	 Cercle forme;
 };
@@ -70,7 +70,6 @@ class Neutraliseur : public Robot
 	 unsigned type;
 	 bool panne;
 	 int k_update_panne;
-	 bool en_collision;
 };
 
 void decodage_robot(std::istringstream& lig, int type, int& compteur1, int& compteur2);
@@ -85,5 +84,6 @@ double neutra_getorientation(unsigned i);
 unsigned neutra_gettype(unsigned i);
 bool neutra_getpanne(unsigned i);
 int neutra_getk_update(unsigned i);
+Cercle r_getForme(unsigned i);
 
 #endif

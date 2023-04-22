@@ -23,6 +23,7 @@ class Particule
 void test_particle_robot_superposition(Cercle robot);
 void decodage_particule(std::istringstream& data);
 unsigned getnbP();
+Carre p_getforme(unsigned i);
 void desintegration();
 
 #endif

@@ -73,7 +73,6 @@ Simulation::Simulation(char* fichier) : file(fichier)
 	lecture();
 }
 
-
 void Simulation::lecture()
 {
 	std::string line;
@@ -130,9 +129,36 @@ unsigned Simulation::p_getnbP()
 	return getnbP();
 }
 
-//~ void save(std::ofstream fichier)
-//~ {
-	//~ fichier<<getnbP<<endl<<
+void save(std::ofstream fichier)
+{
+	fichier<<getnbP()<<std::endl;
+	for (unsigned i(0); i < getnbP(); ++i)
+	{
+		fichier<<p_getforme(i).centre.x<<" "<<p_getforme(i).centre.y<<" "<<p_getforme(i).cote<<std::endl;
+	}
+	fichier<<std::endl<<r_getForme(0).centre.x<<" "<<r_getForme(0).centre.y<<" "<<r_getForme(0).rayon<<std::endl;
+	
+	for (unsigned i(1); i < spatial_getnbRs()+1 ; ++i)
+	{
+		fichier<<r_getForme(i).centre.x<<" "<<r_getForme(i).centre.y<<std::endl;
+	}
+	
+	for (unsigned i(spatial_getnbRs()); i < spatial_getnbRs()+spatial_getnbNs()+1; ++i)
+	{
+		fichier<<r_getForme(i).centre.x<<" "<<r_getForme(i).centre.y<<
+			neutra_getorientation(i)<<" "<< neutra_gettype(i)<<" ";
+		if (neutra_getpanne(i) == 0)
+		{
+			fichier<<"false ";
+		}
+		else
+		{
+			fichier<<"true ";
+		}
+		fichier<<neutra_getk_update(i)<<std::endl;
+	}
+}
+	
 	
 
 	
