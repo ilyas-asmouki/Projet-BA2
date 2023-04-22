@@ -20,6 +20,7 @@ Particule::Particule(double x, double y, double cote)
     detect_particle_too_small();
     detect_particle_superposition();
     tab_particule.push_back(*this);
+    dessin_carre(x, y, forme.cote);
 }
 
 Carre Particule::getForme() const

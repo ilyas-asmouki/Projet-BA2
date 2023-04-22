@@ -31,10 +31,11 @@ Spatial::Spatial(double x, double y, int nbUpdate ,unsigned nbNr, unsigned nbNs,
 	  unsigned nbNd, unsigned nbRr ,unsigned nbRs): Robot(x, y), nbUpdate(nbUpdate), 
 	  nbNr(nbNr), nbNs(nbNs), nbNd(nbNd), nbRr(nbRr), nbRs(nbRs)
 {
-	forme.rayon=r_spatial;
+	forme.rayon = r_spatial;
 	error_outside();
 	test_particle_robot_superposition(forme);
 	tab_robot.push_back(this);
+	dessin_cercle(x, y, forme.rayon, "blue");
 }
 	
 void Spatial::error_outside()
@@ -79,10 +80,11 @@ unsigned Spatial::getnbRs()
 
 Reparateur::Reparateur(double x, double y): Robot(x, y)
 {
-	forme.rayon=r_reparateur; 
+	forme.rayon = r_reparateur; 
 	TestCollision();
 	test_particle_robot_superposition(forme);
 	tab_robot.push_back(this);
+	dessin_cercle(x, y, forme.rayon, "green");
 }
 		
 Neutraliseur::Neutraliseur(double x, double y, double orientation, unsigned type,
@@ -90,11 +92,13 @@ Neutraliseur::Neutraliseur(double x, double y, double orientation, unsigned type
 	orientation(orientation), type(type), k_update_panne(k_update_panne) 
 {
 	panne = ((bool_panne == "false") ? false : true);
-	forme.rayon=r_neutraliseur;
+	forme.rayon = r_neutraliseur;
 	error_k_update(nbUpdate);
 	TestCollision();
 	test_particle_robot_superposition(forme);
 	tab_robot.push_back(this);
+	std::string couleur = (panne ? "orange" : "black");
+	dessin_cercle(x, y, forme.rayon, couleur);
 }
 	
 void Neutraliseur::error_k_update(int nbUpdate)

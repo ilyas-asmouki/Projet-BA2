@@ -70,6 +70,7 @@ class Neutraliseur : public Robot
 	 unsigned type;
 	 bool panne;
 	 int k_update_panne;
+	 bool en_collision;
 };
 
 void decodage_robot(std::istringstream& lig, int type, int& compteur1, int& compteur2);
