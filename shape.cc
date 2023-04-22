@@ -2,6 +2,7 @@
 //ASMOUKI ILYAS 356263
 
 #include "shape.h"
+#include "graphic.h"
 
 double distance(S2d p1, S2d p2)
 {

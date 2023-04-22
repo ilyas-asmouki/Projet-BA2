@@ -4,7 +4,6 @@
 #include "graphic.h"
 #include "constantes.h"
 
-static void draw_frame(const Cairo::RefPtr<Cairo::Context>& cr, Frame frame);
 static void orthographic_projection(const Cairo::RefPtr<Cairo::Context>& cr, 
 									const Frame& frame);
 static Frame default_frame = {-dmax, dmax, -dmax, dmax, 1., 500, 500}; 
@@ -23,10 +22,10 @@ Monde::~Monde()
 
 void Monde::on_draw(const Cairo::RefPtr<Cairo::Context>& cr, int width, int height)
 {
-	graphic_set_context(cr);
+	set_context(cr);
 	adjustFrame(width,height);
-	draw_frame(cr, frame);
-	orthographic_projection(cr, frame); 
+	orthographic_projection(cr, frame);
+	set_world(cr);
 }
 
 Fenetre::Fenetre() : 
@@ -242,27 +241,11 @@ void Monde::adjustFrame(int width, int height)
     }
 }
 
-static void draw_frame(const Cairo::RefPtr<Cairo::Context>& cr, Frame frame)
-{
-//display a rectangular frame around the drawing area
-cr->set_line_width(10.0);
-// draw greenish lines
-cr->set_source_rgb(0.5, 0.5, 0.5);
-cr->rectangle(0,0, frame.width, frame.height);
-cr->stroke();
-}
-
 static void orthographic_projection(const Cairo::RefPtr<Cairo::Context>& cr, 
 									const Frame& frame)
 {
-	// déplace l'origine au centre de la fenêtre
 	cr->translate(frame.width/2, frame.height/2);
-  
-	// normalise la largeur et hauteur aux valeurs fournies par le cadrage
-	// ET inverse la direction de l'axe Y
-	cr->scale(frame.width/(frame.xMax - frame.xMin), 
-             -frame.height/(frame.yMax - frame.yMin));
-  
-	// décalage au centre du cadrage
+	cr->scale(frame.width/(frame.xMax - frame.xMin),
+			  -frame.height/(frame.yMax - frame.yMin));
 	cr->translate(-(frame.xMin + frame.xMax)/2, -(frame.yMin + frame.yMax)/2);
 }

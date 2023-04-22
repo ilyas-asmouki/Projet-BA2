@@ -5,15 +5,15 @@
 
 void graphic_set_context(const Cairo::RefPtr<Cairo::Context>& cr);
 
-struct Frame // Model Framing and window parameters
+struct Frame
 {
-	double xMin; // frame parameters
+	double xMin;
 	double xMax;
 	double yMin;
 	double yMax;
-	double asp;  // frame aspect ratio
-	int width;   // window width
-	int height;  // window height
+	double asp;
+	int width;
+	int height;
 };
 
 class Monde : public Gtk::DrawingArea
