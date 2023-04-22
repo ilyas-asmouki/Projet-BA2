@@ -1,18 +1,19 @@
 #include "gui.h"
 #include <iostream>
-#include "simulation.h"
-#include "graphic.h"
 #include "constantes.h"
+#include "graphic.h"
+#include <algorithm>
+
+constexpr unsigned taille_dessin(500);
 
 static void orthographic_projection(const Cairo::RefPtr<Cairo::Context>& cr, 
 									const Frame& frame);
-static Frame default_frame = {-dmax, dmax, -dmax, dmax, 1., 500, 500}; 
+static Frame default_frame = {-dmax, dmax, -dmax, dmax, 1., taille_dessin, taille_dessin}; 
 
 Monde::Monde()
 {
-    set_content_width(500);
-	set_content_height(500);
-	
+    set_content_width(default_frame.width);
+	set_content_height(default_frame.height);
 	set_draw_func(sigc::mem_fun(*this, &Monde::on_draw));
 }
 
@@ -24,17 +25,17 @@ void Monde::on_draw(const Cairo::RefPtr<Cairo::Context>& cr, int width, int heig
 {
 	set_context(cr);
 	adjustFrame(width,height);
-	orthographic_projection(cr, frame);
+	orthographic_projection(cr, frame); 
 	set_world();
 }
 
-Fenetre::Fenetre() : 
- m_Box_All(Gtk::Orientation::HORIZONTAL,50), m_Box_Left(Gtk::Orientation::VERTICAL,3),
- m_Box_Right(Gtk::Orientation::VERTICAL,0), m_Box_maj(Gtk::Orientation::HORIZONTAL,200),
+Fenetre::Fenetre(char* file) : Propre_en_Ordre(file),
+ m_Box_All(Gtk::Orientation::HORIZONTAL,10), m_Box_Left(Gtk::Orientation::VERTICAL,3),
+ m_Box_Right(Gtk::Orientation::VERTICAL,0),m_Box_maj(Gtk::Orientation::HORIZONTAL,200),
  m_Box_prt(Gtk::Orientation::HORIZONTAL,213), 
- m_Box_rrs(Gtk::Orientation::HORIZONTAL,82), m_Box_rrr(Gtk::Orientation::HORIZONTAL,79),
- m_Box_rns(Gtk::Orientation::HORIZONTAL,74), m_Box_rnp(Gtk::Orientation::HORIZONTAL,80),
- m_Box_rnd(Gtk::Orientation::HORIZONTAL,86), m_Box_rnr(Gtk::Orientation::HORIZONTAL,71),
+ m_Box_rrs(Gtk::Orientation::HORIZONTAL,82),m_Box_rrr(Gtk::Orientation::HORIZONTAL,79),
+ m_Box_rns(Gtk::Orientation::HORIZONTAL,74),m_Box_rnp(Gtk::Orientation::HORIZONTAL,80),
+ m_Box_rnd(Gtk::Orientation::HORIZONTAL,86),m_Box_rnr(Gtk::Orientation::HORIZONTAL,71),
  m_Label_general("General"), m_Label_info("Info : nombre de ..."), 
  m_Label_maj("mises à jour:"), m_Label_prt("particules:"), 
  m_Label_rrs("robots réparateurs en service:"), 
@@ -46,14 +47,18 @@ Fenetre::Fenetre() :
  rrs_data("0"), rrr_data("0"), rns_data("0"), rnp_data("0"), rnd_data("0"), rnr_data("0"),
  m_Button_exit("exit"), m_Button_open("open"), m_Button_save("save"), 
  m_Button_startstop("start"), m_Button_step("step"), timer_added(false), 
- disconnect(false), timeout_value(1000) 
+ disconnect(false), timeout_value(200) 
 {
-	set_default_size(600, 600);
+	set_resizable(true);
+	set_default_size(600, 500);
 	set_title("Propre en ordre");
 	set_child(m_Box_All);
+	
 	m_Box_All.append(m_Box_Left);
 	m_Box_All.append(m_Box_Right);
 	m_Box_Right.append(monde);
+	
+	monde.set_expand();
 	m_Box_Left.append(m_Label_general);
 	m_Box_Left.append(m_Button_exit);
 	m_Box_Left.append(m_Button_open);
@@ -113,6 +118,13 @@ void Fenetre::on_button_clicked_exit()
 
 void Fenetre::on_button_clicked_open()
 {
+	if (timer_added)
+	{
+		disconnect = true;
+		timer_added = false;
+		m_Button_startstop.set_label("start");
+	}
+		
 	auto dialog = new Gtk::FileChooserDialog("Please choose a file",
 	                                         Gtk::FileChooser::Action::OPEN);
 	dialog->set_transient_for(*this);
@@ -126,6 +138,13 @@ void Fenetre::on_button_clicked_open()
 
 void Fenetre::on_button_clicked_save()
 {
+	if (timer_added)
+	{
+		disconnect = true;
+		timer_added = false;
+		m_Button_startstop.set_label("start");
+	}
+		
 	auto dialog = new Gtk::FileChooserDialog("Please choose a file",
 	                                         Gtk::FileChooser::Action::SAVE);
 	dialog->set_transient_for(*this);
@@ -175,6 +194,11 @@ bool Fenetre::on_timeout()
 
 void Fenetre::on_button_clicked_step()
 {
+	if (!timer_added)
+	{
+		on_timeout();
+	}
+	return;
 }
 
 bool Fenetre::on_window_key_pressed(guint keyval, guint, Gdk::ModifierType state)
@@ -199,6 +223,7 @@ void Fenetre::on_file_dialog_response(int response_id,
 		case Gtk::ResponseType::OK:
 		{
 		    auto filename = dialog->get_file()->get_path();
+		    
 		    break;
 		}
 		case Gtk::ResponseType::CANCEL:
@@ -245,7 +270,8 @@ static void orthographic_projection(const Cairo::RefPtr<Cairo::Context>& cr,
 									const Frame& frame)
 {
 	cr->translate(frame.width/2, frame.height/2);
-	cr->scale(frame.width/(frame.xMax - frame.xMin),
-			  -frame.height/(frame.yMax - frame.yMin));
+	cr->scale(frame.width/(frame.xMax - frame.xMin), 
+             -frame.height/(frame.yMax - frame.yMin));
 	cr->translate(-(frame.xMin + frame.xMax)/2, -(frame.yMin + frame.yMax)/2);
 }
+
