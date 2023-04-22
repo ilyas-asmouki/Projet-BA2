@@ -3,6 +3,7 @@
 
 #include "shape.h"
 #include "graphic.h"
+#include <string>
 
 double distance(S2d p1, S2d p2)
 {
@@ -48,3 +49,15 @@ bool superposition_cerclecarre(Carre c1, Cercle c2, MARGIN margin)
 	}
 	return false;
 }
+
+void dessin_cercle(double xc, double yc, double rayon, std::string couleur)
+{
+	draw_circle(xc, yc, rayon, couleur);
+}
+
+void dessin_carre(double xc, double yc, double cote)
+{
+	draw_square(xc, yc, cote);
+}
+
+

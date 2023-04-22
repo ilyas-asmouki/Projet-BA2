@@ -36,6 +36,8 @@ double norme(S2d vect);
 bool superposition_carres(const Carre s1, const Carre s2, MARGIN margin);
 bool superposition_cercles(Cercle c1, Cercle  c2, MARGIN margin);
 bool superposition_cerclecarre(Carre c1, Cercle c2, MARGIN margin);
+void dessin_cercle(double xc, double yc, double rayon, std::string couleur);
+void dessin_carre(double xc, double yc, double cote);
 
 
 #endif
