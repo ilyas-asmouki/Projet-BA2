@@ -62,8 +62,11 @@ void decodage_ligne(std::string line)
 		++i;
 		if (compteur1 == i)
 		{
+			etat = NBP;
+			i=0;
 			std::cout<<message::success();
 		}
+		break;
 	}
 	return;
 }	
@@ -78,23 +81,21 @@ Simulation::Simulation(char* file) : fichier(file)
 	lecture(fichier);
 }
 
+Simulation::~Simulation()
+{
+}
+
 void Simulation::lecture(std::ifstream& file)
 {
 	std::string line;
-	if (!file.fail())
+
+	while (getline(file>>std::ws,line))
 	{
-		while (getline(file>>std::ws,line))
+		if (line[0]=='#')
 		{
-			if (line[0]=='#')
-			{
-				continue;
-			}
-			decodage_ligne(line);
+			continue;
 		}
-	}
-	else
-	{
-		exit(EXIT_FAILURE);
+		decodage_ligne(line);
 	}
 	return;
 }
@@ -134,24 +135,28 @@ unsigned Simulation::p_getnbP()
 	return getnbP();
 }
 
-void sauvegarde(std::string file)
+void Simulation::sauvegarde(std::string file)
 {
 	std::ofstream fichier(file);
 	fichier<<getnbP()<<std::endl;
 	for (unsigned i(0); i < getnbP(); ++i)
 	{
-		fichier<<p_getforme(i).centre.x<<" "<<p_getforme(i).centre.y<<" "<<p_getforme(i).cote<<std::endl;
+		fichier<<"\t"<<p_getforme(i).centre.x<<" "<<p_getforme(i).centre.y<<" "<<p_getforme(i).cote<<std::endl;
 	}
-	fichier<<std::endl<<r_getForme(0).centre.x<<" "<<r_getForme(0).centre.y<<" "<<r_getForme(0).rayon<<std::endl;
+	fichier<<std::endl<<r_getForme(0).centre.x<<" "<<r_getForme(0).centre.y<<" "<<spatial_getnbUpdate()<<
+		" "<<spatial_getnbNr()<<" "<<spatial_getnbNs()<<" "<<spatial_getnbNd()<<" "<<spatial_getnbRr()<<" "<<
+		spatial_getnbRs()<<std::endl;
 	
 	for (unsigned i(1); i < spatial_getnbRs()+1 ; ++i)
 	{
-		fichier<<r_getForme(i).centre.x<<" "<<r_getForme(i).centre.y<<std::endl;
+		fichier<<"\t"<<r_getForme(i).centre.x<<" "<<r_getForme(i).centre.y<<std::endl;
 	}
 	
-	for (unsigned i(spatial_getnbRs()); i < spatial_getnbRs()+spatial_getnbNs()+1; ++i)
+	fichier<<std::endl;
+	
+	for (unsigned i(spatial_getnbRs()+1); i < spatial_getnbRs()+spatial_getnbNs()+1; ++i)
 	{
-		fichier<<r_getForme(i).centre.x<<" "<<r_getForme(i).centre.y<<
+		fichier<<"\t"<<r_getForme(i).centre.x<<" "<<r_getForme(i).centre.y<<" "<<
 			neutra_getorientation(i)<<" "<< neutra_gettype(i)<<" ";
 		if (neutra_getpanne(i) == 0)
 		{

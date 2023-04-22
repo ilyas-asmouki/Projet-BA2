@@ -34,7 +34,6 @@ void Particule::detect_particle_outside()
     {
         std::cout << message::particle_outside(forme.centre.x, forme.centre.y, 
         forme.cote);
-        exit(EXIT_FAILURE);
     }
 }
 
@@ -44,7 +43,6 @@ void Particule::detect_particle_too_small()
     {
 		std::cout << message::particle_too_small(forme.centre.x,forme.centre.y,
 			forme.cote);
-        exit(EXIT_FAILURE);
     }
 }
 
@@ -56,7 +54,6 @@ void Particule::detect_particle_superposition()
 		{
 			std::cout << message::particle_superposition(forme.centre.x,forme.centre.y,
 			tab_particule[i].getForme().centre.x,tab_particule[i].getForme().centre.y);
-			exit(EXIT_FAILURE);
 		}
 	}
 }
@@ -77,7 +74,6 @@ void test_particle_robot_superposition(Cercle robot)
 			std::cout << message::particle_robot_superposition(tab_particule[i]
 			.getForme().centre.x,tab_particule[i].getForme().centre.y,tab_particule[i]
 			.getForme(). cote, robot.centre.x, robot.centre.y, robot.rayon);
-			exit(EXIT_FAILURE);
 		}
 	}
 }

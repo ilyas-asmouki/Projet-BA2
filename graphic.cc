@@ -62,5 +62,3 @@ void draw_orientation(double xc, double yc, double radius, double angle)
 	(*ptcr)->line_to(xc + radius*cos(angle), yc + radius*sin(angle));
 	(*ptcr)->stroke();
 }
-
-

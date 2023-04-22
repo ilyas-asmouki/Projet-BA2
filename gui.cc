@@ -11,7 +11,7 @@ static void orthographic_projection(const Cairo::RefPtr<Cairo::Context>& cr,
 									const Frame& frame);
 static Frame default_frame = {-dmax, dmax, -dmax, dmax, 1., taille_dessin, taille_dessin}; 
 
-Monde::Monde()
+Monde::Monde() : empty(false)
 {
     set_content_width(default_frame.width);
 	set_content_height(default_frame.height);
@@ -24,11 +24,26 @@ Monde::~Monde()
 
 void Monde::on_draw(const Cairo::RefPtr<Cairo::Context>& cr, int width, int height)
 {
-	set_context(cr);
-	adjustFrame(width,height);
-	orthographic_projection(cr, frame); 
-	set_world();
-	draw_world();
+	if (not empty)
+	{
+		set_context(cr);
+		adjustFrame(width,height);
+		orthographic_projection(cr, frame); 
+		set_world();
+		draw_world();
+	}
+}
+
+void Monde::clear()
+{
+	empty = true;
+	queue_draw();
+}
+
+void Monde::draw()
+{
+	empty = false;
+	queue_draw();
 }
 
 Fenetre::Fenetre(char* file, int argc) : 
@@ -51,15 +66,15 @@ Fenetre::Fenetre(char* file, int argc) :
  m_Button_startstop("start"), m_Button_step("step"), timer_added(false), 
  disconnect(false), timeout_value(200), dialogue(OPEN)
 {
-	
-	Propre_en_Ordre = ((argc==1)? new Simulation(empty) : new Simulation(file));
-	prt_data.set_text(std::to_string(Propre_en_Ordre->p_getnbP()));
-	rrs_data.set_text(std::to_string(Propre_en_Ordre->s_getnbRs()));
-	rrr_data.set_text(std::to_string(Propre_en_Ordre->s_getnbRr()));
-	rns_data.set_text(std::to_string(Propre_en_Ordre->s_getnbNs()));
-	//~ rnp_data.set_text(std::to_string(Propre_en_Ordre->
-	rnd_data.set_text(std::to_string(Propre_en_Ordre->s_getnbNd()));
-	rnr_data.set_text(std::to_string(Propre_en_Ordre->s_getnbNr()));
+	if (argc == 1)
+	{
+		Propre_en_Ordre = new Simulation(empty);
+	}
+	else 
+	{
+		Propre_en_Ordre = new Simulation(file);
+		set_data();
+	}
 	set_resizable(true);
 	set_default_size(600, 500);
 	set_title("Propre en ordre");
@@ -119,6 +134,18 @@ Fenetre::Fenetre(char* file, int argc) :
 
 Fenetre::~Fenetre()
 {
+}
+
+void Fenetre::set_data()
+{
+	prt_data.set_text(std::to_string(Propre_en_Ordre->p_getnbP()));
+	rrs_data.set_text(std::to_string(Propre_en_Ordre->s_getnbRs()));
+	rrr_data.set_text(std::to_string(Propre_en_Ordre->s_getnbRr()));
+	rns_data.set_text(std::to_string(Propre_en_Ordre->s_getnbNs()));
+	//~ rnp_data.set_text(std::to_string(Propre_en_Ordre->
+	rnd_data.set_text(std::to_string(Propre_en_Ordre->s_getnbNd()));
+	rnr_data.set_text(std::to_string(Propre_en_Ordre->s_getnbNr()));
+	return;
 }
 
 void Fenetre::on_button_clicked_exit()
@@ -240,8 +267,11 @@ void Fenetre::on_file_dialog_response(int response_id,
 			{
 				std::ifstream fichier(filename);
 				Propre_en_Ordre->destroy_data();
+				monde.clear();
 				delete Propre_en_Ordre;
 				Propre_en_Ordre = new Simulation(fichier);
+				set_data();
+				monde.draw();
 			}
 		    break;
 		}
@@ -254,7 +284,7 @@ void Fenetre::on_file_dialog_response(int response_id,
 		    break;
 		}
 	}
-	delete dialog;
+	dialog->hide();
 }
 
 void Monde::adjustFrame(int width, int height)

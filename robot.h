@@ -12,6 +12,7 @@ class Robot
 {
 	public :
 	 Robot(double x, double y);
+	 virtual ~Robot();
 	 Cercle getForme() const;
 	 void TestCollision();
 	 virtual unsigned getnbUpdate(){return 0;}
@@ -33,6 +34,7 @@ class Spatial : public Robot
 	public:
 	 Spatial(double x, double y, int nbUpdate ,unsigned nbNr, unsigned nbNs,
 	 unsigned nbNd, unsigned nbRr ,unsigned nbRs);
+	 ~Spatial();
 	 void error_outside();
 	 virtual unsigned getnbUpdate();
 	 virtual unsigned getnbNr();
@@ -53,6 +55,7 @@ class Reparateur : public Robot
 {
 	public :
 	 Reparateur(double x, double y);
+	 ~Reparateur();
 };
 
 class Neutraliseur : public Robot
@@ -60,6 +63,7 @@ class Neutraliseur : public Robot
 	public :
 	 Neutraliseur(double x, double y, double orientation, unsigned type,
 	              std::string bool_panne, int nbUpdate, int k_update_panne);
+	 ~Neutraliseur();
 	 void error_k_update(int nbUpdate);
 	 virtual double getorientation();
 	 virtual unsigned gettype();

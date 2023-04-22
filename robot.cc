@@ -22,6 +22,10 @@ Robot::Robot(double x1=0, double y1=0)
 	forme.rayon = 0;
 }
 
+Robot::~Robot()
+{
+}
+
 Cercle Robot::getForme() const
 {
 	return forme;
@@ -34,7 +38,10 @@ Spatial::Spatial(double x, double y, int nbUpdate ,unsigned nbNr, unsigned nbNs,
 	forme.rayon=r_spatial;
 	error_outside();
 	test_particle_robot_superposition(forme);
-	//~ dessin_cercle(forme);
+}
+
+Spatial::~Spatial()
+{
 }
 	
 void Spatial::error_outside()
@@ -42,7 +49,6 @@ void Spatial::error_outside()
 	if ((((abs(forme.centre.x)+r_spatial)>dmax)or(abs(forme.centre.y)+r_spatial)>dmax))
 	{
 		std::cout<<message::spatial_robot_ouside(forme.centre.x, forme.centre.y);
-		exit(EXIT_FAILURE);
 	}
 	return;
 }
@@ -82,7 +88,10 @@ Reparateur::Reparateur(double x, double y): Robot(x, y)
 	forme.rayon=r_reparateur; 
 	TestCollision();
 	test_particle_robot_superposition(forme);
-	//~ dessin_cercle(forme);
+}
+		
+Reparateur::~Reparateur()
+{
 }
 		
 Neutraliseur::Neutraliseur(double x, double y, double orientation, unsigned type,
@@ -91,20 +100,21 @@ Neutraliseur::Neutraliseur(double x, double y, double orientation, unsigned type
 {
 	panne = ((bool_panne == "false") ? false : true);
 	forme.rayon=r_neutraliseur;
-	error_k_update(nbUpdate);
 	TestCollision();
 	test_particle_robot_superposition(forme);
-	std::string couleur = ( panne ? "orange" : "black");
-	//~ dessin_cercle(forme);
+	error_k_update(nbUpdate);
 }
 	
+Neutraliseur::~Neutraliseur()
+{
+}
+
 void Neutraliseur::error_k_update(int nbUpdate)
 {
 	if (k_update_panne > nbUpdate)
 	{
 		std::cout<<message::invalid_k_update(forme.centre.x, forme.centre.y, 
 		k_update_panne, nbUpdate);
-		exit(EXIT_FAILURE);
 	}
 }
 
@@ -164,7 +174,6 @@ void Robot::TestCollision()
 					forme.centre.x, forme.centre.y);	
 				}	
 			}
-			exit(EXIT_FAILURE);
 		}
 	}	
 }
@@ -177,7 +186,7 @@ int decodage_spatial(std::istringstream& data, int& compteur1, int& compteur2)
 	data >> x >> y >> nbUpdate >> nbNr >> nbNs >> nbNd >> nbRr >> nbRs;
 	compteur1 = nbNs;
 	compteur2 = nbRs;
-	Spatial* pt = new Spatial(x,y,nbUpdate,nbNr,nbNd,nbNs, nbRr,nbRs);
+	Spatial* pt = new Spatial(x,y,nbUpdate,nbNr,nbNs ,nbNd, nbRr,nbRs);
 	tab_robot.push_back(pt);
 	return nbUpdate;
 }
@@ -294,6 +303,7 @@ void destroy_tab_robots()
 {
 	while (tab_robot.size() != 0)
 	{
+		delete tab_robot[tab_robot.size()-1];
 		tab_robot.pop_back();
 	}
 	return;

@@ -13,6 +13,7 @@ class Simulation
 	public :
 	 Simulation(std::ifstream& fichier);
 	 Simulation(char* file);
+	 virtual ~Simulation();
 	 void lecture(std::ifstream& file);
 	 unsigned s_getnbUpdate();
    	 unsigned s_getnbNr();

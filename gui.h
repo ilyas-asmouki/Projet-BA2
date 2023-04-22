@@ -26,11 +26,14 @@ public:
 	virtual ~Monde();
 	void setFrame(Frame x); 
 	void adjustFrame(int width, int height); 
+	void clear();
+	void draw();
 protected:
 	void on_draw(const Cairo::RefPtr<Cairo::Context>& cr, int width, int height);
   
 private:
 	Frame frame;
+	bool empty;
 };
 
 class Fenetre : public Gtk::Window
@@ -48,6 +51,7 @@ class Fenetre : public Gtk::Window
 	 bool on_timeout();
 	 bool on_window_key_pressed(guint keyval, guint keycode, Gdk::ModifierType state);
 	 void on_file_dialog_response(int response_id, Gtk::FileChooserDialog* dialog);
+	 void set_data();
  
 	 Monde monde;
 	 Simulation* Propre_en_Ordre;
