@@ -68,12 +68,17 @@ void decodage_ligne(std::string line)
 	return;
 }	
 
-Simulation::Simulation(char* fichier) : file(fichier)
+Simulation::Simulation(std::ifstream& fichier) 
 {
-	lecture();
+	lecture(fichier);
 }
 
-void Simulation::lecture()
+Simulation::Simulation(char* file) : fichier(file)
+{
+	lecture(fichier);
+}
+
+void Simulation::lecture(std::ifstream& file)
 {
 	std::string line;
 	if (!file.fail())
@@ -159,13 +164,20 @@ void save(std::ofstream fichier)
 	}
 }
 
-void draw_world(){
+void draw_world()
+{
 	draw_robots();
 	draw_particles();
 	return;
 }
 	
-
+void Simulation::destroy_data()
+{
+	destroy_tab_robots();
+	destroy_tab_particule();
+	return;
+}
+	
 	
 	
 		

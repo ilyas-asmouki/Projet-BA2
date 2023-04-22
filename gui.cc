@@ -2,8 +2,10 @@
 #include <iostream>
 #include "constantes.h"
 #include "graphic.h"
+#include <fstream>
 
 constexpr unsigned taille_dessin(500);
+static std::ifstream empty;
 
 static void orthographic_projection(const Cairo::RefPtr<Cairo::Context>& cr, 
 									const Frame& frame);
@@ -29,7 +31,7 @@ void Monde::on_draw(const Cairo::RefPtr<Cairo::Context>& cr, int width, int heig
 	draw_world();
 }
 
-Fenetre::Fenetre(char* file) : Propre_en_Ordre(new Simulation(file)), 
+Fenetre::Fenetre(char* file, int argc) : 
  m_Box_All(Gtk::Orientation::HORIZONTAL,10), m_Box_Left(Gtk::Orientation::VERTICAL,3),
  m_Box_Right(Gtk::Orientation::VERTICAL,0),m_Box_maj(Gtk::Orientation::HORIZONTAL,200),
  m_Box_prt(Gtk::Orientation::HORIZONTAL,213), 
@@ -49,6 +51,9 @@ Fenetre::Fenetre(char* file) : Propre_en_Ordre(new Simulation(file)),
  m_Button_startstop("start"), m_Button_step("step"), timer_added(false), 
  disconnect(false), timeout_value(200), dialogue(OPEN)
 {
+	
+	Propre_en_Ordre = ((argc==1)? new Simulation(empty) : new Simulation(file));
+
 	set_resizable(true);
 	set_default_size(600, 500);
 	set_title("Propre en ordre");
@@ -223,10 +228,12 @@ void Fenetre::on_file_dialog_response(int response_id,
 		    auto filename = dialog->get_file()->get_path();
 		    //~ if (dialogue)
 		    //~ {
-				//~ Propre_en_Ordre.save(filename);
+				//~ Propre_en_Ordre->save(filename);
 			//~ }
 			//~ else 
 			//~ {
+				//~ Propre_en_Ordre->destroy_data();
+				//~ delete Propre_en_Ordre;
 				
 		    
 		    break;

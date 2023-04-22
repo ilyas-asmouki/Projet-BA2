@@ -26,5 +26,6 @@ unsigned getnbP();
 Carre p_getforme(unsigned i);
 void desintegration();
 void draw_particles();
+void destroy_tab_particule();
 
 #endif

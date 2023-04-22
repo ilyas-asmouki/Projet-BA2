@@ -10,8 +10,9 @@
 class Simulation 
 {
 	public :
-	 Simulation(char* fichier);	
-	 void lecture();
+	 Simulation(std::ifstream& fichier);
+	 Simulation(char* file);
+	 void lecture(std::ifstream& file);
 	 unsigned s_getnbUpdate();
    	 unsigned s_getnbNr();
 	 unsigned s_getnbNs();
@@ -20,8 +21,9 @@ class Simulation
 	 unsigned s_getnbRs();
 	 unsigned p_getnbP();
 	 void save(std::ofstream fichier);
+	 void destroy_data();
 	private : 
-	 std::ifstream file; 
+	 std::ifstream fichier;
 };
 
 void draw_world();

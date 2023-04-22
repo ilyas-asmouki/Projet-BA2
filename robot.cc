@@ -132,8 +132,6 @@ void Robot::TestCollision()
 {
 	for (size_t i(1); i < tab_robot.size(); ++i)
 	{
-		std::cout<<forme.centre.x<<","<<forme.centre.y<<" et "<<tab_robot[i]->getForme().centre.x<<","
-			<<tab_robot[i]->getForme().centre.y<<"     "<<i<<std::endl;
 		if (superposition_cercles(forme, tab_robot[i]->getForme(),NO_MARGIN))
 		{
 			if (forme.rayon == r_reparateur)
@@ -193,7 +191,6 @@ void decodage_neutraliseur(std::istringstream& data, int nbUpdate)
 	data >> x >> y >> orienta >> type >> panne >> k_update_panne;
 	Neutraliseur* pt = new Neutraliseur(x,y,orienta,type,panne,nbUpdate, k_update_panne);
 	tab_robot.push_back(pt);
-	//~ dessin_cercle(pt->getForme());
 }
 	 
 void decodage_reparateur(std::istringstream& data)
@@ -290,4 +287,13 @@ void draw_robots()
             dessin_cercle(tab_robot[i]->getForme(), color);
         }
     }
+}
+
+void destroy_tab_robots()
+{
+	while (tab_robot.size() != 0)
+	{
+		tab_robot.pop_back();
+	}
+	return;
 }

@@ -122,3 +122,12 @@ void draw_particles()
     for (size_t i = 0; i < tab_particule.size(); ++i)
         dessin_carre(tab_particule[i].getForme());
 }
+
+void destroy_tab_particule()
+{
+	while (tab_particule.size() != 0)
+	{
+		tab_particule.pop_back();
+	}
+	return;
+}

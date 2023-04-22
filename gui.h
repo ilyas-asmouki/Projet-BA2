@@ -36,7 +36,7 @@ private:
 class Fenetre : public Gtk::Window
 {
 	public:
-	 Fenetre(char* file);
+	 Fenetre(char* file, int argc);
 	 virtual ~Fenetre();
 
 	protected:

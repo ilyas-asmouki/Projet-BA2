@@ -86,5 +86,6 @@ bool neutra_getpanne(unsigned i);
 int neutra_getk_update(unsigned i);
 Cercle r_getForme(unsigned i);
 void draw_robots();
+void destroy_tab_robots();
 
 #endif
