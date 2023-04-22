@@ -158,7 +158,12 @@ void save(std::ofstream fichier)
 		fichier<<neutra_getk_update(i)<<std::endl;
 	}
 }
-	
+
+void draw_world(){
+	draw_robots();
+	draw_particles();
+	return;
+}
 	
 
 	

@@ -50,14 +50,12 @@ bool superposition_cerclecarre(Carre c1, Cercle c2, MARGIN margin)
 	return false;
 }
 
-void dessin_cercle(double xc, double yc, double rayon, std::string couleur)
+void dessin_cercle(Cercle cercle, std::string couleur)
 {
-	draw_circle(xc, yc, rayon, couleur);
+	draw_circle(cercle.centre.x, cercle.centre.y, cercle.rayon, couleur);
 }
 
-void dessin_carre(double xc, double yc, double cote)
+void dessin_carre(Carre carre)
 {
-	draw_square(xc, yc, cote);
+	draw_square(carre.centre.x, carre.centre.y, carre.cote);
 }
-
-

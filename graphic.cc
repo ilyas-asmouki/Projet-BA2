@@ -29,7 +29,7 @@ void draw_circle(double xc, double yc, double radius, std::string color)
 		(*ptcr)->set_source_rgb(1., 0.4, 0.);
 	else
 		(*ptcr)->set_source_rgb(0., 0., 0.);
-	(*ptcr)->set_line_width(10.0);
+	(*ptcr)->set_line_width(1.0);
 	(*ptcr)->arc(xc, yc, radius, 0, 2*M_PI);
 	(*ptcr)->stroke();
 	if (color == "green")
@@ -46,8 +46,9 @@ void draw_square(double xc, double yc, double length)
     (*ptcr)->rectangle(xc - length/2, yc - length/2, length, length);
     (*ptcr)->fill();
 	(*ptcr)->set_source_rgb(0.5, 0.5, 0.5);
-	(*ptcr)->set_line_width(2.0);
+	(*ptcr)->set_line_width(1.0);
 	(*ptcr)->set_source_rgb(1, 0., 0.);
     (*ptcr)->rectangle(xc - length/2, yc - length/2, length, length);
 	(*ptcr)->stroke();
 }
+

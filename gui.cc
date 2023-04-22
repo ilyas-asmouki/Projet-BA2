@@ -2,7 +2,6 @@
 #include <iostream>
 #include "constantes.h"
 #include "graphic.h"
-#include <algorithm>
 
 constexpr unsigned taille_dessin(500);
 
@@ -27,9 +26,10 @@ void Monde::on_draw(const Cairo::RefPtr<Cairo::Context>& cr, int width, int heig
 	adjustFrame(width,height);
 	orthographic_projection(cr, frame); 
 	set_world();
+	draw_world();
 }
 
-Fenetre::Fenetre(char* file) : Propre_en_Ordre(file),
+Fenetre::Fenetre(char* file) : Propre_en_Ordre(new Simulation(file)), 
  m_Box_All(Gtk::Orientation::HORIZONTAL,10), m_Box_Left(Gtk::Orientation::VERTICAL,3),
  m_Box_Right(Gtk::Orientation::VERTICAL,0),m_Box_maj(Gtk::Orientation::HORIZONTAL,200),
  m_Box_prt(Gtk::Orientation::HORIZONTAL,213), 
@@ -47,7 +47,7 @@ Fenetre::Fenetre(char* file) : Propre_en_Ordre(file),
  rrs_data("0"), rrr_data("0"), rns_data("0"), rnp_data("0"), rnd_data("0"), rnr_data("0"),
  m_Button_exit("exit"), m_Button_open("open"), m_Button_save("save"), 
  m_Button_startstop("start"), m_Button_step("step"), timer_added(false), 
- disconnect(false), timeout_value(200) 
+ disconnect(false), timeout_value(200), dialogue(OPEN)
 {
 	set_resizable(true);
 	set_default_size(600, 500);
@@ -57,7 +57,6 @@ Fenetre::Fenetre(char* file) : Propre_en_Ordre(file),
 	m_Box_All.append(m_Box_Left);
 	m_Box_All.append(m_Box_Right);
 	m_Box_Right.append(monde);
-	
 	monde.set_expand();
 	m_Box_Left.append(m_Label_general);
 	m_Box_Left.append(m_Button_exit);
@@ -124,7 +123,8 @@ void Fenetre::on_button_clicked_open()
 		timer_added = false;
 		m_Button_startstop.set_label("start");
 	}
-		
+	
+	dialogue = OPEN;	
 	auto dialog = new Gtk::FileChooserDialog("Please choose a file",
 	                                         Gtk::FileChooser::Action::OPEN);
 	dialog->set_transient_for(*this);
@@ -144,7 +144,8 @@ void Fenetre::on_button_clicked_save()
 		timer_added = false;
 		m_Button_startstop.set_label("start");
 	}
-		
+	
+	dialogue = SAVE;
 	auto dialog = new Gtk::FileChooserDialog("Please choose a file",
 	                                         Gtk::FileChooser::Action::SAVE);
 	dialog->set_transient_for(*this);
@@ -184,10 +185,7 @@ bool Fenetre::on_timeout()
 		disconnect = false;
 		return false;
 	}
-	//
 	maj_data.set_text(std::to_string(val)); 
-	//~ std::cout << "This is simulation update number : " << val << std::endl;
-
 	++val;
 	return true; 
 }
@@ -223,6 +221,13 @@ void Fenetre::on_file_dialog_response(int response_id,
 		case Gtk::ResponseType::OK:
 		{
 		    auto filename = dialog->get_file()->get_path();
+		    //~ if (dialogue)
+		    //~ {
+				//~ Propre_en_Ordre.save(filename);
+			//~ }
+			//~ else 
+			//~ {
+				
 		    
 		    break;
 		}
@@ -274,4 +279,3 @@ static void orthographic_projection(const Cairo::RefPtr<Cairo::Context>& cr,
              -frame.height/(frame.yMax - frame.yMin));
 	cr->translate(-(frame.xMin + frame.xMax)/2, -(frame.yMin + frame.yMax)/2);
 }
-

@@ -5,9 +5,8 @@
 #include <fstream>
 #include "simulation.h"
 
-static std::ifstream file;
-
 void graphic_set_context(const Cairo::RefPtr<Cairo::Context>& cr);
+enum Dialog {OPEN, SAVE};
 
 struct Frame 
 {
@@ -50,8 +49,8 @@ class Fenetre : public Gtk::Window
 	 bool on_window_key_pressed(guint keyval, guint keycode, Gdk::ModifierType state);
 	 void on_file_dialog_response(int response_id, Gtk::FileChooserDialog* dialog);
  
-	 Simulation Propre_en_Ordre;
 	 Monde monde;
+	 Simulation* Propre_en_Ordre;
 	 Gtk::Box m_Box_All, m_Box_Left, m_Box_Right, m_Box_maj, m_Box_prt, m_Box_rrs,
 	          m_Box_rrr, m_Box_rns, m_Box_rnp, m_Box_rnd, m_Box_rnr;
 	 
@@ -65,7 +64,8 @@ class Fenetre : public Gtk::Window
 	 
 	 bool timer_added; 
 	 bool disconnect; 
-	 const int timeout_value; 
+	 const int timeout_value;
+	 Dialog dialogue; 
 };
 
 #endif

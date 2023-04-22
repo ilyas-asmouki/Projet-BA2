@@ -24,4 +24,6 @@ class Simulation
 	 std::ifstream file; 
 };
 
+void draw_world();
+
 #endif

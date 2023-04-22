@@ -116,3 +116,9 @@ Carre p_getforme(unsigned i)
 {
 	return tab_particule[i].getForme();
 }
+
+void draw_particles()
+{
+    for (size_t i = 0; i < tab_particule.size(); ++i)
+        dessin_carre(tab_particule[i].getForme());
+}

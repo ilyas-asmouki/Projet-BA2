@@ -25,5 +25,6 @@ void decodage_particule(std::istringstream& data);
 unsigned getnbP();
 Carre p_getforme(unsigned i);
 void desintegration();
+void draw_particles();
 
 #endif

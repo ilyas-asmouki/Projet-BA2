@@ -34,6 +34,7 @@ Spatial::Spatial(double x, double y, int nbUpdate ,unsigned nbNr, unsigned nbNs,
 	forme.rayon=r_spatial;
 	error_outside();
 	test_particle_robot_superposition(forme);
+	//~ dessin_cercle(forme);
 }
 	
 void Spatial::error_outside()
@@ -81,6 +82,7 @@ Reparateur::Reparateur(double x, double y): Robot(x, y)
 	forme.rayon=r_reparateur; 
 	TestCollision();
 	test_particle_robot_superposition(forme);
+	//~ dessin_cercle(forme);
 }
 		
 Neutraliseur::Neutraliseur(double x, double y, double orientation, unsigned type,
@@ -92,6 +94,8 @@ Neutraliseur::Neutraliseur(double x, double y, double orientation, unsigned type
 	error_k_update(nbUpdate);
 	TestCollision();
 	test_particle_robot_superposition(forme);
+	std::string couleur = ( panne ? "orange" : "black");
+	//~ dessin_cercle(forme);
 }
 	
 void Neutraliseur::error_k_update(int nbUpdate)
@@ -189,6 +193,7 @@ void decodage_neutraliseur(std::istringstream& data, int nbUpdate)
 	data >> x >> y >> orienta >> type >> panne >> k_update_panne;
 	Neutraliseur* pt = new Neutraliseur(x,y,orienta,type,panne,nbUpdate, k_update_panne);
 	tab_robot.push_back(pt);
+	//~ dessin_cercle(pt->getForme());
 }
 	 
 void decodage_reparateur(std::istringstream& data)
@@ -269,4 +274,20 @@ bool neutra_getpanne(unsigned i)
 int neutra_getk_update(unsigned i)
 {
 	return tab_robot[i]->getk_update();
+}
+
+void draw_robots()
+{
+    for (size_t i = 0; i < tab_robot.size(); ++i)
+    {
+        if (i == 0)
+            dessin_cercle(tab_robot[i]->getForme(), "blue");
+        else if ((i >= 1) and (i <= spatial_getnbRs()))
+            dessin_cercle(tab_robot[i]->getForme(), "green");
+        else
+        {
+            std::string color = (neutra_getpanne(i) ? "orange" : "black");
+            dessin_cercle(tab_robot[i]->getForme(), color);
+        }
+    }
 }
