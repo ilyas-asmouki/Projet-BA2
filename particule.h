@@ -10,19 +10,19 @@
 
 class Particule
 {
-	public:
-     Particule(double x, double y, double cote);
-     Carre getForme() const;
-     void detect_particle_outside();
-     void detect_particle_too_small();
-     void detect_particle_superposition();
-    private:
-     Carre forme;
+	public: 
+	 Particule(double x, double y, double cote);
+	 Carre getForme() const;
+	 void detect_particle_outside();
+	 void detect_particle_too_small();
+	 void detect_particle_superposition();
+	private:
+	 Carre forme;
 };
-
-static std::vector<Particule> tab_particule;
 
 void test_particle_robot_superposition(Cercle robot);
 void decodage_particule(std::istringstream& data);
+unsigned getnbP();
+void desintegration();
 
 #endif

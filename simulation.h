@@ -5,14 +5,23 @@
 #define SIMULATION_H
 
 #include <fstream>
+#include "robot.h"
 	
 class Simulation 
 {
 	public :
+	 Simulation(char* fichier);	
 	 void lecture();
-	 Simulation(char* fichier);
-	private :
-	 std::ifstream file;
+	 unsigned s_getnbUpdate();
+   	 unsigned s_getnbNr();
+	 unsigned s_getnbNs();
+	 unsigned s_getnbNd();
+	 unsigned s_getnbRr();
+	 unsigned s_getnbRs();
+	 unsigned p_getnbP();
+	 void save(std::ofstream fichier);
+	private : 
+	 std::ifstream file; 
 };
 
 #endif

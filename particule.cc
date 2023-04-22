@@ -7,6 +7,9 @@
 #include "message.h"
 #include "shape.h"
 #include "constantes.h"
+#include <random>
+
+static std::vector<Particule> tab_particule;
 
 Particule::Particule(double x, double y, double cote)
 {
@@ -39,8 +42,8 @@ void Particule::detect_particle_too_small()
 {
 	if (forme.cote < d_particule_min)
     {
-        std::cout << message::particle_too_small(forme.centre.x,forme.centre.y,
-        forme.cote);
+		std::cout << message::particle_too_small(forme.centre.x,forme.centre.y,
+			forme.cote);
         exit(EXIT_FAILURE);
     }
 }
@@ -77,4 +80,34 @@ void test_particle_robot_superposition(Cercle robot)
 			exit(EXIT_FAILURE);
 		}
 	}
+}
+
+void desintegration()
+{
+	std::default_random_engine e;
+	double p(desintegration_rate);
+	std::bernoulli_distribution b(p/tab_particule.size());
+	
+	for (size_t i(0); i < tab_particule.size(); ++i) 
+	{
+		if (b(e))
+		{
+			Carre carre(tab_particule[i].getForme());
+			tab_particule.erase(tab_particule.begin()+i);
+			Particule prt1(carre.centre.x-carre.cote/4,carre.centre.y+carre.cote/4,
+				carre.cote/2 - 2*shape::epsil_zero);
+			Particule prt2(carre.centre.x-carre.cote/4,carre.centre.y-carre.cote/4,
+				carre.cote/2 - 2*shape::epsil_zero);
+			Particule prt3(carre.centre.x+carre.cote/4,carre.centre.y+carre.cote/4,
+				carre.cote/2 - 2*shape::epsil_zero);
+			Particule prt4(carre.centre.x+carre.cote/4,carre.centre.y-carre.cote/4,
+				carre.cote/2 - 2*shape::epsil_zero);
+		}
+	}
+	return;
+}
+
+unsigned getnbP()
+{
+	return tab_particule.size();
 }
