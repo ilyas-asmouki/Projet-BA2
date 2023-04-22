@@ -59,3 +59,8 @@ void dessin_carre(Carre carre)
 {
 	draw_square(carre.centre.x, carre.centre.y, carre.cote);
 }
+
+void dessin_orientation(Cercle cercle, double orientation)
+{
+	draw_orientation(cercle.centre.x, cercle.centre.y, cercle.rayon, orientation);
+}

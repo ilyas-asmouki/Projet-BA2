@@ -38,6 +38,7 @@ bool superposition_cercles(Cercle c1, Cercle  c2, MARGIN margin);
 bool superposition_cerclecarre(Carre c1, Cercle c2, MARGIN margin);
 void dessin_cercle(Cercle cercle, std::string couleur);
 void dessin_carre(Carre carre);
+void dessin_orientation(Cercle cercle, double orientation);
 
 
 #endif

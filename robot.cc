@@ -285,6 +285,7 @@ void draw_robots()
         {
             std::string color = (neutra_getpanne(i) ? "orange" : "black");
             dessin_cercle(tab_robot[i]->getForme(), color);
+            dessin_orientation(tab_robot[i]->getForme(), neutra_getorientation(i));
         }
     }
 }

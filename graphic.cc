@@ -54,3 +54,13 @@ void draw_square(double xc, double yc, double length)
 	(*ptcr)->stroke();
 }
 
+void draw_orientation(double xc, double yc, double radius, double angle)
+{
+	(*ptcr)->set_source_rgb(0., 1., 0.);
+	(*ptcr)->set_line_width(1.0);
+	(*ptcr)->move_to(xc, yc);
+	(*ptcr)->line_to(xc + radius*cos(angle), yc + radius*sin(angle));
+	(*ptcr)->stroke();
+}
+
+
