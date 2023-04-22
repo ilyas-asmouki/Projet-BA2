@@ -25,7 +25,7 @@ void Monde::on_draw(const Cairo::RefPtr<Cairo::Context>& cr, int width, int heig
 	set_context(cr);
 	adjustFrame(width,height);
 	orthographic_projection(cr, frame);
-	set_world(cr);
+	set_world();
 }
 
 Fenetre::Fenetre() : 
