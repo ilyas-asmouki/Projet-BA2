@@ -8,6 +8,7 @@
 #include "shape.h"
 #include "constantes.h"
 #include <random>
+#include <fstream>
 
 static std::vector<Particule> tab_particule;
 
@@ -84,14 +85,16 @@ void test_particle_robot_superposition(Cercle robot, bool& file_success)
 
 void desintegration(bool file_success, std::default_random_engine engine)
 {
+	size_t vect_size = tab_particule.size();
 	std::bernoulli_distribution b(desintegration_rate/tab_particule.size());
 	
-	for (size_t i(0); i < tab_particule.size(); ++i) 
+	for (size_t i(vect_size-1); i >= 0; --i) 
 	{
 		if (b(engine) and (tab_particule[i].getForme().cote >= 2*d_particule_min))
 		{
-			tab_particule.erase(tab_particule.begin()+i);
 			Carre carre(tab_particule[i].getForme());
+			std::swap(tab_particule[i], tab_particule.back());
+			tab_particule.pop_back();
 			Particule prt1(carre.centre.x-carre.cote/4,carre.centre.y+carre.cote/4,
 				carre.cote/2 - 2*shape::epsil_zero, file_success);
 			Particule prt2(carre.centre.x-carre.cote/4,carre.centre.y-carre.cote/4,
@@ -109,11 +112,6 @@ unsigned getnbP()
 	return tab_particule.size();
 }
 
-Carre p_getforme(unsigned i)
-{
-	return tab_particule[i].getForme();
-}
-
 void draw_particles()
 {
     for (size_t i = 0; i < tab_particule.size(); ++i)
@@ -125,6 +123,17 @@ void destroy_tab_particule()
 	while (tab_particule.size() != 0)
 	{
 		tab_particule.pop_back();
+	}
+	return;
+}
+
+void sauvegarde_particules(std::ofstream& fichier)
+{
+	fichier<<tab_particule.size()<<std::endl;
+	for (unsigned i(0); i < getnbP(); ++i)
+	{
+		fichier<<"\t"<<tab_particule[i].getForme().centre.x<<" "<<tab_particule[i].
+			getForme().centre.y<<" "<<tab_particule[i].getForme().cote<<std::endl;
 	}
 	return;
 }

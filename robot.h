@@ -83,13 +83,11 @@ unsigned spatial_getnbNs();
 unsigned spatial_getnbNd();
 unsigned spatial_getnbRr();
 unsigned spatial_getnbRs();
+unsigned spatial_getnbNp();
 
-double neutra_getorientation(unsigned i);
-unsigned neutra_gettype(unsigned i);
-bool neutra_getpanne(unsigned i);
-int neutra_getk_update(unsigned i);
 Cercle r_getForme(unsigned i);
 void draw_robots();
 void destroy_tab_robots();
+void sauvegarde_robots(std::ofstream& fichier);
 
 #endif

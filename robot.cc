@@ -10,6 +10,7 @@
 #include "constantes.h"
 #include "shape.h"
 #include "particule.h"
+#include <fstream>
 
 enum {SPATIAL=2, REPARATEUR, NEUTRALISEUR};
 
@@ -268,24 +269,17 @@ unsigned spatial_getnbRs()
 	return ((tab_robot.size()==0) ? 0 : tab_robot[0]->getnbRs());
 }
 
-double neutra_getorientation(unsigned i)
+unsigned spatial_getnbNp()
 {
-	return tab_robot[i]->getorientation();
-}
-
-unsigned neutra_gettype(unsigned i)
-{
-	return tab_robot[i]->gettype();
-}
-
-bool neutra_getpanne(unsigned i)
-{
-	return tab_robot[i]->getpanne();
-}
-
-int neutra_getk_update(unsigned i)
-{
-	return tab_robot[i]->getk_update();
+	unsigned nbNp(0);
+	for (size_t i(spatial_getnbRs()+1); i < tab_robot.size(); ++i)
+	{
+		if (tab_robot[i]->getpanne())
+		{
+			++nbNp;
+		}
+	}
+	return nbNp;
 }
 
 void draw_robots()
@@ -298,9 +292,9 @@ void draw_robots()
             dessin_cercle(tab_robot[i]->getForme(), "green");
         else
         {
-            std::string color = (neutra_getpanne(i) ? "orange" : "black");
+            std::string color = (tab_robot[i]->getpanne() ? "orange" : "black");
             dessin_cercle(tab_robot[i]->getForme(), color);
-            dessin_orientation(tab_robot[i]->getForme(), neutra_getorientation(i));
+            dessin_orientation(tab_robot[i]->getForme(), tab_robot[i]->getorientation());
         }
     }
 }
@@ -311,6 +305,38 @@ void destroy_tab_robots()
 	{
 		delete tab_robot[tab_robot.size()-1];
 		tab_robot.pop_back();
+	}
+	return;
+}
+
+void sauvegarde_robots(std::ofstream& fichier)
+{
+	fichier<<std::endl<<tab_robot[0]->getForme().centre.x<<" "<<tab_robot[0]->getForme().
+		centre.y<<" "<<spatial_getnbUpdate()<<" "<<spatial_getnbNr()<<" "<<
+		spatial_getnbNs()<<" "<<spatial_getnbNd()<<" "<<spatial_getnbRr()<<" "<<
+		spatial_getnbRs()<<std::endl;
+	
+	for (unsigned i(1); i < spatial_getnbRs()+1 ; ++i)
+	{
+		fichier<<"\t"<<tab_robot[i]->getForme().centre.x<<" "<<tab_robot[i]->getForme().
+			centre.y<<std::endl;
+	}
+	fichier<<std::endl;
+	
+	for (unsigned i(spatial_getnbRs()+1); i<spatial_getnbRs()+spatial_getnbNs()+1; ++i)
+	{
+		fichier<<"\t"<<tab_robot[i]->getForme().centre.x<<" "<<tab_robot[i]->getForme().
+			centre.y<<" "<< tab_robot[i]->getorientation()<<" "<< 
+			tab_robot[i]->gettype()<<" ";
+		if (tab_robot[i]->getpanne() == 0)
+		{
+			fichier<<"false ";
+		}
+		else
+		{
+			fichier<<"true ";
+		}
+		fichier<<tab_robot[i]->getk_update()<<std::endl;
 	}
 	return;
 }

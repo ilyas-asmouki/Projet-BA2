@@ -142,7 +142,7 @@ void Fenetre::set_data()
 	rrs_data.set_text(std::to_string(Propre_en_Ordre->s_getnbRs()));
 	rrr_data.set_text(std::to_string(Propre_en_Ordre->s_getnbRr()));
 	rns_data.set_text(std::to_string(Propre_en_Ordre->s_getnbNs()));
-	//~ rnp_data.set_text(std::to_string(Propre_en_Ordre->
+	rnp_data.set_text(std::to_string(Propre_en_Ordre->s_getnbNp()));
 	rnd_data.set_text(std::to_string(Propre_en_Ordre->s_getnbNd()));
 	rnr_data.set_text(std::to_string(Propre_en_Ordre->s_getnbNr()));
 	return;
@@ -240,9 +240,9 @@ bool Fenetre::on_timeout()
 	maj_data.set_text(std::to_string(val)); 
 	++val;
 	Propre_en_Ordre->desintegration_status();
-	set_data();
 	monde.clear();
 	monde.draw();
+	set_data();
 	return true; 
 }
 
