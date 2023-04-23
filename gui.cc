@@ -239,6 +239,10 @@ bool Fenetre::on_timeout()
 	}
 	maj_data.set_text(std::to_string(val)); 
 	++val;
+	Propre_en_Ordre->desintegration_status();
+	set_data();
+	monde.clear();
+	monde.draw();
 	return true; 
 }
 

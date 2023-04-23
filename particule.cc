@@ -82,30 +82,27 @@ void test_particle_robot_superposition(Cercle robot, bool& file_success)
 	}
 }
 
-//~ void desintegration()
-//~ {
-	//~ std::default_random_engine e;
-	//~ double p(desintegration_rate);
-	//~ std::bernoulli_distribution b(p/tab_particule.size());
+void desintegration(bool file_success, std::default_random_engine engine)
+{
+	std::bernoulli_distribution b(desintegration_rate/tab_particule.size());
 	
-	//~ for (size_t i(0); i < tab_particule.size(); ++i) 
-	//~ {
-		//~ if (b(e))
-		//~ {
-			//~ Carre carre(tab_particule[i].getForme());
-			//~ tab_particule.erase(tab_particule.begin()+i);
-			//~ Particule prt1(carre.centre.x-carre.cote/4,carre.centre.y+carre.cote/4,
-				//~ carre.cote/2 - 2*shape::epsil_zero);
-			//~ Particule prt2(carre.centre.x-carre.cote/4,carre.centre.y-carre.cote/4,
-				//~ carre.cote/2 - 2*shape::epsil_zero);
-			//~ Particule prt3(carre.centre.x+carre.cote/4,carre.centre.y+carre.cote/4,
-				//~ carre.cote/2 - 2*shape::epsil_zero);
-			//~ Particule prt4(carre.centre.x+carre.cote/4,carre.centre.y-carre.cote/4,
-				//~ carre.cote/2 - 2*shape::epsil_zero);
-		//~ }
-	//~ }
-	//~ return;
-//~ }
+	for (size_t i(0); i < tab_particule.size(); ++i) 
+	{
+		if (b(engine) and (tab_particule[i].getForme().cote >= 2*d_particule_min))
+		{
+			tab_particule.erase(tab_particule.begin()+i);
+			Carre carre(tab_particule[i].getForme());
+			Particule prt1(carre.centre.x-carre.cote/4,carre.centre.y+carre.cote/4,
+				carre.cote/2 - 2*shape::epsil_zero, file_success);
+			Particule prt2(carre.centre.x-carre.cote/4,carre.centre.y-carre.cote/4,
+				carre.cote/2 - 2*shape::epsil_zero, file_success);
+			Particule prt3(carre.centre.x+carre.cote/4,carre.centre.y+carre.cote/4,
+				carre.cote/2 - 2*shape::epsil_zero, file_success);
+			Particule prt4(carre.centre.x+carre.cote/4,carre.centre.y-carre.cote/4,
+				carre.cote/2 - 2*shape::epsil_zero, file_success);
+		}
+	}
+}
 
 unsigned getnbP()
 {

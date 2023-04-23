@@ -192,7 +192,10 @@ void Simulation::destroy_data()
 	return;
 }
 	
-	
+void Simulation::desintegration_status()
+{
+	desintegration(file_success, engine);
+}
 	
 		
 	

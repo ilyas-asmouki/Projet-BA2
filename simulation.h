@@ -7,6 +7,7 @@
 #include <fstream>
 #include "robot.h"
 #include <string>
+#include <random>
 	
 class Simulation 
 {
@@ -25,9 +26,11 @@ class Simulation
 	 unsigned p_getnbP();
 	 void sauvegarde(std::string file);
 	 void destroy_data();
+	 void desintegration_status();
 	private : 
 	 std::ifstream fichier;
 	 bool file_success=true;
+	 std::default_random_engine engine;
 };
 
 void draw_world();

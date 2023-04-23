@@ -7,6 +7,7 @@
 #include "shape.h"
 #include <vector>
 #include <sstream>
+#include <random>
 
 class Particule
 {
@@ -24,7 +25,7 @@ void test_particle_robot_superposition(Cercle robot, bool& file_success);
 void decodage_particule(std::istringstream& data, bool& file_success);
 unsigned getnbP();
 Carre p_getforme(unsigned i);
-void desintegration();
+void desintegration(bool file_success, std::default_random_engine engine);
 void draw_particles();
 void destroy_tab_particule();
 
