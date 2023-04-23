@@ -24,12 +24,12 @@ Monde::~Monde()
 
 void Monde::on_draw(const Cairo::RefPtr<Cairo::Context>& cr, int width, int height)
 {
+	set_context(cr);
+	adjustFrame(width,height);
+	orthographic_projection(cr, frame); 
+	set_world();
 	if (not empty)
 	{
-		set_context(cr);
-		adjustFrame(width,height);
-		orthographic_projection(cr, frame); 
-		set_world();
 		draw_world();
 	}
 }
@@ -60,12 +60,12 @@ Fenetre::Fenetre(char* file, int argc) :
  m_Label_rns("robots neutraliseurs en service:"),
  m_Label_rnp("robots neutraliseurs en panne:"),
  m_Label_rnd("robots neutraliseurs détruits:"),
- m_Label_rnr("robots neutraliseurs en réserve:"), maj_data("0"), prt_data("0"), 
- rrs_data("0"), rrr_data("0"), rns_data("0"), rnp_data("0"), rnd_data("0"), rnr_data("0"),
+ m_Label_rnr("robots neutraliseurs en réserve:"),
  m_Button_exit("exit"), m_Button_open("open"), m_Button_save("save"), 
  m_Button_startstop("start"), m_Button_step("step"), timer_added(false), 
  disconnect(false), timeout_value(200), dialogue(OPEN)
 {
+	reset_data();
 	if (argc == 1)
 	{
 		Propre_en_Ordre = new Simulation(empty);
@@ -147,6 +147,20 @@ void Fenetre::set_data()
 	rnr_data.set_text(std::to_string(Propre_en_Ordre->s_getnbNr()));
 	return;
 }
+
+void Fenetre::reset_data()
+{
+	maj_data.set_text("0");
+	prt_data.set_text("0");
+	rrs_data.set_text("0");
+	rrr_data.set_text("0");
+	rns_data.set_text("0");
+	rnp_data.set_text("0");
+	rnd_data.set_text("0");
+	rnr_data.set_text("0");
+	return;
+}
+
 
 void Fenetre::on_button_clicked_exit()
 {
@@ -270,8 +284,12 @@ void Fenetre::on_file_dialog_response(int response_id,
 				monde.clear();
 				delete Propre_en_Ordre;
 				Propre_en_Ordre = new Simulation(fichier);
-				set_data();
-				monde.draw();
+				reset_data();
+				if (Propre_en_Ordre->getfile_success())
+				{
+					set_data();
+					monde.draw();
+				}
 			}
 		    break;
 		}

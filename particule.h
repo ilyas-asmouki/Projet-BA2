@@ -11,17 +11,17 @@
 class Particule
 {
 	public: 
-	 Particule(double x, double y, double cote);
+	 Particule(double x, double y, double cote, bool& file_success);
 	 Carre getForme() const;
-	 void detect_particle_outside();
-	 void detect_particle_too_small();
-	 void detect_particle_superposition();
+	 void detect_particle_outside(bool& file_success);
+	 void detect_particle_too_small(bool& file_success);
+	 void detect_particle_superposition(bool& file_success);
 	private:
 	 Carre forme;
 };
 
-void test_particle_robot_superposition(Cercle robot);
-void decodage_particule(std::istringstream& data);
+void test_particle_robot_superposition(Cercle robot, bool& file_success);
+void decodage_particule(std::istringstream& data, bool& file_success);
 unsigned getnbP();
 Carre p_getforme(unsigned i);
 void desintegration();

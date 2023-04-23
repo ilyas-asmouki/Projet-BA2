@@ -13,6 +13,7 @@ class Simulation
 	public :
 	 Simulation(std::ifstream& fichier);
 	 Simulation(char* file);
+	 bool getfile_success();
 	 virtual ~Simulation();
 	 void lecture(std::ifstream& file);
 	 unsigned s_getnbUpdate();
@@ -26,6 +27,7 @@ class Simulation
 	 void destroy_data();
 	private : 
 	 std::ifstream fichier;
+	 bool file_success=true;
 };
 
 void draw_world();

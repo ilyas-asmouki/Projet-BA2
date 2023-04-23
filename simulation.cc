@@ -11,7 +11,7 @@
 #include "shape.h"
 #include "message.h"
 
-void decodage_ligne(std::string line)
+void decodage_ligne(std::string line, bool& file_success)
 {
 	enum ETAT{NBP, PARTICULE, SPATIAL, REPARATEUR, NEUTRALISEUR};
 	static int etat(NBP);
@@ -34,7 +34,7 @@ void decodage_ligne(std::string line)
 		}
 		break;
 	case PARTICULE :
-		decodage_particule(data);
+		decodage_particule(data, file_success);
 		++i;
 		if (compteur1==i)
 		{
@@ -42,13 +42,13 @@ void decodage_ligne(std::string line)
 		}
 		break;
 	case SPATIAL :
-		decodage_robot(data, SPATIAL, compteur1, compteur2);
+		decodage_robot(data, SPATIAL, compteur1, compteur2, file_success);
 		etat = REPARATEUR;
 		i=0;
 		break;
 	
 	case REPARATEUR :
-		decodage_robot(data, REPARATEUR, compteur1, compteur2);
+		decodage_robot(data, REPARATEUR, compteur1, compteur2, file_success);
 		++i;
 		if (compteur2 == i)
 		{
@@ -58,13 +58,16 @@ void decodage_ligne(std::string line)
 		break;
 	
 	case NEUTRALISEUR :
-		decodage_robot(data, NEUTRALISEUR, compteur1, compteur2);
+		decodage_robot(data, NEUTRALISEUR, compteur1, compteur2, file_success);
 		++i;
 		if (compteur1 == i)
 		{
 			etat = NBP;
 			i=0;
-			std::cout<<message::success();
+			if (file_success)
+			{
+				std::cout<<message::success();
+			}
 		}
 		break;
 	}
@@ -85,17 +88,21 @@ Simulation::~Simulation()
 {
 }
 
+bool Simulation::getfile_success()
+{
+	return file_success;
+}
+
 void Simulation::lecture(std::ifstream& file)
 {
 	std::string line;
-
 	while (getline(file>>std::ws,line))
 	{
 		if (line[0]=='#')
 		{
 			continue;
 		}
-		decodage_ligne(line);
+		decodage_ligne(line, file_success);
 	}
 	return;
 }

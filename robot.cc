@@ -32,23 +32,24 @@ Cercle Robot::getForme() const
 }
 
 Spatial::Spatial(double x, double y, int nbUpdate ,unsigned nbNr, unsigned nbNs,
-	  unsigned nbNd, unsigned nbRr ,unsigned nbRs): Robot(x, y), nbUpdate(nbUpdate), 
+	  unsigned nbNd, unsigned nbRr ,unsigned nbRs, bool& file_success): Robot(x, y), nbUpdate(nbUpdate), 
 	  nbNr(nbNr), nbNs(nbNs), nbNd(nbNd), nbRr(nbRr), nbRs(nbRs)
 {
 	forme.rayon=r_spatial;
-	error_outside();
-	test_particle_robot_superposition(forme);
+	error_outside(file_success);
+	test_particle_robot_superposition(forme, file_success);
 }
 
 Spatial::~Spatial()
 {
 }
 	
-void Spatial::error_outside()
+void Spatial::error_outside(bool& file_success)
 {
 	if ((((abs(forme.centre.x)+r_spatial)>dmax)or(abs(forme.centre.y)+r_spatial)>dmax))
 	{
 		std::cout<<message::spatial_robot_ouside(forme.centre.x, forme.centre.y);
+		file_success = false;
 	}
 	return;
 }
@@ -83,11 +84,11 @@ unsigned Spatial::getnbRs()
 	return nbRs;
 }
 
-Reparateur::Reparateur(double x, double y): Robot(x, y)
+Reparateur::Reparateur(double x, double y, bool& file_success): Robot(x, y)
 {
 	forme.rayon=r_reparateur; 
-	TestCollision();
-	test_particle_robot_superposition(forme);
+	TestCollision(file_success);
+	test_particle_robot_superposition(forme, file_success);
 }
 		
 Reparateur::~Reparateur()
@@ -95,26 +96,27 @@ Reparateur::~Reparateur()
 }
 		
 Neutraliseur::Neutraliseur(double x, double y, double orientation, unsigned type,
-	std::string bool_panne, int nbUpdate, int k_update_panne): Robot(x, y), 
+	std::string bool_panne, int nbUpdate, int k_update_panne, bool& file_success): Robot(x, y), 
 	orientation(orientation), type(type), k_update_panne(k_update_panne) 
 {
 	panne = ((bool_panne == "false") ? false : true);
 	forme.rayon=r_neutraliseur;
-	TestCollision();
-	test_particle_robot_superposition(forme);
-	error_k_update(nbUpdate);
+	TestCollision(file_success);
+	test_particle_robot_superposition(forme, file_success);
+	error_k_update(nbUpdate, file_success);
 }
 	
 Neutraliseur::~Neutraliseur()
 {
 }
 
-void Neutraliseur::error_k_update(int nbUpdate)
+void Neutraliseur::error_k_update(int nbUpdate, bool& file_success)
 {
 	if (k_update_panne > nbUpdate)
 	{
 		std::cout<<message::invalid_k_update(forme.centre.x, forme.centre.y, 
 		k_update_panne, nbUpdate);
+		file_success = false;
 	}
 }
 
@@ -138,7 +140,7 @@ int Neutraliseur::getk_update()
 	return k_update_panne;
 }
 	
-void Robot::TestCollision()
+void Robot::TestCollision(bool& file_success)
 {
 	for (size_t i(1); i < tab_robot.size(); ++i)
 	{
@@ -151,12 +153,14 @@ void Robot::TestCollision()
 					std::cout << message::repairers_superposition(forme.centre.x,
 					forme.centre.y, tab_robot[i]->getForme().centre.x,
 					tab_robot[i]->getForme().centre.y);
+					file_success = false;
 				} 
 				else
 				{ 
 					std::cout << message::repairer_neutralizer_superposition(forme
 					.centre.x, forme.centre.y, tab_robot[i]->getForme().centre.x,
 					tab_robot[i]->getForme().centre.y);	
+					file_success = false;
 				}
 			}
 			else
@@ -166,19 +170,21 @@ void Robot::TestCollision()
 					std::cout << message::neutralizers_superposition(forme.centre.x,
 					forme.centre.y,	tab_robot[i]->getForme().centre.x,
 					tab_robot[i]->getForme().centre.y);
+					file_success = false;
 				}
 				else
 				{ 
 					std::cout<<message::repairer_neutralizer_superposition(tab_robot[i]
 					->getForme().centre.x, tab_robot[i]->getForme().centre.y,
-					forme.centre.x, forme.centre.y);	
+					forme.centre.x, forme.centre.y);
+					file_success = false;	
 				}	
 			}
 		}
 	}	
 }
 		
-int decodage_spatial(std::istringstream& data, int& compteur1, int& compteur2)
+int decodage_spatial(std::istringstream& data, int& compteur1, int& compteur2, bool& file_success)
 {
 	double x, y;
 	int nbUpdate;
@@ -186,43 +192,43 @@ int decodage_spatial(std::istringstream& data, int& compteur1, int& compteur2)
 	data >> x >> y >> nbUpdate >> nbNr >> nbNs >> nbNd >> nbRr >> nbRs;
 	compteur1 = nbNs;
 	compteur2 = nbRs;
-	Spatial* pt = new Spatial(x,y,nbUpdate,nbNr,nbNs ,nbNd, nbRr,nbRs);
+	Spatial* pt = new Spatial(x,y,nbUpdate,nbNr,nbNs ,nbNd, nbRr,nbRs, file_success);
 	tab_robot.push_back(pt);
 	return nbUpdate;
 }
 	
-void decodage_neutraliseur(std::istringstream& data, int nbUpdate)
+void decodage_neutraliseur(std::istringstream& data, int nbUpdate, bool& file_success)
 {
 	double x, y, orienta;
 	unsigned type;
 	std::string panne;
 	int k_update_panne;
 	data >> x >> y >> orienta >> type >> panne >> k_update_panne;
-	Neutraliseur* pt = new Neutraliseur(x,y,orienta,type,panne,nbUpdate, k_update_panne);
+	Neutraliseur* pt = new Neutraliseur(x,y,orienta,type,panne,nbUpdate, k_update_panne, file_success);
 	tab_robot.push_back(pt);
 }
 	 
-void decodage_reparateur(std::istringstream& data)
+void decodage_reparateur(std::istringstream& data, bool& file_success)
 {
 	double x, y;
 	data >> x >> y;
-	Reparateur* pt = new Reparateur(x,y);
+	Reparateur* pt = new Reparateur(x,y, file_success);
 	tab_robot.push_back(pt);
 }
 
-void decodage_robot(std::istringstream& data, int type, int& compteur1, int& compteur2)
+void decodage_robot(std::istringstream& data, int type, int& compteur1, int& compteur2, bool& file_success)
 {
 	static int nbUpdate(0);
 	switch(type)
 	{
 	case SPATIAL :
-		nbUpdate = decodage_spatial(data, compteur1, compteur2);	
+		nbUpdate = decodage_spatial(data, compteur1, compteur2, file_success);	
 	break;
 	case REPARATEUR :
-		decodage_reparateur(data);
+		decodage_reparateur(data, file_success);
 	break;
 	case NEUTRALISEUR :
-		decodage_neutraliseur(data, nbUpdate);
+		decodage_neutraliseur(data, nbUpdate, file_success);
 	break;
 	}
 }
@@ -234,32 +240,32 @@ Cercle r_getForme(unsigned i)
 
 unsigned spatial_getnbUpdate()
 {
-	return tab_robot[0]->getnbUpdate();
+	return ((tab_robot.size()==0) ? 0 : tab_robot[0]->getnbUpdate());
 }
 
 unsigned spatial_getnbNr()
 {
-	return tab_robot[0]->getnbNr();
+	return ((tab_robot.size()==0) ? 0 : tab_robot[0]->getnbNr());
 }
 
 unsigned spatial_getnbNs()
 {
-	return tab_robot[0]->getnbNs();
+	return ((tab_robot.size()==0) ? 0 : tab_robot[0]->getnbNs());
 }
 
 unsigned spatial_getnbNd()
 {
-	return tab_robot[0]->getnbNd();
+	return ((tab_robot.size()==0) ? 0 : tab_robot[0]->getnbNd());
 }
 
 unsigned spatial_getnbRr()
 {
-	return tab_robot[0]->getnbRr();
+	return ((tab_robot.size()==0) ? 0 : tab_robot[0]->getnbRr());
 }
 
 unsigned spatial_getnbRs()
 {
-	return tab_robot[0]->getnbRs();
+	return ((tab_robot.size()==0) ? 0 : tab_robot[0]->getnbRs());
 }
 
 double neutra_getorientation(unsigned i)

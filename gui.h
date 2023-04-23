@@ -52,6 +52,7 @@ class Fenetre : public Gtk::Window
 	 bool on_window_key_pressed(guint keyval, guint keycode, Gdk::ModifierType state);
 	 void on_file_dialog_response(int response_id, Gtk::FileChooserDialog* dialog);
 	 void set_data();
+	 void reset_data();
  
 	 Monde monde;
 	 Simulation* Propre_en_Ordre;
