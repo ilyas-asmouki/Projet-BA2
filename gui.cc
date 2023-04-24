@@ -74,12 +74,69 @@ Fenetre::Fenetre(char* file, int argc) :
 	{
 		Propre_en_Ordre = new Simulation(file);
 		set_data();
+		if (!(Propre_en_Ordre->getfile_success()))
+		{
+			monde.clear();
+			Propre_en_Ordre->destroy_data();
+		}
 	}
 	set_resizable(true);
 	set_default_size(600, 500);
 	set_title("Propre en ordre");
 	set_child(m_Box_All);
+	set_interface();	
 	
+	m_Button_exit.signal_clicked().connect(sigc::mem_fun(*this, 
+	                           &Fenetre::on_button_clicked_exit));
+	m_Button_open.signal_clicked().connect(sigc::mem_fun(*this, 
+	                           &Fenetre::on_button_clicked_open));
+	m_Button_startstop.signal_clicked().connect(sigc::mem_fun(*this, 
+	                           &Fenetre::on_button_clicked_startstop));
+    m_Button_save.signal_clicked().connect(sigc::mem_fun(*this, 
+	                           &Fenetre::on_button_clicked_save));
+	m_Button_step.signal_clicked().connect(sigc::mem_fun(*this, 
+	                           &Fenetre::on_button_clicked_step));
+	auto controller = Gtk::EventControllerKey::create();
+    controller->signal_key_pressed().connect(
+                  sigc::mem_fun(*this, &Fenetre::on_window_key_pressed), false);
+    add_controller(controller);
+}
+
+Fenetre::~Fenetre()
+{
+}
+
+void Fenetre::set_data()
+{
+	if (Propre_en_Ordre->getfile_success())
+	{
+		maj_data.set_text(std::to_string(Propre_en_Ordre->s_getnbUpdate()));
+		prt_data.set_text(std::to_string(Propre_en_Ordre->p_getnbP()));
+		rrs_data.set_text(std::to_string(Propre_en_Ordre->s_getnbRs()));
+		rrr_data.set_text(std::to_string(Propre_en_Ordre->s_getnbRr()));
+		rns_data.set_text(std::to_string(Propre_en_Ordre->s_getnbNs()));
+		rnp_data.set_text(std::to_string(Propre_en_Ordre->s_getnbNp()));
+		rnd_data.set_text(std::to_string(Propre_en_Ordre->s_getnbNd()));
+		rnr_data.set_text(std::to_string(Propre_en_Ordre->s_getnbNr()));
+	}
+	return;
+}
+
+void Fenetre::reset_data()
+{
+	maj_data.set_text("0");
+	prt_data.set_text("0");
+	rrs_data.set_text("0");
+	rrr_data.set_text("0");
+	rns_data.set_text("0");
+	rnp_data.set_text("0");
+	rnd_data.set_text("0");
+	rnr_data.set_text("0");
+	return;
+}
+
+void Fenetre::set_interface()
+{
 	m_Box_All.append(m_Box_Left);
 	m_Box_All.append(m_Box_Right);
 	m_Box_Right.append(monde);
@@ -115,52 +172,7 @@ Fenetre::Fenetre(char* file, int argc) :
 	m_Box_rnd.append(rnd_data);
 	m_Box_rnr.append(m_Label_rnr);
 	m_Box_rnr.append(rnr_data);
-	
-	m_Button_exit.signal_clicked().connect(sigc::mem_fun(*this, 
-	                           &Fenetre::on_button_clicked_exit));
-	m_Button_open.signal_clicked().connect(sigc::mem_fun(*this, 
-	                           &Fenetre::on_button_clicked_open));
-	m_Button_startstop.signal_clicked().connect(sigc::mem_fun(*this, 
-	                           &Fenetre::on_button_clicked_startstop));
-    m_Button_save.signal_clicked().connect(sigc::mem_fun(*this, 
-	                           &Fenetre::on_button_clicked_save));
-	m_Button_step.signal_clicked().connect(sigc::mem_fun(*this, 
-	                           &Fenetre::on_button_clicked_step));
-	auto controller = Gtk::EventControllerKey::create();
-    controller->signal_key_pressed().connect(
-                  sigc::mem_fun(*this, &Fenetre::on_window_key_pressed), false);
-    add_controller(controller);
 }
-
-Fenetre::~Fenetre()
-{
-}
-
-void Fenetre::set_data()
-{
-	prt_data.set_text(std::to_string(Propre_en_Ordre->p_getnbP()));
-	rrs_data.set_text(std::to_string(Propre_en_Ordre->s_getnbRs()));
-	rrr_data.set_text(std::to_string(Propre_en_Ordre->s_getnbRr()));
-	rns_data.set_text(std::to_string(Propre_en_Ordre->s_getnbNs()));
-	rnp_data.set_text(std::to_string(Propre_en_Ordre->s_getnbNp()));
-	rnd_data.set_text(std::to_string(Propre_en_Ordre->s_getnbNd()));
-	rnr_data.set_text(std::to_string(Propre_en_Ordre->s_getnbNr()));
-	return;
-}
-
-void Fenetre::reset_data()
-{
-	maj_data.set_text("0");
-	prt_data.set_text("0");
-	rrs_data.set_text("0");
-	rrr_data.set_text("0");
-	rns_data.set_text("0");
-	rnp_data.set_text("0");
-	rnd_data.set_text("0");
-	rnr_data.set_text("0");
-	return;
-}
-
 
 void Fenetre::on_button_clicked_exit()
 {
@@ -211,38 +223,43 @@ void Fenetre::on_button_clicked_save()
 
 void Fenetre::on_button_clicked_startstop()
 {
-	if(not timer_added)
-	{	  
-		sigc::slot<bool()> my_slot = sigc::bind(sigc::mem_fun(*this,
-		                                        &Fenetre::on_timeout));
-		auto conn = Glib::signal_timeout().connect(my_slot,timeout_value);
-			
-		timer_added = true;
-		m_Button_startstop.set_label("stop");
-	}
-	else
+	if (Propre_en_Ordre->getfile_success())
 	{
-	    disconnect  = true;   
-		timer_added = false;
-		m_Button_startstop.set_label("start");
+		if(not timer_added)
+		{	  
+			sigc::slot<bool()> my_slot = sigc::bind(sigc::mem_fun(*this,
+		                                        &Fenetre::on_timeout));
+			auto conn = Glib::signal_timeout().connect(my_slot,timeout_value);
+			
+			timer_added = true;
+			m_Button_startstop.set_label("stop");
+		}
+		else
+		{
+			disconnect  = true;   
+			timer_added = false;
+			m_Button_startstop.set_label("start");
+		}
 	}
 }
 
 bool Fenetre::on_timeout()
 {
-	static unsigned int val(1);
-	
-	if(disconnect)
+	if (Propre_en_Ordre->getfile_success())
 	{
-		disconnect = false;
-		return false;
+		unsigned val(Propre_en_Ordre->s_getnbUpdate());
+		if(disconnect)
+		{
+			disconnect = false;
+			return false;
+		}
+		maj_data.set_text(std::to_string(val)); 
+		Propre_en_Ordre->s_setnbUpdate(++val);
+		Propre_en_Ordre->desintegration_status();
+		monde.clear();
+		monde.draw();
+		set_data();
 	}
-	maj_data.set_text(std::to_string(val)); 
-	++val;
-	Propre_en_Ordre->desintegration_status();
-	monde.clear();
-	monde.draw();
-	set_data();
 	return true; 
 }
 

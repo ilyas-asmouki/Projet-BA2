@@ -15,16 +15,20 @@ class Robot
 	 virtual ~Robot();
 	 Cercle getForme() const;
 	 void TestCollision(bool& file_success);
-	 virtual unsigned getnbUpdate(){return 0;}
-	 virtual unsigned getnbNr(){return 0;}
-	 virtual unsigned getnbNs(){return 0;}
-	 virtual unsigned getnbNd(){return 0;}
-	 virtual unsigned getnbRr(){return 0;}
-	 virtual unsigned getnbRs(){return 0;}
-	 virtual double getorientation(){return 0;}
-	 virtual unsigned gettype(){return 0;}
-	 virtual bool getpanne(){return 0;}
-	 virtual int getk_update(){return 0;}
+	 //~ virtual unsigned getnbUpdate(){return 0;}
+	 //~ virtual unsigned getnbNr(){return 0;}
+	 //~ virtual unsigned getnbNs(){return 0;}
+	 //~ virtual unsigned getnbNd(){return 0;}
+	 //~ virtual unsigned getnbRr(){return 0;}
+	 //~ virtual unsigned getnbRs(){return 0;}
+	 //~ virtual double getorientation(){return 0;}
+	 //~ virtual unsigned gettype(){return 0;}
+	 //~ virtual bool getpanne(){return 0;}
+	 //~ virtual int getk_update(){return 0;}
+	 
+	 virtual double get_data(std::string data_type)=0;
+	 
+	 virtual void setnbUpdate(int value){};
 	protected : 
 	 Cercle forme;
 };
@@ -36,12 +40,9 @@ class Spatial : public Robot
 	 unsigned nbNd, unsigned nbRr ,unsigned nbRs, bool& file_success);
 	 ~Spatial();
 	 void error_outside(bool& file_success);
-	 virtual unsigned getnbUpdate();
-	 virtual unsigned getnbNr();
-	 virtual unsigned getnbNs();
-	 virtual unsigned getnbNd();
-	 virtual unsigned getnbRr();
-	 virtual unsigned getnbRs();
+	 virtual void setnbUpdate(int value);
+	 virtual double get_data(std::string data_type);
+	 
 	private :
 	 int nbUpdate=0;
 	 unsigned nbNr=0;
@@ -56,6 +57,7 @@ class Reparateur : public Robot
 	public :
 	 Reparateur(double x, double y, bool& file_success);
 	 ~Reparateur();
+	 virtual double get_data(std::string data_type);
 };
 
 class Neutraliseur : public Robot
@@ -65,10 +67,8 @@ class Neutraliseur : public Robot
 	              std::string bool_panne, int nbUpdate, int k_update_panne, bool& file_success);
 	 ~Neutraliseur();
 	 void error_k_update(int nbUpdate, bool& file_success);
-	 virtual double getorientation();
-	 virtual unsigned gettype();
-	 virtual bool getpanne();
-	 virtual int getk_update();
+	 virtual double get_data(std::string data_type);
+
 	private :
 	 double  orientation;
 	 unsigned type;
@@ -84,6 +84,7 @@ unsigned spatial_getnbNd();
 unsigned spatial_getnbRr();
 unsigned spatial_getnbRs();
 unsigned spatial_getnbNp();
+void spatial_setnbUpdate(int value);
 
 Cercle r_getForme(unsigned i);
 void draw_robots();

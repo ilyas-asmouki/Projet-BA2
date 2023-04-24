@@ -7,8 +7,8 @@
 #include <fstream>
 #include "robot.h"
 #include <string>
-#include <random>
-	
+#include <random>	
+
 class Simulation 
 {
 	public :
@@ -23,7 +23,9 @@ class Simulation
 	 unsigned s_getnbNd();
 	 unsigned s_getnbRr();
 	 unsigned s_getnbRs();
+	 unsigned s_getnbNp();
 	 unsigned p_getnbP();
+	 void s_setnbUpdate(int value);
 	 void sauvegarde(std::string file);
 	 void destroy_data();
 	 void desintegration_status();

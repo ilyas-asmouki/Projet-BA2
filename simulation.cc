@@ -5,7 +5,6 @@
 #include <string>
 #include <fstream>
 #include <sstream>
-#include <random>
 #include "simulation.h"
 #include "robot.h"
 #include "particule.h"
@@ -140,44 +139,28 @@ unsigned Simulation::s_getnbRs()
 	return spatial_getnbRs();
 }
 
+unsigned Simulation::s_getnbNp()
+{
+	return spatial_getnbNp();
+}
+
 unsigned Simulation::p_getnbP()
 {
 	return getnbP();
 }
 
+void Simulation::s_setnbUpdate(int value)
+{
+	spatial_setnbUpdate(value);
+	return;
+}
+
 void Simulation::sauvegarde(std::string file)
 {
 	std::ofstream fichier(file);
-	fichier<<getnbP()<<std::endl;
-	for (unsigned i(0); i < getnbP(); ++i)
-	{
-		fichier<<"\t"<<p_getforme(i).centre.x<<" "<<p_getforme(i).centre.y<<" "<<p_getforme(i).cote<<std::endl;
-	}
-	fichier<<std::endl<<r_getForme(0).centre.x<<" "<<r_getForme(0).centre.y<<" "<<spatial_getnbUpdate()<<
-		" "<<spatial_getnbNr()<<" "<<spatial_getnbNs()<<" "<<spatial_getnbNd()<<" "<<spatial_getnbRr()<<" "<<
-		spatial_getnbRs()<<std::endl;
-	
-	for (unsigned i(1); i < spatial_getnbRs()+1 ; ++i)
-	{
-		fichier<<"\t"<<r_getForme(i).centre.x<<" "<<r_getForme(i).centre.y<<std::endl;
-	}
-	
-	fichier<<std::endl;
-	
-	for (unsigned i(spatial_getnbRs()+1); i < spatial_getnbRs()+spatial_getnbNs()+1; ++i)
-	{
-		fichier<<"\t"<<r_getForme(i).centre.x<<" "<<r_getForme(i).centre.y<<" "<<
-			neutra_getorientation(i)<<" "<< neutra_gettype(i)<<" ";
-		if (neutra_getpanne(i) == 0)
-		{
-			fichier<<"false ";
-		}
-		else
-		{
-			fichier<<"true ";
-		}
-		fichier<<neutra_getk_update(i)<<std::endl;
-	}
+	sauvegarde_particules(fichier);
+	sauvegarde_robots(fichier);
+
 	return;
 }
 
@@ -194,12 +177,12 @@ void Simulation::destroy_data()
 	destroy_tab_particule();
 	return;
 }
-	
+
 void Simulation::desintegration_status()
 {
 	desintegration(file_success, engine);
 }
-	
+
 		
 	
 

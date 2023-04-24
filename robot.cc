@@ -14,6 +14,8 @@
 
 enum {SPATIAL=2, REPARATEUR, NEUTRALISEUR};
 
+constexpr double NULL_DATA(0);
+
 static std::vector<Robot*> tab_robot;
 
 Robot::Robot(double x1=0, double y1=0)
@@ -55,34 +57,10 @@ void Spatial::error_outside(bool& file_success)
 	return;
 }
 
-unsigned Spatial::getnbUpdate()
+void Spatial::setnbUpdate(int value)
 {
-	return nbUpdate;
-}
-
-unsigned Spatial::getnbNr()
-{
-	return nbNr;
-}
-
-unsigned Spatial::getnbNs()
-{
-	return nbNs;
-}
-
-unsigned Spatial::getnbNd()
-{
-	return nbNd;
-}
-
-unsigned Spatial::getnbRr()
-{
-	return nbRr;
-}
-
-unsigned Spatial::getnbRs()
-{
-	return nbRs;
+	nbUpdate = value;
+	return;
 }
 
 Reparateur::Reparateur(double x, double y, bool& file_success): Robot(x, y)
@@ -119,26 +97,6 @@ void Neutraliseur::error_k_update(int nbUpdate, bool& file_success)
 		k_update_panne, nbUpdate);
 		file_success = false;
 	}
-}
-
-double Neutraliseur::getorientation()
-{
-	return orientation;
-}
-
-unsigned Neutraliseur::gettype()
-{
-	return type;
-}
-
-bool Neutraliseur::getpanne()
-{
-	return panne;
-}
-
-int Neutraliseur::getk_update()
-{
-	return k_update_panne;
 }
 	
 void Robot::TestCollision(bool& file_success)
@@ -241,45 +199,51 @@ Cercle r_getForme(unsigned i)
 
 unsigned spatial_getnbUpdate()
 {
-	return ((tab_robot.size()==0) ? 0 : tab_robot[0]->getnbUpdate());
+	return ((tab_robot.size()==0) ? 0 : tab_robot[0]->get_data("nbUpdate"));
 }
 
 unsigned spatial_getnbNr()
 {
-	return ((tab_robot.size()==0) ? 0 : tab_robot[0]->getnbNr());
+	return ((tab_robot.size()==0) ? 0 : tab_robot[0]->get_data("nbNr"));
 }
 
 unsigned spatial_getnbNs()
 {
-	return ((tab_robot.size()==0) ? 0 : tab_robot[0]->getnbNs());
+	return ((tab_robot.size()==0) ? 0 : tab_robot[0]->get_data("nbNs"));
 }
 
 unsigned spatial_getnbNd()
 {
-	return ((tab_robot.size()==0) ? 0 : tab_robot[0]->getnbNd());
+	return ((tab_robot.size()==0) ? 0 : tab_robot[0]->get_data("nbNd"));
 }
 
 unsigned spatial_getnbRr()
 {
-	return ((tab_robot.size()==0) ? 0 : tab_robot[0]->getnbRr());
+	return ((tab_robot.size()==0) ? 0 : tab_robot[0]->get_data("nbRr"));
 }
 
 unsigned spatial_getnbRs()
 {
-	return ((tab_robot.size()==0) ? 0 : tab_robot[0]->getnbRs());
+	return ((tab_robot.size()==0) ? 0 : tab_robot[0]->get_data("nbRs"));
 }
 
 unsigned spatial_getnbNp()
 {
 	unsigned nbNp(0);
-	for (size_t i(spatial_getnbRs()+1); i < tab_robot.size(); ++i)
+	for (size_t i((tab_robot[0]->get_data("nbRs"))+1); i < tab_robot.size(); ++i)
 	{
-		if (tab_robot[i]->getpanne())
+		if (tab_robot[i]->get_data("panne"))
 		{
 			++nbNp;
 		}
 	}
 	return nbNp;
+}
+
+void spatial_setnbUpdate(int value)
+{
+	tab_robot[0]->setnbUpdate(value);
+	return;
 }
 
 void draw_robots()
@@ -292,9 +256,9 @@ void draw_robots()
             dessin_cercle(tab_robot[i]->getForme(), "green");
         else
         {
-            std::string color = (tab_robot[i]->getpanne() ? "orange" : "black");
+            std::string color = (tab_robot[i]->get_data("panne") ? "orange" : "black");
             dessin_cercle(tab_robot[i]->getForme(), color);
-            dessin_orientation(tab_robot[i]->getForme(), tab_robot[i]->getorientation());
+            dessin_orientation(tab_robot[i]->getForme(), tab_robot[i]->get_data("orientation"));
         }
     }
 }
@@ -326,9 +290,9 @@ void sauvegarde_robots(std::ofstream& fichier)
 	for (unsigned i(spatial_getnbRs()+1); i<spatial_getnbRs()+spatial_getnbNs()+1; ++i)
 	{
 		fichier<<"\t"<<tab_robot[i]->getForme().centre.x<<" "<<tab_robot[i]->getForme().
-			centre.y<<" "<< tab_robot[i]->getorientation()<<" "<< 
-			tab_robot[i]->gettype()<<" ";
-		if (tab_robot[i]->getpanne() == 0)
+			centre.y<<" "<< tab_robot[i]->get_data("orientation")<<" "<< 
+			tab_robot[i]->get_data("type")<<" ";
+		if (tab_robot[i]->get_data("panne") == 0)
 		{
 			fichier<<"false ";
 		}
@@ -336,7 +300,45 @@ void sauvegarde_robots(std::ofstream& fichier)
 		{
 			fichier<<"true ";
 		}
-		fichier<<tab_robot[i]->getk_update()<<std::endl;
+		fichier<<tab_robot[i]->get_data("k_update_panne")<<std::endl;
 	}
 	return;
 }
+
+double Spatial::get_data(std::string data_type)
+{
+	if (data_type == "nbUpdate")
+		return nbUpdate;
+	else if (data_type == "nbNr")
+		return nbNr;
+	else if (data_type == "nbNs")
+		return nbNs;
+	else if (data_type == "nbNd")
+		return nbNd;
+	else if (data_type == "nbRr")
+		return nbRr;
+	else if (data_type == "nbRs")
+		return nbRs;
+		
+	return NULL_DATA;
+}
+
+double Reparateur::get_data(std::string data_type)
+{
+	return NULL_DATA;   
+}
+
+double Neutraliseur::get_data(std::string data_type)
+{
+	if (data_type == "orientation") 
+		return orientation;
+	else if (data_type == "type")
+		return type;
+	else if (data_type == "panne")
+		return panne;
+	else if (data_type == "k_update_panne")
+		return k_update_panne;
+	
+	return NULL_DATA;
+}
+

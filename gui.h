@@ -53,6 +53,7 @@ class Fenetre : public Gtk::Window
 	 void on_file_dialog_response(int response_id, Gtk::FileChooserDialog* dialog);
 	 void set_data();
 	 void reset_data();
+	 void set_interface();
  
 	 Monde monde;
 	 Simulation* Propre_en_Ordre;

@@ -8,6 +8,7 @@
 #include "shape.h"
 #include "constantes.h"
 #include <random>
+#include <fstream>
 
 static std::vector<Particule> tab_particule;
 
@@ -61,13 +62,6 @@ void Particule::detect_particle_superposition(bool& file_success)
 	}
 }
 
-bool Particule::operator==(Particule const& prt2)
-{
-	return (forme.centre.x == prt2.getForme().centre.x
-		and forme.centre.y == prt2.getForme().centre.y
-		and forme.cote == prt2.getForme().cote);
-}
-
 void decodage_particule(std::istringstream& data, bool& file_success)
 {
 	double x, y, d;
@@ -87,6 +81,37 @@ void test_particle_robot_superposition(Cercle robot, bool& file_success)
 			file_success = false;
 		}
 	}
+}
+
+unsigned getnbP()
+{
+	return tab_particule.size();
+}
+
+void draw_particles()
+{
+    for (size_t i = 0; i < tab_particule.size(); ++i)
+        dessin_carre(tab_particule[i].getForme());
+}
+
+void destroy_tab_particule()
+{
+	while (tab_particule.size() != 0)
+	{
+		tab_particule.pop_back();
+	}
+	return;
+}
+
+void sauvegarde_particules(std::ofstream& fichier)
+{
+	fichier<<tab_particule.size()<<std::endl;
+	for (unsigned i(0); i < getnbP(); ++i)
+	{
+		fichier<<"\t"<<tab_particule[i].getForme().centre.x<<" "<<tab_particule[i].
+			getForme().centre.y<<" "<<tab_particule[i].getForme().cote<<std::endl;
+	}
+	return;
 }
 
 void desintegration(bool file_success, std::default_random_engine engine)
@@ -126,27 +151,9 @@ void desintegration(bool file_success, std::default_random_engine engine)
 	}
 }
 
-unsigned getnbP()
+bool Particule::operator==(Particule const& prt2)
 {
-	return tab_particule.size();
-}
-
-Carre p_getforme(unsigned i)
-{
-	return tab_particule[i].getForme();
-}
-
-void draw_particles()
-{
-    for (size_t i = 0; i < tab_particule.size(); ++i)
-        dessin_carre(tab_particule[i].getForme());
-}
-
-void destroy_tab_particule()
-{
-	while (tab_particule.size() != 0)
-	{
-		tab_particule.pop_back();
-	}
-	return;
+	return (forme.centre.x == prt2.getForme().centre.x
+		and forme.centre.y == prt2.getForme().centre.y
+		and forme.cote == prt2.getForme().cote);
 }

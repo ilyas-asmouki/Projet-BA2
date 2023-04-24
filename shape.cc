@@ -24,8 +24,8 @@ bool superposition_carres(const Carre s1, const Carre s2, MARGIN margin)
 
 bool superposition_cercles(Cercle c1, Cercle  c2, MARGIN margin)
 {
-    return ((c1.rayon+c2.rayon+shape::epsil_zero*margin)>distance(c1.centre,
-    c2.centre));
+    return ((c1.rayon+c2.rayon+shape::epsil_zero*margin)>distance(c1.centre, c2.centre)
+                                                                                     );
 }
 
 bool superposition_cerclecarre(Carre c1, Cercle c2, MARGIN margin)
