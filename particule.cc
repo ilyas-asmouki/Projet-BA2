@@ -8,7 +8,6 @@
 #include "shape.h"
 #include "constantes.h"
 #include <random>
-#include <fstream>
 
 static std::vector<Particule> tab_particule;
 
@@ -62,6 +61,13 @@ void Particule::detect_particle_superposition(bool& file_success)
 	}
 }
 
+bool Particule::operator==(Particule const& prt2)
+{
+	return (forme.centre.x == prt2.getForme().centre.x
+		and forme.centre.y == prt2.getForme().centre.y
+		and forme.cote == prt2.getForme().cote);
+}
+
 void decodage_particule(std::istringstream& data, bool& file_success)
 {
 	double x, y, d;
@@ -86,30 +92,48 @@ void test_particle_robot_superposition(Cercle robot, bool& file_success)
 void desintegration(bool file_success, std::default_random_engine engine)
 {
 	size_t vect_size = tab_particule.size();
-	std::bernoulli_distribution b(desintegration_rate/tab_particule.size());
+	double p = desintegration_rate;
+	std::bernoulli_distribution b(p / tab_particule.size());
+	std::vector<Particule> destroyed_particles;
 	
-	for (size_t i(vect_size-1); i >= 0; --i) 
+	for (size_t i = 0; i < vect_size; ++i) 
 	{
-		if (b(engine) and (tab_particule[i].getForme().cote >= 2*d_particule_min))
+		if (b(engine) and tab_particule[i].getForme().cote > 2*d_particule_min)
 		{
-			Carre carre(tab_particule[i].getForme());
-			std::swap(tab_particule[i], tab_particule.back());
-			tab_particule.pop_back();
-			Particule prt1(carre.centre.x-carre.cote/4,carre.centre.y+carre.cote/4,
-				carre.cote/2 - 2*shape::epsil_zero, file_success);
-			Particule prt2(carre.centre.x-carre.cote/4,carre.centre.y-carre.cote/4,
-				carre.cote/2 - 2*shape::epsil_zero, file_success);
-			Particule prt3(carre.centre.x+carre.cote/4,carre.centre.y+carre.cote/4,
-				carre.cote/2 - 2*shape::epsil_zero, file_success);
-			Particule prt4(carre.centre.x+carre.cote/4,carre.centre.y-carre.cote/4,
-				carre.cote/2 - 2*shape::epsil_zero, file_success);
+			destroyed_particles.push_back(tab_particule[i]);
 		}
+	}
+	for (size_t j = 0; j < tab_particule.size(); ++j)
+	{
+		for (size_t k = 0; k < destroyed_particles.size(); ++k)
+		{
+			if (tab_particule[j] == destroyed_particles[k])
+				tab_particule.erase(tab_particule.begin()+j);
+		}
+	}
+	for (size_t l = 0; l < destroyed_particles.size(); ++l)
+	{
+		double d_particule = destroyed_particles[l].getForme().cote;
+		Carre carre(destroyed_particles[l].getForme());
+		Particule prt1(carre.centre.x-d_particule/4, carre.centre.y+d_particule/4,
+					   d_particule/2 - 2*shape::epsil_zero, file_success);
+		Particule prt2(carre.centre.x+d_particule/4, carre.centre.y+d_particule/4,
+					   d_particule/2 - 2*shape::epsil_zero, file_success);
+		Particule prt3(carre.centre.x-d_particule/4, carre.centre.y-d_particule/4,
+					   d_particule/2 - 2*shape::epsil_zero, file_success);
+		Particule prt4(carre.centre.x+d_particule/4, carre.centre.y-d_particule/4,
+					   d_particule/2 - 2*shape::epsil_zero, file_success);
 	}
 }
 
 unsigned getnbP()
 {
 	return tab_particule.size();
+}
+
+Carre p_getforme(unsigned i)
+{
+	return tab_particule[i].getForme();
 }
 
 void draw_particles()
@@ -123,17 +147,6 @@ void destroy_tab_particule()
 	while (tab_particule.size() != 0)
 	{
 		tab_particule.pop_back();
-	}
-	return;
-}
-
-void sauvegarde_particules(std::ofstream& fichier)
-{
-	fichier<<tab_particule.size()<<std::endl;
-	for (unsigned i(0); i < getnbP(); ++i)
-	{
-		fichier<<"\t"<<tab_particule[i].getForme().centre.x<<" "<<tab_particule[i].
-			getForme().centre.y<<" "<<tab_particule[i].getForme().cote<<std::endl;
 	}
 	return;
 }
