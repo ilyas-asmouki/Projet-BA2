@@ -11,17 +11,16 @@
 #include <fstream>
 #include <random>
 
-class Particule
-{
-	public: 
-	 Particule(double x, double y, double cote, bool& file_success);
-	 Carre getForme() const;
-	 void detect_particle_outside(bool& file_success);
-	 void detect_particle_too_small(bool& file_success);
-	 void detect_particle_superposition(bool& file_success);
-	 bool operator==(Particule const& prt2);
-	private:
-	 Carre forme;
+class Particule {
+public: 
+	Particule(double x, double y, double cote, bool& file_success);
+	Carre getForme() const;
+	void detect_particle_outside(bool& file_success);
+	void detect_particle_too_small(bool& file_success);
+	void detect_particle_superposition(bool& file_success);
+	bool operator==(Particule const& prt2);
+private:
+	Carre forme;
 };
 
 void test_particle_robot_superposition(Cercle robot, bool& file_success);

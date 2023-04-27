@@ -4,44 +4,40 @@
 #include "graphic.h"
 #include <fstream>
 
-constexpr unsigned taille_dessin(500);
+constexpr unsigned taille_dessin = 500;
+constexpr unsigned aspect_ratio = 1.0;
 static std::ifstream empty;
 
 static void orthographic_projection(const Cairo::RefPtr<Cairo::Context>& cr, 
 									const Frame& frame);
-static Frame default_frame = {-dmax, dmax, -dmax, dmax, 1., taille_dessin, taille_dessin}; 
+static Frame default_frame = {-dmax, dmax, -dmax, dmax, aspect_ratio, taille_dessin,
+							  taille_dessin}; 
 
-Monde::Monde() : empty(false)
-{
+Monde::Monde() : empty(false) {
     set_content_width(default_frame.width);
 	set_content_height(default_frame.height);
 	set_draw_func(sigc::mem_fun(*this, &Monde::on_draw));
 }
 
-Monde::~Monde()
-{
+Monde::~Monde() {
 }
 
-void Monde::on_draw(const Cairo::RefPtr<Cairo::Context>& cr, int width, int height)
-{
+void Monde::on_draw(const Cairo::RefPtr<Cairo::Context>& cr, int width, int height) {
 	set_context(cr);
 	adjustFrame(width,height);
 	orthographic_projection(cr, frame); 
 	set_world();
-	if (not empty)
-	{
+	if (not empty) {
 		draw_world();
 	}
 }
 
-void Monde::clear()
-{
+void Monde::clear() {
 	empty = true;
 	queue_draw();
 }
 
-void Monde::draw()
-{
+void Monde::draw() {
 	empty = false;
 	queue_draw();
 }
@@ -66,16 +62,13 @@ Fenetre::Fenetre(char* file, int argc) :
  disconnect(false), timeout_value(20), dialogue(OPEN)
 {
 	reset_data();
-	if (argc == 1)
-	{
+	if (argc == 1) {
 		Propre_en_Ordre = new Simulation(empty);
 	}
-	else 
-	{
+	else {
 		Propre_en_Ordre = new Simulation(file);
 		set_data();
-		if (!(Propre_en_Ordre->getfile_success()))
-		{
+		if (!(Propre_en_Ordre->getfile_success())) {
 			monde.clear();
 			Propre_en_Ordre->destroy_data();
 		}
@@ -87,29 +80,26 @@ Fenetre::Fenetre(char* file, int argc) :
 	set_interface();	
 	
 	m_Button_exit.signal_clicked().connect(sigc::mem_fun(*this, 
-	                           &Fenetre::on_button_clicked_exit));
+										   &Fenetre::on_button_clicked_exit));
 	m_Button_open.signal_clicked().connect(sigc::mem_fun(*this, 
-	                           &Fenetre::on_button_clicked_open));
+										   &Fenetre::on_button_clicked_open));
 	m_Button_startstop.signal_clicked().connect(sigc::mem_fun(*this, 
-	                           &Fenetre::on_button_clicked_startstop));
+											   &Fenetre::on_button_clicked_startstop));
     m_Button_save.signal_clicked().connect(sigc::mem_fun(*this, 
-	                           &Fenetre::on_button_clicked_save));
+										   &Fenetre::on_button_clicked_save));
 	m_Button_step.signal_clicked().connect(sigc::mem_fun(*this, 
-	                           &Fenetre::on_button_clicked_step));
+										   &Fenetre::on_button_clicked_step));
 	auto controller = Gtk::EventControllerKey::create();
     controller->signal_key_pressed().connect(
                   sigc::mem_fun(*this, &Fenetre::on_window_key_pressed), false);
     add_controller(controller);
 }
 
-Fenetre::~Fenetre()
-{
+Fenetre::~Fenetre() {
 }
 
-void Fenetre::set_data()
-{
-	if (Propre_en_Ordre->getfile_success())
-	{
+void Fenetre::set_data() {
+	if (Propre_en_Ordre->getfile_success()) {
 		maj_data.set_text(std::to_string(Propre_en_Ordre->s_getnbUpdate()));
 		prt_data.set_text(std::to_string(Propre_en_Ordre->p_getnbP()));
 		rrs_data.set_text(std::to_string(Propre_en_Ordre->s_getnbRs()));
@@ -119,11 +109,9 @@ void Fenetre::set_data()
 		rnd_data.set_text(std::to_string(Propre_en_Ordre->s_getnbNd()));
 		rnr_data.set_text(std::to_string(Propre_en_Ordre->s_getnbNr()));
 	}
-	return;
 }
 
-void Fenetre::reset_data()
-{
+void Fenetre::reset_data() {
 	maj_data.set_text("0");
 	prt_data.set_text("0");
 	rrs_data.set_text("0");
@@ -132,11 +120,9 @@ void Fenetre::reset_data()
 	rnp_data.set_text("0");
 	rnd_data.set_text("0");
 	rnr_data.set_text("0");
-	return;
 }
 
-void Fenetre::set_interface()
-{
+void Fenetre::set_interface() {
 	m_Box_All.append(m_Box_Left);
 	m_Box_All.append(m_Box_Right);
 	m_Box_Right.append(monde);
@@ -174,15 +160,12 @@ void Fenetre::set_interface()
 	m_Box_rnr.append(rnr_data);
 }
 
-void Fenetre::on_button_clicked_exit()
-{
+void Fenetre::on_button_clicked_exit() {
 	hide();
 }
 
-void Fenetre::on_button_clicked_open()
-{
-	if (timer_added)
-	{
+void Fenetre::on_button_clicked_open() {
+	if (timer_added) {
 		disconnect = true;
 		timer_added = false;
 		m_Button_startstop.set_label("start");
@@ -200,10 +183,8 @@ void Fenetre::on_button_clicked_open()
 	dialog->show();
 }
 
-void Fenetre::on_button_clicked_save()
-{
-	if (timer_added)
-	{
+void Fenetre::on_button_clicked_save() {
+	if (timer_added) {
 		disconnect = true;
 		timer_added = false;
 		m_Button_startstop.set_label("start");
@@ -221,21 +202,16 @@ void Fenetre::on_button_clicked_save()
 	dialog->show();
 }
 
-void Fenetre::on_button_clicked_startstop()
-{
-	if (Propre_en_Ordre->getfile_success())
-	{
-		if(not timer_added)
-		{	  
+void Fenetre::on_button_clicked_startstop() {
+	if (Propre_en_Ordre->getfile_success()) {
+		if(not timer_added) {	  
 			sigc::slot<bool()> my_slot = sigc::bind(sigc::mem_fun(*this,
-		                                        &Fenetre::on_timeout));
+													&Fenetre::on_timeout));
 			auto conn = Glib::signal_timeout().connect(my_slot,timeout_value);
 			
 			timer_added = true;
 			m_Button_startstop.set_label("stop");
-		}
-		else
-		{
+		} else {
 			disconnect  = true;   
 			timer_added = false;
 			m_Button_startstop.set_label("start");
@@ -243,13 +219,10 @@ void Fenetre::on_button_clicked_startstop()
 	}
 }
 
-bool Fenetre::on_timeout()
-{
-	if (Propre_en_Ordre->getfile_success())
-	{
+bool Fenetre::on_timeout() {
+	if (Propre_en_Ordre->getfile_success()) {
 		unsigned val(Propre_en_Ordre->s_getnbUpdate());
-		if(disconnect)
-		{
+		if(disconnect) {
 			disconnect = false;
 			return false;
 		}
@@ -263,102 +236,82 @@ bool Fenetre::on_timeout()
 	return true; 
 }
 
-void Fenetre::on_button_clicked_step()
-{
-	if (!timer_added)
-	{
+void Fenetre::on_button_clicked_step() {
+	if (!timer_added) {
 		on_timeout();
 	}
-	return;
 }
 
-bool Fenetre::on_window_key_pressed(guint keyval, guint, Gdk::ModifierType state)
-{
-	switch(gdk_keyval_to_unicode(keyval))
-	{
-		case 's':
-			on_button_clicked_startstop();
-			return true;
-		case '1':
-			on_button_clicked_step();
-			return true;
+bool Fenetre::on_window_key_pressed(guint keyval, guint, Gdk::ModifierType state) {
+	switch(gdk_keyval_to_unicode(keyval)) {
+	case 's':
+		on_button_clicked_startstop();
+		return true;
+	case '1':
+		on_button_clicked_step();
+		return true;
 	}
 	return false;
 }
 			
 void Fenetre::on_file_dialog_response(int response_id, 
-										    Gtk::FileChooserDialog* dialog)
-{
-	switch (response_id)
-	{
-		case Gtk::ResponseType::OK:
-		{
-		    auto filename = dialog->get_file()->get_path();
-		    if (dialogue)
-		    {
-				Propre_en_Ordre->sauvegarde(filename);
+										    Gtk::FileChooserDialog* dialog) {
+	switch (response_id) {
+	case Gtk::ResponseType::OK: {
+		auto filename = dialog->get_file()->get_path();
+		if (dialogue) {
+			Propre_en_Ordre->sauvegarde(filename);
+		} else {
+			std::ifstream fichier(filename);
+			Propre_en_Ordre->destroy_data();
+			monde.clear();
+			delete Propre_en_Ordre;
+			Propre_en_Ordre = new Simulation(fichier);
+			reset_data();
+			if (Propre_en_Ordre->getfile_success()) {
+				set_data();
+				monde.draw();
 			}
-			else 
-			{
-				std::ifstream fichier(filename);
-				Propre_en_Ordre->destroy_data();
-				monde.clear();
-				delete Propre_en_Ordre;
-				Propre_en_Ordre = new Simulation(fichier);
-				reset_data();
-				if (Propre_en_Ordre->getfile_success())
-				{
-					set_data();
-					monde.draw();
-				}
-			}
-		    break;
 		}
-		case Gtk::ResponseType::CANCEL:
-		{
-		    break;
-		}
-		default:
-		{
-		    break;
-		}
+		break;
+	}
+	case Gtk::ResponseType::CANCEL:
+		break;
+		
+	default:
+		break;
 	}
 	dialog->hide();
 }
 
-void Monde::adjustFrame(int width, int height)
-{	
+void Monde::adjustFrame(int width, int height) {	
 	frame.width  = width;
 	frame.height = height;
 
     double new_aspect_ratio((double)width/height);
-    if( new_aspect_ratio > default_frame.asp)
-    {
-	    frame.yMax = default_frame.yMax ;
-	    frame.yMin = default_frame.yMin ;	
+    if (new_aspect_ratio > default_frame.asp) {
+	    frame.yMax = default_frame.yMax;
+	    frame.yMin = default_frame.yMin;	
 	  
 	    double delta(default_frame.xMax - default_frame.xMin);
 	    double mid((default_frame.xMax + default_frame.xMin)/2);
-	    frame.xMax = mid + 0.5*(new_aspect_ratio/default_frame.asp)*delta ;
-	    frame.xMin = mid - 0.5*(new_aspect_ratio/default_frame.asp)*delta ;		  	  
-    }
-    else
-    {
-	    frame.xMax = default_frame.xMax ;
-	    frame.xMin = default_frame.xMin ;
+	    frame.xMax = mid + 0.5*(new_aspect_ratio/default_frame.asp)*delta;
+	    frame.xMin = mid - 0.5*(new_aspect_ratio/default_frame.asp)*delta;		  	  
+    } else {
+	    frame.xMax = default_frame.xMax;
+	    frame.xMin = default_frame.xMin;
 	  	  
  	    double delta(default_frame.yMax - default_frame.yMin);
 	    double mid((default_frame.yMax + default_frame.yMin)/2);
-	    frame.yMax = mid + 0.5*(default_frame.asp/new_aspect_ratio)*delta ;
-	    frame.yMin = mid - 0.5*(default_frame.asp/new_aspect_ratio)*delta ;		  	  
+	    frame.yMax = mid + 0.5*(default_frame.asp/new_aspect_ratio)*delta;
+	    frame.yMin = mid - 0.5*(default_frame.asp/new_aspect_ratio)*delta;		  	  
     }
 }
 
 static void orthographic_projection(const Cairo::RefPtr<Cairo::Context>& cr, 
-									const Frame& frame)
-{
+									const Frame& frame) {
 	cr->translate(frame.width/2, frame.height/2);
-	cr->scale(frame.width/(frame.xMax - frame.xMin), 
-             -frame.height/(frame.yMax - frame.yMin));
+	cr->scale(frame.width/(frame.xMax - frame.xMin),
+	-frame.height/(frame.yMax - frame.yMin));
 	cr->translate(-(frame.xMin + frame.xMax)/2, -(frame.yMin + frame.yMax)/2);
 }
