@@ -10,9 +10,13 @@
 #include "particule.h"
 #include "shape.h"
 #include "message.h"
+#include "constantes.h"
+
+static std::default_random_engine engine;
 
 void decodage_ligne(std::string line, bool& file_success)
 {
+	engine.seed(1);
 	enum ETAT{NBP, PARTICULE, SPATIAL, REPARATEUR, NEUTRALISEUR};
 	static int etat(NBP);
 	std::istringstream data(line);
@@ -77,13 +81,11 @@ void decodage_ligne(std::string line, bool& file_success)
 Simulation::Simulation(std::ifstream& fichier) 
 {
 	lecture(fichier);
-	engine.seed(1);
 }
 
 Simulation::Simulation(char* file) : fichier(file)
 {
 	lecture(fichier);
-	engine.seed(1);
 }
 
 Simulation::~Simulation()
@@ -178,11 +180,22 @@ void Simulation::destroy_data()
 	return;
 }
 
-void Simulation::desintegration_status()
+void Simulation::desintegration()
 {
-	desintegration(file_success, engine);
-}
+	size_t vect_size = getnbP();
+	double p = desintegration_rate;
+	std::bernoulli_distribution b(p / getnbP());
 
+	for (size_t i = 0; i < vect_size; ++i) 
+	{
+		if (b(engine)) 
+		{
+			new_particules(i,file_success);
+		
+		}
+	}
+	return;
+}
 		
 	
 

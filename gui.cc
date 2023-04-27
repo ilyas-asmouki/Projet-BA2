@@ -63,7 +63,7 @@ Fenetre::Fenetre(char* file, int argc) :
  m_Label_rnr("robots neutraliseurs en réserve:"),
  m_Button_exit("exit"), m_Button_open("open"), m_Button_save("save"), 
  m_Button_startstop("start"), m_Button_step("step"), timer_added(false), 
- disconnect(false), timeout_value(200), dialogue(OPEN)
+ disconnect(false), timeout_value(20), dialogue(OPEN)
 {
 	reset_data();
 	if (argc == 1)
@@ -255,7 +255,7 @@ bool Fenetre::on_timeout()
 		}
 		maj_data.set_text(std::to_string(val)); 
 		Propre_en_Ordre->s_setnbUpdate(++val);
-		Propre_en_Ordre->desintegration_status();
+		Propre_en_Ordre->desintegration();
 		monde.clear();
 		monde.draw();
 		set_data();

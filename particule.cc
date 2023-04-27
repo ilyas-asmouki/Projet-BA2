@@ -114,20 +114,21 @@ void sauvegarde_particules(std::ofstream& fichier)
 	return;
 }
 
-void desintegration(bool file_success, std::default_random_engine engine)
+bool Particule::operator==(Particule const& prt2)
 {
-	size_t vect_size = tab_particule.size();
-	double p = desintegration_rate;
-	std::bernoulli_distribution b(p / tab_particule.size());
+	return (forme.centre.x == prt2.getForme().centre.x
+		and forme.centre.y == prt2.getForme().centre.y
+		and forme.cote == prt2.getForme().cote);
+}
+
+void new_particules(unsigned i, bool file_success)
+{
 	std::vector<Particule> destroyed_particles;
-	
-	for (size_t i = 0; i < vect_size; ++i) 
-	{
-		if (b(engine) and tab_particule[i].getForme().cote > 2*d_particule_min)
+	if ((tab_particule[i].getForme().cote >= (2*(d_particule_min+
+			3*shape::epsil_zero))))
 		{
 			destroyed_particles.push_back(tab_particule[i]);
 		}
-	}
 	for (size_t j = 0; j < tab_particule.size(); ++j)
 	{
 		for (size_t k = 0; k < destroyed_particles.size(); ++k)
@@ -151,9 +152,3 @@ void desintegration(bool file_success, std::default_random_engine engine)
 	}
 }
 
-bool Particule::operator==(Particule const& prt2)
-{
-	return (forme.centre.x == prt2.getForme().centre.x
-		and forme.centre.y == prt2.getForme().centre.y
-		and forme.cote == prt2.getForme().cote);
-}

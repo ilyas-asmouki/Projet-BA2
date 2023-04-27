@@ -31,5 +31,6 @@ void desintegration(bool file_success, std::default_random_engine engine);
 void draw_particles();
 void destroy_tab_particule();
 void sauvegarde_particules(std::ofstream& fichier);
+void new_particules(unsigned i, bool file_success);
 
 #endif

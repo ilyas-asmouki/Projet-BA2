@@ -9,6 +9,7 @@
 #include <string>
 #include <random>	
 
+
 class Simulation 
 {
 	public :
@@ -28,11 +29,10 @@ class Simulation
 	 void s_setnbUpdate(int value);
 	 void sauvegarde(std::string file);
 	 void destroy_data();
-	 void desintegration_status();
+	 void desintegration();
 	private : 
 	 std::ifstream fichier;
 	 bool file_success=true;
-	 std::default_random_engine engine;
 };
 
 void draw_world();

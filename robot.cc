@@ -18,26 +18,23 @@ constexpr double NULL_DATA(0);
 
 static std::vector<Robot*> tab_robot;
 
-Robot::Robot(double x1=0, double y1=0)
-{
+Robot::Robot(double x1=0, double y1=0) {
 	forme.centre.x = x1;
 	forme.centre.y = y1;
 	forme.rayon = 0;
 }
 
-Robot::~Robot()
-{
+Robot::~Robot() {
 }
 
-Cercle Robot::getForme() const
-{
+Cercle Robot::getForme() const {
 	return forme;
 }
 
-Spatial::Spatial(double x, double y, int nbUpdate ,unsigned nbNr, unsigned nbNs,
-	  unsigned nbNd, unsigned nbRr ,unsigned nbRs, bool& file_success): Robot(x, y), nbUpdate(nbUpdate), 
-	  nbNr(nbNr), nbNs(nbNs), nbNd(nbNd), nbRr(nbRr), nbRs(nbRs)
-{
+Spatial::Spatial(double x, double y, int nbUpdate, unsigned nbNr, unsigned nbNs,
+	  unsigned nbNd, unsigned nbRr, unsigned nbRs, bool& file_success): Robot(x, y), 
+	  nbUpdate(nbUpdate), nbNr(nbNr), nbNs(nbNs), nbNd(nbNd), nbRr(nbRr), nbRs(nbRs) {
+
 	forme.rayon=r_spatial;
 	error_outside(file_success);
 	test_particle_robot_superposition(forme, file_success);
@@ -49,10 +46,9 @@ Spatial::~Spatial()
 	
 void Spatial::error_outside(bool& file_success)
 {
-	if ((((abs(forme.centre.x)+r_spatial)>dmax)or(abs(forme.centre.y)+r_spatial)>dmax))
-	{
+	if (((abs(forme.centre.x)+r_spatial>dmax)or(abs(forme.centre.y)+r_spatial)>dmax)){
 		std::cout<<message::spatial_robot_ouside(forme.centre.x, forme.centre.y);
-		file_success = false;
+			file_success = false;
 	}
 	return;
 }
@@ -75,8 +71,9 @@ Reparateur::~Reparateur()
 }
 		
 Neutraliseur::Neutraliseur(double x, double y, double orientation, unsigned type,
-	std::string bool_panne, int nbUpdate, int k_update_panne, bool& file_success): Robot(x, y), 
-	orientation(orientation), type(type), k_update_panne(k_update_panne) 
+						   std::string bool_panne, int nbUpdate, int k_update_panne, 
+						   bool& file_success): Robot(x, y), orientation(orientation), 
+						   type(type), k_update_panne(k_update_panne) 
 {
 	panne = ((bool_panne == "false") ? false : true);
 	forme.rayon=r_neutraliseur;
@@ -94,49 +91,40 @@ void Neutraliseur::error_k_update(int nbUpdate, bool& file_success)
 	if (k_update_panne > nbUpdate)
 	{
 		std::cout<<message::invalid_k_update(forme.centre.x, forme.centre.y, 
-		k_update_panne, nbUpdate);
-		file_success = false;
+			k_update_panne, nbUpdate);
+			file_success = false;
 	}
 }
 	
 void Robot::TestCollision(bool& file_success)
 {
-	for (size_t i(1); i < tab_robot.size(); ++i)
-	{
-		if (superposition_cercles(forme, tab_robot[i]->getForme(),NO_MARGIN))
-		{
-			if (forme.rayon == r_reparateur)
-			{
-				if (forme.rayon == tab_robot[i]->getForme().rayon)
-				{
+	for (size_t i(1); i < tab_robot.size(); ++i) {
+		if (superposition_cercles(forme, tab_robot[i]->getForme(),NO_MARGIN)) {
+			if (forme.rayon == r_reparateur) {
+				if (forme.rayon == tab_robot[i]->getForme().rayon) {
 					std::cout << message::repairers_superposition(forme.centre.x,
-					forme.centre.y, tab_robot[i]->getForme().centre.x,
-					tab_robot[i]->getForme().centre.y);
-					file_success = false;
-				} 
-				else
-				{ 
-					std::cout << message::repairer_neutralizer_superposition(forme
-					.centre.x, forme.centre.y, tab_robot[i]->getForme().centre.x,
-					tab_robot[i]->getForme().centre.y);	
-					file_success = false;
+						forme.centre.y, tab_robot[i]->getForme().centre.x,
+						tab_robot[i]->getForme().centre.y);
+						file_success = false;
+				} else { 
+					std::cout << message::repairer_neutralizer_superposition(
+						forme.centre.x, forme.centre.y, 
+						tab_robot[i]->getForme().centre.x,
+						tab_robot[i]->getForme().centre.y);	
+						file_success = false;
 				}
-			}
-			else
-			{
-				if (forme.rayon == tab_robot[i]->getForme().rayon)
-				{
+			} else {
+				if (forme.rayon == tab_robot[i]->getForme().rayon) {
 					std::cout << message::neutralizers_superposition(forme.centre.x,
-					forme.centre.y,	tab_robot[i]->getForme().centre.x,
-					tab_robot[i]->getForme().centre.y);
-					file_success = false;
-				}
-				else
-				{ 
-					std::cout<<message::repairer_neutralizer_superposition(tab_robot[i]
-					->getForme().centre.x, tab_robot[i]->getForme().centre.y,
-					forme.centre.x, forme.centre.y);
-					file_success = false;	
+						forme.centre.y,	tab_robot[i]->getForme().centre.x,
+						tab_robot[i]->getForme().centre.y);
+						file_success = false;
+				} else { 
+					std::cout<<message::repairer_neutralizer_superposition(
+						tab_robot[i]->getForme().centre.x, 
+						tab_robot[i]->getForme().centre.y,forme.centre.x, 
+						forme.centre.y);
+						file_success = false;	
 				}	
 			}
 		}
