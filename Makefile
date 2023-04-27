@@ -1,3 +1,6 @@
+#LAHLOU SAAD 361150
+#ASMOUKI ILYAS 356263
+
 OUT = projet
 CXX = g++
 CXXFLAGS = -Wall -std=c++17 
@@ -10,7 +13,7 @@ all: $(OUT)
 projet.o: projet.cc gui.h simulation.h
 	$(CXX) $(CXXFLAGS) $(LINKING) -c $< -o $@ $(LINKING)
 	
-gui.o: gui.cc gui.h simulation.h
+gui.o: gui.cc gui.h simulation.h graphic.h
 	$(CXX) $(CXXFLAGS) $(LINKING) -c $< -o $@ $(LINKING)
 	
 simulation.o: simulation.cc simulation.h robot.h shape.h particule.h message.h

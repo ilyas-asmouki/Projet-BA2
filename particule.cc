@@ -1,14 +1,12 @@
-//LAHLOU SAAD 361150
-//ASMOUKI ILYAS 356263
+//NOM PRENOM SCIPER CONTRIBUTION(%)
+//LAHLOU SAAD 361150 35%
+//ASMOUKI ILYAS 356263 65% 
 
-#include <cmath>
+#include <fstream>
 #include <iostream>
 #include "particule.h"
 #include "message.h"
-#include "shape.h"
 #include "constantes.h"
-#include <random>
-#include <fstream>
 
 static std::vector<Particule> tab_particule;
 

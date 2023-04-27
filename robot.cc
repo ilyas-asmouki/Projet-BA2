@@ -1,17 +1,14 @@
 //NOM PRENOM SCIPER CONTRIBUTION(%)
-//LAHLOU SAAD 361150
-//ASMOUKI ILYAS 356263
+//LAHLOU SAAD 361150 65%
+//ASMOUKI ILYAS 356263 35%
 
 #include <vector>
 #include <iostream>
-#include <string>
-#include <sstream>
+#include <fstream>
 #include "robot.h"
 #include "message.h"
 #include "constantes.h"
-#include "shape.h"
 #include "particule.h"
-#include <fstream>
 
 enum {SPATIAL=2, REPARATEUR, NEUTRALISEUR};
 

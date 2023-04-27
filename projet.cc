@@ -1,9 +1,9 @@
-//LAHLOU SAAD 361150
-//ASMOUKI ILYAS 356263
+//NOM PRENOM SCIPER CONTRIBUTION(%)
+//LAHLOU SAAD 361150 50%
+//ASMOUKI ILYAS 356263 50% 
 
 #include "simulation.h"
 #include "gui.h"
-#include <iostream>
 
 int main(int argc, char* argv[]) {		
 	auto app = Gtk::Application::create();

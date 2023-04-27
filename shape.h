@@ -4,7 +4,7 @@
 #ifndef SHAPE_H
 #define SHAPE_H
 
-#include <iostream>
+#include <string>
 #include <cmath>
 
 enum MARGIN {NO_MARGIN, WITH_MARGIN};
@@ -12,6 +12,7 @@ enum MARGIN {NO_MARGIN, WITH_MARGIN};
 namespace shape {
 	constexpr double epsil_zero(0.125);
 }
+
 struct S2d {
 	double x;
 	double y;

@@ -2,9 +2,9 @@
 //LAHLOU SAAD 361150 20%
 //ASMOUKI ILYAS 356263 80% 
 
+#include <cmath>
 #include "graphic.h"
 #include "constantes.h"
-#include <cmath>
 
 static const Cairo::RefPtr<Cairo::Context>* ptcr = nullptr;
 

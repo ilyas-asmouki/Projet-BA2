@@ -5,10 +5,8 @@
 #define SIMULATION_H
 
 #include <fstream>
-#include "robot.h"
 #include <string>
 #include <random>	
-
 
 class Simulation 
 {

@@ -4,7 +4,6 @@
 
 #include "shape.h"
 #include "graphic.h"
-#include <string>
 
 double distance(S2d p1, S2d p2) {
     return sqrt((p2.x-p1.x) * (p2.x-p1.x) + (p2.y-p1.y) * (p2.y-p1.y));
@@ -21,8 +20,8 @@ bool superposition_carres(const Carre s1, const Carre s2, MARGIN margin) {
 }
 
 bool superposition_cercles(Cercle c1, Cercle  c2, MARGIN margin) {
-    return ((c1.rayon+c2.rayon+shape::epsil_zero*margin)>distance(c1.centre, c2.centre)
-                                                                                     );
+    return ((c1.rayon+c2.rayon+shape::epsil_zero*margin) >
+			distance(c1.centre, c2.centre));
 }
 
 bool superposition_cerclecarre(Carre c1, Cercle c2, MARGIN margin) {

@@ -4,12 +4,11 @@
 #ifndef PARTICULE_H
 #define PARTICULE_H
 
-#include "shape.h"
 #include <vector>
+#include <random>
 #include <sstream>
 #include <string>
-#include <fstream>
-#include <random>
+#include "shape.h"
 
 class Particule {
 public: 

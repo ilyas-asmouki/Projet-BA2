@@ -1,11 +1,22 @@
+//LAHLOU SAAD 361150
+//ASMOUKI ILYAS 356263
+
 #ifndef GUI_H
 #define GUI_H
 
-#include <gtkmm.h>
+#include <gtkmm/drawingarea.h>
+#include <gtkmm/button.h>
+#include <gtkmm/label.h>
+#include <gtkmm/window.h>
+#include <gtkmm/box.h>
+#include <cairomm/context.h>
+#include <gtkmm/application.h>
+#include <gtkmm/filechooserdialog.h>
+#include <gtkmm/eventcontrollerkey.h>
+#include <glibmm.h>
 #include <fstream>
 #include "simulation.h"
 
-void graphic_set_context(const Cairo::RefPtr<Cairo::Context>& cr);
 enum Dialog {OPEN, SAVE};
 
 struct Frame {

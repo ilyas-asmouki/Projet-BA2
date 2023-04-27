@@ -1,8 +1,10 @@
+//NOM PRENOM SCIPER CONTRIBUTION(%)
+//LAHLOU SAAD 361150 70%
+//ASMOUKI ILYAS 356263 30% 
+
 #include "gui.h"
-#include <iostream>
 #include "constantes.h"
 #include "graphic.h"
-#include <fstream>
 
 constexpr unsigned taille_dessin = 500;
 constexpr unsigned aspect_ratio = 1.0;

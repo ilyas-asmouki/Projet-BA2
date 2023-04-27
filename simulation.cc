@@ -4,7 +4,6 @@
 
 #include <iostream>
 #include <string>
-#include <fstream>
 #include <sstream>
 #include "simulation.h"
 #include "robot.h"
@@ -42,7 +41,13 @@ void decodage_ligne(std::string line, bool& file_success) {
 		break;
 	case SPATIAL :
 		decodage_robot(data, SPATIAL, compteur1, compteur2, file_success);
-		etat = REPARATEUR;
+		if (compteur2 != 0) {
+			etat = REPARATEUR;
+		} else if (compteur2 == 0 and compteur1 != 0) {
+			etat = NEUTRALISEUR;
+		} else {
+			etat = NBP;
+		}	
 		i=0;
 		break;
 	
@@ -50,7 +55,11 @@ void decodage_ligne(std::string line, bool& file_success) {
 		decodage_robot(data, REPARATEUR, compteur1, compteur2, file_success);
 		++i;
 		if (compteur2 == i) {
-			etat = NEUTRALISEUR;
+			if (compteur1 != 0){
+				etat = NEUTRALISEUR;
+			} else {
+				etat = NBP;
+			}
 			i=0;
 		}
 		break;
@@ -61,9 +70,6 @@ void decodage_ligne(std::string line, bool& file_success) {
 		if (compteur1 == i) {
 			etat = NBP;
 			i=0;
-			if (file_success){
-				std::cout<<message::success();
-			}
 		}
 		break;
 	}
@@ -93,6 +99,9 @@ void Simulation::lecture(std::ifstream& file) {
 			}
 		decodage_ligne(line, file_success);
 	}
+	if (file_success) {
+		std::cout<<message::success();
+	}	
 	return;
 }
 	
