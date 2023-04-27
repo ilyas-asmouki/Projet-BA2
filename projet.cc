@@ -5,8 +5,7 @@
 #include "gui.h"
 #include <iostream>
 
-int main(int argc, char* argv[])
-{		
+int main(int argc, char* argv[]) {		
 	auto app = Gtk::Application::create();
     return app->make_window_and_run<Fenetre>(1, argv, argv[1], argc);
 }

@@ -1,4 +1,3 @@
-
 //LAHLOU SAAD 361150
 //ASMOUKI ILYAS 356263
 
@@ -10,24 +9,20 @@
 
 enum MARGIN {NO_MARGIN, WITH_MARGIN};
 
-namespace shape 
-{
+namespace shape {
 	constexpr double epsil_zero(0.125);
 }
-struct S2d
-{
+struct S2d {
 	double x;
 	double y;
 };
 
-struct Cercle
-{
+struct Cercle {
 	S2d centre;
 	double rayon;
 };
 
-struct Carre
-{
+struct Carre {
 	S2d centre;
 	double cote;
 };

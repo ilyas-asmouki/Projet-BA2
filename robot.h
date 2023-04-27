@@ -50,7 +50,8 @@ class Neutraliseur : public Robot
 {
 public :
 	Neutraliseur(double x, double y, double orientation, unsigned type,
-		std::string bool_panne, int nbUpdate, int k_update_panne, bool& file_success);
+				 std::string bool_panne, int nbUpdate, int k_update_panne, 
+				 bool& file_success);
 	~Neutraliseur();
 	void error_k_update(int nbUpdate, bool& file_success);
 	virtual double get_data(std::string data_type);
@@ -63,7 +64,7 @@ private :
 };
 
 void decodage_robot(std::istringstream& lig, int type, int& compteur1, int& compteur2,
-					bool& file_success);
+						bool& file_success);
 unsigned spatial_getnbUpdate();
 unsigned spatial_getnbNr();
 unsigned spatial_getnbNs();
