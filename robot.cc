@@ -87,6 +87,27 @@ void Neutraliseur::error_k_update(int nbUpdate, bool& file_success) {
 	}
 	return;
 }
+
+Neutra_0::Neutra_0(double x, double y, double orientation, unsigned type,
+					std::string bool_panne, int nbUpdate, int k_update_panne, 
+					bool& file_success) : Neutraliseur(x, y, orientation, type, 
+					bool_panne, nbUpdate, k_update_panne, file_success)
+{
+}
+
+Neutra_1::Neutra_1(double x, double y, double orientation, unsigned type,
+					std::string bool_panne, int nbUpdate, int k_update_panne, 
+					bool& file_success) : Neutraliseur(x, y, orientation, type, 
+					bool_panne, nbUpdate, k_update_panne, file_success)
+{
+}
+
+Neutra_2::Neutra_2(double x, double y, double orientation, unsigned type,
+					std::string bool_panne, int nbUpdate, int k_update_panne, 
+					bool& file_success) : Neutraliseur(x, y, orientation, type, 
+					bool_panne, nbUpdate, k_update_panne, file_success)
+{
+}
 	
 void Robot::TestCollision(bool& file_success)
 {
@@ -143,8 +164,18 @@ void decodage_neutraliseur(std::istringstream& data, int nbUpdate, bool& file_su
 	std::string panne;
 	int k_update_panne;
 	data >> x >> y >> orienta >> type >> panne >> k_update_panne;
-	Neutraliseur* pt = new Neutraliseur(x,y,orienta,type,panne,nbUpdate, 
-										k_update_panne, file_success);
+	Neutraliseur* pt = nullptr;
+	if (type == 0)	{
+		pt = new Neutra_0(x,y,orienta,type,panne,nbUpdate, k_update_panne,
+		file_success);
+	} else if (type == 1)	{
+		pt = new Neutra_1(x,y,orienta,type,panne,nbUpdate, k_update_panne,
+		file_success);
+	} else if (type == 2)	{
+		pt = new Neutra_2(x,y,orienta,type,panne,nbUpdate, k_update_panne,
+		file_success);
+	}
+
 	tab_robot.push_back(pt);
 }
 	 
