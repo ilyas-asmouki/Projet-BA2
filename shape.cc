@@ -13,6 +13,15 @@ double norme(S2d vect) {
 	return sqrt(pow(vect.x, 2) + pow(vect.y, 2));
 }
 
+double prod_scalaire(S2d vect1, S2d vect2)	{
+	return vect1.x * vect2.x + vect1.y * vect2.y;
+}
+
+void add_scaled_vector(S2d& vect, S2d added_vect, double scalar)	{
+	vect.x += scalar * added_vect.x;
+	vect.y += scalar * added_vect.y;
+}
+
 bool superposition_carres(const Carre s1, const Carre s2, MARGIN margin) {
 	double d1 = s1.cote, d2 = s2.cote;
 	return (abs(s2.centre.x - s1.centre.x) < d1/2 + d2/2 + shape::epsil_zero*margin)
