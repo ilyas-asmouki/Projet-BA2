@@ -16,6 +16,7 @@ public :
 	void TestCollision(bool& file_success);
 	virtual double get_data(std::string data_type)=0;
 	virtual void setnbUpdate(int value){};
+	virtual void move_to(S2d goal)=0;
 	 
 protected : 
 	Cercle forme;
@@ -29,6 +30,7 @@ public:
 	void error_outside(bool& file_success);
 	virtual void setnbUpdate(int value);
 	virtual double get_data(std::string data_type);
+	void move_to(S2d goal){}; 
 	 
 private :
 	int nbUpdate=0;
@@ -44,6 +46,10 @@ public :
 	Reparateur(double x, double y, bool& file_success);
 	~Reparateur();
 	virtual double get_data(std::string data_type);
+	void move_to(S2d goal) override;
+
+private :
+	S2d goal;
 };
 
 class Neutraliseur : public Robot {
@@ -54,12 +60,38 @@ public :
 	~Neutraliseur();
 	void error_k_update(int nbUpdate, bool& file_success);
 	virtual double get_data(std::string data_type);
+	void move_to(S2d goal)=0;
 
-private :
+protected :
 	double  orientation;
 	unsigned type;
 	bool panne;
 	int k_update_panne;
+	S2d goal;
+};
+
+class Neutra_0 : public Neutraliseur {
+public : 
+	Neutra_0(double x, double y, double orientation, unsigned type,
+			 std::string bool_panne, int nbUpdate, int k_update_panne, 
+			 bool& file_success);
+	void move_to(S2d goal) override;
+};
+
+class Neutra_1 : public Neutraliseur {
+public : 
+	Neutra_1(double x, double y, double orientation, unsigned type,
+			 std::string bool_panne, int nbUpdate, int k_update_panne, 
+			 bool& file_success);
+	void move_to(S2d goal) override;
+};
+
+class Neutra_2 : public Neutraliseur {
+public : 
+	Neutra_2(double x, double y, double orientation, unsigned type,
+			 std::string bool_panne, int nbUpdate, int k_update_panne, 
+			 bool& file_success);
+	void move_to(S2d goal) override;
 };
 
 void decodage_robot(std::istringstream& lig, int type, int& compteur1, int& compteur2,
