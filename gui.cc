@@ -7,9 +7,11 @@
 #include "graphic.h"
 
 constexpr unsigned taille_dessin = 500;
+constexpr unsigned taille_fenetre = 600;
 constexpr unsigned aspect_ratio = 1.0;
-static std::ifstream empty;
+constexpr unsigned timer_update = 250;
 
+static std::ifstream empty;
 static void orthographic_projection(const Cairo::RefPtr<Cairo::Context>& cr, 
 									const Frame& frame);
 static Frame default_frame = {-dmax, dmax, -dmax, dmax, aspect_ratio, taille_dessin,
@@ -61,11 +63,10 @@ Fenetre::Fenetre(char* file, int argc) :
  m_Label_rnr("robots neutraliseurs en réserve:"),
  m_Button_exit("exit"), m_Button_open("open"), m_Button_save("save"), 
  m_Button_startstop("start"), m_Button_step("step"), timer_added(false), 
- disconnect(false), timeout_value(20), dialogue(OPEN)
-{
+ disconnect(false), timeout_value(timer_update), dialogue(OPEN) {
 	reset_data();
 	if (argc == 1) {
-		Propre_en_Ordre = new Simulation(empty);
+		Propre_en_Ordre = new Simulation(empty, false);
 	}
 	else {
 		Propre_en_Ordre = new Simulation(file);
@@ -76,7 +77,7 @@ Fenetre::Fenetre(char* file, int argc) :
 		}
 	}
 	set_resizable(true);
-	set_default_size(600, 500);
+	set_default_size(taille_fenetre, taille_dessin);
 	set_title("Propre en ordre");
 	set_child(m_Box_All);
 	set_interface();	
@@ -98,6 +99,7 @@ Fenetre::Fenetre(char* file, int argc) :
 }
 
 Fenetre::~Fenetre() {
+	delete Propre_en_Ordre;
 }
 
 void Fenetre::set_data() {
@@ -204,6 +206,36 @@ void Fenetre::on_button_clicked_save() {
 	dialog->show();
 }
 
+void Fenetre::on_file_dialog_response(int response_id, 
+									  Gtk::FileChooserDialog* dialog) {
+	switch (response_id) {
+	case Gtk::ResponseType::OK: {
+		auto filename = dialog->get_file()->get_path();
+		if (dialogue) {
+			Propre_en_Ordre->sauvegarde(filename);
+		} else {
+			std::ifstream fichier(filename);
+			Propre_en_Ordre->destroy_data();
+			monde.clear();
+			delete Propre_en_Ordre;
+			Propre_en_Ordre = new Simulation(fichier, true);
+			reset_data();
+			if (Propre_en_Ordre->getfile_success()) {
+				set_data();
+				monde.draw();
+			}
+		}
+		break;
+	}
+	case Gtk::ResponseType::CANCEL:
+		break;
+		
+	default:
+		break;
+	}
+	dialog->hide();
+}
+
 void Fenetre::on_button_clicked_startstop() {
 	if (Propre_en_Ordre->getfile_success()) {
 		if(not timer_added) {	  
@@ -218,6 +250,12 @@ void Fenetre::on_button_clicked_startstop() {
 			timer_added = false;
 			m_Button_startstop.set_label("start");
 		}
+	}
+}
+
+void Fenetre::on_button_clicked_step() {
+	if (!timer_added) {
+		on_timeout();
 	}
 }
 
@@ -238,12 +276,6 @@ bool Fenetre::on_timeout() {
 	return true; 
 }
 
-void Fenetre::on_button_clicked_step() {
-	if (!timer_added) {
-		on_timeout();
-	}
-}
-
 bool Fenetre::on_window_key_pressed(guint keyval, guint, Gdk::ModifierType state) {
 	switch(gdk_keyval_to_unicode(keyval)) {
 	case 's':
@@ -254,36 +286,6 @@ bool Fenetre::on_window_key_pressed(guint keyval, guint, Gdk::ModifierType state
 		return true;
 	}
 	return false;
-}
-			
-void Fenetre::on_file_dialog_response(int response_id, 
-										    Gtk::FileChooserDialog* dialog) {
-	switch (response_id) {
-	case Gtk::ResponseType::OK: {
-		auto filename = dialog->get_file()->get_path();
-		if (dialogue) {
-			Propre_en_Ordre->sauvegarde(filename);
-		} else {
-			std::ifstream fichier(filename);
-			Propre_en_Ordre->destroy_data();
-			monde.clear();
-			delete Propre_en_Ordre;
-			Propre_en_Ordre = new Simulation(fichier);
-			reset_data();
-			if (Propre_en_Ordre->getfile_success()) {
-				set_data();
-				monde.draw();
-			}
-		}
-		break;
-	}
-	case Gtk::ResponseType::CANCEL:
-		break;
-		
-	default:
-		break;
-	}
-	dialog->hide();
 }
 
 void Monde::adjustFrame(int width, int height) {	

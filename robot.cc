@@ -50,7 +50,9 @@ void Spatial::error_outside(bool& file_success) {
 }
 
 void Spatial::setnbUpdate(int value) {
-	nbUpdate = value;
+	if (value > 0) {
+		nbUpdate = value;
+	}
 	return;
 }
 

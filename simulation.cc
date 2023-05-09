@@ -76,7 +76,7 @@ void decodage_ligne(std::string line, bool& file_success) {
 	return;
 }	
 
-Simulation::Simulation(std::ifstream& fichier) {
+Simulation::Simulation(std::ifstream& fichier, bool success) : file_success(success){
 	lecture(fichier);
 }
 

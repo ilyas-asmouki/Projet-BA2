@@ -37,6 +37,7 @@ public:
 	void adjustFrame(int width, int height); 
 	void clear();
 	void draw();
+	
 protected:
 	void on_draw(const Cairo::RefPtr<Cairo::Context>& cr, int width, int height);
   
@@ -45,8 +46,7 @@ private:
 	bool empty;
 };
 
-class Fenetre : public Gtk::Window
-{
+class Fenetre : public Gtk::Window {
 public:
 	Fenetre(char* file, int argc);
 	virtual ~Fenetre();

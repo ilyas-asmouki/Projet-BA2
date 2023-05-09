@@ -24,7 +24,7 @@ protected :
 class Spatial : public Robot {
 public:
 	Spatial(double x, double y, int nbUpdate ,unsigned nbNr, unsigned nbNs,
-	unsigned nbNd, unsigned nbRr ,unsigned nbRs, bool& file_success);
+			unsigned nbNd, unsigned nbRr ,unsigned nbRs, bool& file_success);
 	~Spatial();
 	void error_outside(bool& file_success);
 	virtual void setnbUpdate(int value);
@@ -46,8 +46,7 @@ public :
 	virtual double get_data(std::string data_type);
 };
 
-class Neutraliseur : public Robot
-{
+class Neutraliseur : public Robot {
 public :
 	Neutraliseur(double x, double y, double orientation, unsigned type,
 				 std::string bool_panne, int nbUpdate, int k_update_panne, 

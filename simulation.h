@@ -8,13 +8,12 @@
 #include <string>
 #include <random>	
 
-class Simulation 
-{
+class Simulation {
 public :
-	Simulation(std::ifstream& fichier);
+	Simulation(std::ifstream& fichier, bool success);
 	Simulation(char* file);
-	bool getfile_success();
 	virtual ~Simulation();
+	bool getfile_success();
 	void lecture(std::ifstream& file);
 	unsigned s_getnbUpdate();
 	unsigned s_getnbNr();
@@ -28,6 +27,7 @@ public :
 	void sauvegarde(std::string file);
 	void destroy_data();
 	void desintegration();
+	
 private : 
 	bool file_success=true;
 	std::ifstream fichier;	

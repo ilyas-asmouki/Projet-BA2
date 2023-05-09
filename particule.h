@@ -18,6 +18,7 @@ public:
 	void detect_particle_too_small(bool& file_success);
 	void detect_particle_superposition(bool& file_success);
 	bool operator==(Particule const& prt2);
+	
 private:
 	Carre forme;
 };
