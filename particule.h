@@ -18,6 +18,7 @@ public:
 	void detect_particle_too_small(bool& file_success);
 	void detect_particle_superposition(bool& file_success);
 	bool operator==(Particule const& prt2);
+	bool operator<(Particule const& prt2);		// Compare taille des particules
 	
 private:
 	Carre forme;
@@ -31,5 +32,7 @@ void draw_particles();
 void destroy_tab_particule();
 void sauvegarde_particules(std::ofstream& fichier);
 void new_particules(unsigned i, bool file_success);
+Carre get_particle_shape(size_t i);
+void sort_particle_vector();
 
 #endif

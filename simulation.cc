@@ -37,6 +37,7 @@ void decodage_ligne(std::string line, bool& file_success) {
 		++i;
 		if (compteur1==i) {
 			etat = SPATIAL;
+			sort_particle_vector();
 		}
 		break;
 	case SPATIAL :
@@ -166,9 +167,11 @@ void Simulation::desintegration() {
 	size_t vect_size = getnbP();
 	double p = desintegration_rate;
 	std::bernoulli_distribution b(p / getnbP());
-
+	bool desintegration_occurred = false;
+	
 	for (size_t i = 0; i < vect_size; ++i) {
 		if (b(engine)) {
+			desintegration_occurred = true;
 			new_particules(i,file_success);
 			for (size_t j = s_getnbRs()+1; j <= s_getnbRs() + s_getnbNs(); ++j) {
 				if (in_desintegration_area(get_particle_shape(i), j))	{
@@ -177,6 +180,10 @@ void Simulation::desintegration() {
 				
 			}
 		}
+	}
+	
+	if (desintegration_occurred) {
+		sort_particle_vector();
 	}
 	return;
 }

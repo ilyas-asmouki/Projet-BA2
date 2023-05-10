@@ -4,6 +4,7 @@
 
 #include <fstream>
 #include <iostream>
+#include <algorithm>
 #include "particule.h"
 #include "message.h"
 #include "constantes.h"
@@ -99,6 +100,10 @@ bool Particule::operator==(Particule const& prt2) {
 		and forme.cote == prt2.getForme().cote);
 }
 
+bool Particule::operator<(Particule const& prt2) {
+	return (prt2.getForme().cote < forme.cote);
+}
+
 void new_particules(unsigned i, bool file_success) {
 	std::vector<Particule> destroyed_particles;
 	if ((tab_particule[i].getForme().cote >= (2*(d_particule_min +
@@ -125,3 +130,10 @@ void new_particules(unsigned i, bool file_success) {
 	}
 }
 
+Carre get_particle_shape(size_t i)	{
+	return tab_particule[i].getForme();
+}
+
+void sort_particle_vector() {
+	sort(tab_particule.begin(), tab_particule.end());
+}
