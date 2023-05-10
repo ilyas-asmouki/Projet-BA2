@@ -16,6 +16,7 @@ enum {SPATIAL=2, REPARATEUR, NEUTRALISEUR};
 constexpr double NULL_DATA(0);
 constexpr double max_delta_tr(vtran_max*delta_t);
 constexpr double max_delta_rt(vrot_max*delta_t);
+constexpr int NO_REPARATEUR(-1);
 
 static std::vector<Robot*> tab_robot;
 
@@ -336,6 +337,14 @@ void Neutraliseur::set_panne(bool p) {
 	panne = p;
 }
 
+void Robot::set_goal(S2d* goal_ptr) {
+	goal = new S2d (*goal_ptr);
+}
+
+S2d* Robot::get_goal() {
+	return goal;
+}
+
 bool in_desintegration_area(Carre particle, size_t i)
 {
 	return superposition_cerclecarre(particle, tab_robot[i]->getForme(), WITH_MARGIN);
@@ -413,37 +422,83 @@ void Neutraliseur::destroy_neutraliseurs(){
 	return;
 }
 
-void decision_reparateur(){
-	int taken = 0;
-	vector <array<double, 2>> reparateur_list;
-	do {
-		for (size_t i(spatial_getnbRs()+1); i < tab_robot.size() ; ++i){
-			if (tab_robot[i]->get_data("panne")){
-				S2d vect = {tab_robot[i]->getForme().centre.x - 
-				tab_robot[1]->getForme().centre.x , tab_robot[i]->getForme().centre.y - 
-				tab_robot[1]->getForme().centre.y };
-				double dist_min(norme(vect));
-				reparateur_list.push_back({1 , dist_min});
-				tab_robot[1]->set_goal(tab_robot[i]->getForme().centre);
-				
-				for (size_t j(2); j < spatial_getnbRs()+1; ++j){
-					dist = norme(tab_robot[i]->getForme().centre.x - 
-						tab_robot[j]->getForme().centre.x , 
-						tab_robot[i]->getForme().centre.y - 
-						tab_robot[j]->getForme().centre.y);
-						if (dist < dist_min){
-							dist_min = dist;
-							reparateur_list 
-					
-					
-		} while (spatial_getnbRs() != taken);
-					
-				
-
-
-void Robot::set_goal(S2d dest){
-	goal = dest;
-	return;
-}
+void decision_reparateur()	{
+	std::vector<Robot*> tab_panne;
+	for (auto& robot : tab_robot) {
+		if (robot->get_data("panne"))
+			tab_panne.push_back(robot);
+	}
 	
-
+	for (size_t i = 0; i < tab_panne.size(); ++i)	{
+		int k = NO_REPARATEUR;
+		double dist_min;
+		S2d vect;
+		for (size_t m = 1; m < spatial_getnbRs() + 1; ++m) {
+			S2d vect = {tab_robot[i]->getForme().centre.x - 
+			tab_robot[m]->getForme().centre.x , tab_robot[i]->getForme().centre.y - 
+			tab_robot[m]->getForme().centre.y};
+			dist_min = norme(vect);
+			if (dist_min <= max_update - (spatial_getnbUpdate() -
+			tab_robot[m]->get_data("k_update_panne")) * vtran_max) {
+				S2d* ptr = new S2d({tab_panne[i]->getForme().centre.x, tab_panne[i]->getForme().centre.y});
+				tab_robot[m]->set_goal(ptr);
+				k = m;
+				vect = {tab_robot[i]->getForme().centre.x - 
+				tab_robot[k]->getForme().centre.x , tab_robot[i]->getForme().centre.y - 
+				tab_robot[k]->getForme().centre.y};
+				dist_min = norme(vect);
+				break;
+			}
+		}
+		if (k == NO_REPARATEUR) continue;
+		
+		for (size_t j = k + 1; j < spatial_getnbRs() + 1; ++j)	{
+			S2d vect2 = {tab_robot[i]->getForme().centre.x - 
+			tab_robot[j]->getForme().centre.x , tab_robot[i]->getForme().centre.y - 
+			tab_robot[j]->getForme().centre.y};
+			if (norme(vect2) < dist_min) {
+				if (tab_robot[j]->get_goal() == nullptr) {
+					dist_min = norme(vect2);
+					S2d* ptr = new S2d({tab_panne[i]->getForme().centre.x, tab_panne[i]->getForme().centre.y});
+					tab_robot[j]->set_goal(ptr);
+					
+					tab_robot[k]->set_goal(nullptr);
+					k = j;
+				} else if (norme({tab_robot[j]->get_goal()->x - tab_robot[j]->getForme().x,
+								  tab_robot[j]->get_goal()->y - tab_robot[j]->getForme().y)
+									< dist_min) {
+					continue;
+				} else {
+					tab_robot[j]->set_goal());
+					
+					
+				}
+		}
+	}
+}
+//~ void decision_reparateur(){
+	//~ int taken = 0;
+	//~ vector <array<double, 2>> reparateur_list;
+	//~ do {
+		//~ for (size_t i(spatial_getnbRs()+1); i < tab_robot.size() ; ++i){
+			//~ if (tab_robot[i]->get_data("panne")){
+				//~ S2d vect = {tab_robot[i]->getForme().centre.x - 
+				//~ tab_robot[1]->getForme().centre.x , tab_robot[i]->getForme().centre.y - 
+				//~ tab_robot[1]->getForme().centre.y };
+				//~ double dist_min(norme(vect));
+				//~ reparateur_list.push_back({1 , dist_min});
+				//~ tab_robot[1]->set_goal(tab_robot[i]->getForme().centre);
+				
+				//~ for (size_t j(2); j < spatial_getnbRs()+1; ++j){
+					//~ dist = norme(tab_robot[i]->getForme().centre.x - 
+						//~ tab_robot[j]->getForme().centre.x , 
+						//~ tab_robot[i]->getForme().centre.y - 
+						//~ tab_robot[j]->getForme().centre.y);
+						//~ if (dist < dist_min){
+							//~ dist_min = dist;
+							//~ reparateur_list 
+					
+					
+		//~ } while (spatial_getnbRs() != taken);
+					
+				

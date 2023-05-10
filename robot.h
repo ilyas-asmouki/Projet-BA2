@@ -19,10 +19,12 @@ public :
 	virtual void setnbUpdate(int value){};
 	virtual void move_to(S2d goal)=0;
 	virtual void set_panne(bool p){};
+	void set_goal(S2d* goal_ptr);
+	S2d* get_goal();
 	 
 protected : 
 	Cercle forme;
-	S2d goal;
+	S2d* goal;
 };
 
 class Spatial : public Robot {
@@ -114,4 +116,3 @@ void destroy_tab_robots();
 void sauvegarde_robots(std::ofstream& fichier);
 
 #endif
-
