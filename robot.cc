@@ -342,3 +342,70 @@ void destroy_robot(size_t i)
 {
 	tab_robot[i]->set_panne(true);
 }
+
+void Reparateur::move_to(S2d goal){
+	S2d pos_to_goal = {goal.x - forme.centre.x, goal.y - forme.centre.y} ;
+	double norm(norme(pos_to_goal));
+	
+	if (norm <= max_delta_tr) {
+		forme.centre = goal;
+	} else {
+		add_scaled_vector(forme.centre, pos_to_goal, max_delta_tr/norm);
+	}
+	return;
+}
+
+void Neutra_0::move_to(S2d goal){
+	S2d pos_to_goal = {goal.x - forme.centre.x, goal.y - forme.centre.y};
+	
+	double goal_a(atan2(pos_to_goal.y ,pos_to_goal.x));
+	double delta_a(goal_a - orientation);
+	
+	if((abs(delta_a) <= max_delta_rt) and (abs(delta_a) > 0)) {
+		orientation = goal_a;
+	} else if (abs(delta_a) > max_delta_rt) {
+		orientation += ((delta_a > 0) ?  1. : -1.)*max_delta_rt;
+	} else {
+		S2d travel_dir = {cos(orientation), sin(orientation)}; 
+		add_scaled_vector(forme.centre, travel_dir, max_delta_tr);
+	}
+}
+
+void Neutra_1::move_to(S2d goal){
+}
+
+void Neutra_2::move_to(S2d goal){
+	S2d init_pos_to_goal = {goal.x - forme.centre.x, goal.y - forme.centre.y};
+	S2d travel_dir    = {cos(orientation), sin(orientation)}; 
+	double proj_goal= prod_scalaire(init_pos_to_goal, travel_dir);
+
+    if(abs(proj_goal) > max_delta_tr){ 
+		proj_goal = ((proj_goal > 0) ? 1 : -1)*max_delta_tr;
+	}
+	add_scaled_vector(forme.centre, travel_dir, proj_goal);
+	S2d    updated_pos_to_goal = {goal.x - forme.centre.x, goal.y - forme.centre.y};
+	double goal_a(atan2(updated_pos_to_goal.y ,updated_pos_to_goal.x));
+	double delta_a(goal_a - orientation);
+	
+	if(abs(delta_a) <= max_delta_rt) {
+		orientation = goal_a;
+	} else {
+		orientation += ((delta_a > 0) ?  1. : -1.)*max_delta_rt;
+	}
+	return;
+}
+
+void Neutraliseur::destroy_neutraliseurs(){
+	for (size_t i(spatial_getnbRs()+1); i < spatial_getnbRs() + spatial_getnbNs() + 1 ;
+		++i){
+		if (tab_robot[i]->get_data("panne")){
+			if (spatial_getnbUpdate() - tab_robot[i]->get_data("k_update_panne") >= 
+				max_update){
+				delete tab_robot[i];
+				std::swap(tab_robot.back(), tab_robot[i]);
+				tab_robot.pop_back();
+			}
+		}
+	}
+	return;
+}
