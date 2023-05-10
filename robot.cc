@@ -4,6 +4,7 @@
 
 #include <vector>
 #include <iostream>
+#include <array>
 #include <fstream>
 #include "robot.h"
 #include "message.h"
@@ -13,6 +14,8 @@
 enum {SPATIAL=2, REPARATEUR, NEUTRALISEUR};
 
 constexpr double NULL_DATA(0);
+constexpr double max_delta_tr(vtran_max*delta_t);
+constexpr double max_delta_rt(vrot_max*delta_t);
 
 static std::vector<Robot*> tab_robot;
 
@@ -409,3 +412,38 @@ void Neutraliseur::destroy_neutraliseurs(){
 	}
 	return;
 }
+
+void decision_reparateur(){
+	int taken = 0;
+	vector <array<double, 2>> reparateur_list;
+	do {
+		for (size_t i(spatial_getnbRs()+1); i < tab_robot.size() ; ++i){
+			if (tab_robot[i]->get_data("panne")){
+				S2d vect = {tab_robot[i]->getForme().centre.x - 
+				tab_robot[1]->getForme().centre.x , tab_robot[i]->getForme().centre.y - 
+				tab_robot[1]->getForme().centre.y };
+				double dist_min(norme(vect));
+				reparateur_list.push_back({1 , dist_min});
+				tab_robot[1]->set_goal(tab_robot[i]->getForme().centre);
+				
+				for (size_t j(2); j < spatial_getnbRs()+1; ++j){
+					dist = norme(tab_robot[i]->getForme().centre.x - 
+						tab_robot[j]->getForme().centre.x , 
+						tab_robot[i]->getForme().centre.y - 
+						tab_robot[j]->getForme().centre.y);
+						if (dist < dist_min){
+							dist_min = dist;
+							reparateur_list 
+					
+					
+		} while (spatial_getnbRs() != taken);
+					
+				
+
+
+void Robot::set_goal(S2d dest){
+	goal = dest;
+	return;
+}
+	
+
