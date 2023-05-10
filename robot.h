@@ -14,6 +14,7 @@ public :
 	virtual ~Robot();
 	Cercle getForme() const;
 	void TestCollision(bool& file_success);
+	void set_goal(S2d dest);
 	virtual double get_data(std::string data_type)=0;
 	virtual void setnbUpdate(int value){};
 	virtual void move_to(S2d goal)=0;
@@ -21,6 +22,7 @@ public :
 	 
 protected : 
 	Cercle forme;
+	S2d goal;
 };
 
 class Spatial : public Robot {
@@ -48,9 +50,6 @@ public :
 	~Reparateur();
 	virtual double get_data(std::string data_type);
 	void move_to(S2d goal) override;
-
-private :
-	S2d goal;
 };
 
 class Neutraliseur : public Robot {
@@ -58,18 +57,18 @@ public :
 	Neutraliseur(double x, double y, double orientation, unsigned type,
 				 std::string bool_panne, int nbUpdate, int k_update_panne, 
 				 bool& file_success);
-	~Neutraliseur();
+	virtual ~Neutraliseur();
 	void error_k_update(int nbUpdate, bool& file_success);
 	virtual double get_data(std::string data_type);
 	void move_to(S2d goal)=0;
-	void set_panne(bool p) override;
+	void destroy_neutraliseurs();
+	virtual void set_panne(bool p);
 
 protected :
 	double  orientation;
 	unsigned type;
 	bool panne;
 	int k_update_panne;
-	S2d goal;
 };
 
 class Neutra_0 : public Neutraliseur {
@@ -77,6 +76,7 @@ public :
 	Neutra_0(double x, double y, double orientation, unsigned type,
 			 std::string bool_panne, int nbUpdate, int k_update_panne, 
 			 bool& file_success);
+	~Neutra_0(){}
 	void move_to(S2d goal) override;
 };
 
@@ -85,6 +85,7 @@ public :
 	Neutra_1(double x, double y, double orientation, unsigned type,
 			 std::string bool_panne, int nbUpdate, int k_update_panne, 
 			 bool& file_success);
+	~Neutra_1(){}
 	void move_to(S2d goal) override;
 };
 
@@ -93,6 +94,7 @@ public :
 	Neutra_2(double x, double y, double orientation, unsigned type,
 			 std::string bool_panne, int nbUpdate, int k_update_panne, 
 			 bool& file_success);
+	~Neutra_2(){}
 	void move_to(S2d goal) override;
 };
 
@@ -110,7 +112,6 @@ Cercle r_getForme(unsigned i);
 void draw_robots();
 void destroy_tab_robots();
 void sauvegarde_robots(std::ofstream& fichier);
-bool in_desintegration_area(Carre particle, size_t i);
-void destroy_robot(size_t i);
 
 #endif
+
