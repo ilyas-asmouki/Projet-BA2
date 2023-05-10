@@ -13,8 +13,6 @@
 enum {SPATIAL=2, REPARATEUR, NEUTRALISEUR};
 
 constexpr double NULL_DATA(0);
-constexpr double max_delta_tr(vtran_max*delta_t);
-constexpr double max_delta_rt(vrot_max*delta_t);
 
 static std::vector<Robot*> tab_robot;
 
@@ -91,21 +89,24 @@ void Neutraliseur::error_k_update(int nbUpdate, bool& file_success) {
 }
 
 Neutra_0::Neutra_0(double x, double y, double orientation, unsigned type,
-				std::string bool_panne, int nbUpdate, int k_update_panne, 
-				bool& file_success) : Neutraliseur(x, y, orientation, type, bool_panne,
-				nbUpdate,k_update_panne, file_success) {
+					std::string bool_panne, int nbUpdate, int k_update_panne, 
+					bool& file_success) : Neutraliseur(x, y, orientation, type, 
+					bool_panne, nbUpdate, k_update_panne, file_success)
+{
 }
 
 Neutra_1::Neutra_1(double x, double y, double orientation, unsigned type,
-				std::string bool_panne, int nbUpdate, int k_update_panne, 
-				bool& file_success) : Neutraliseur(x, y, orientation, type, bool_panne,
-				nbUpdate,k_update_panne, file_success) {
+					std::string bool_panne, int nbUpdate, int k_update_panne, 
+					bool& file_success) : Neutraliseur(x, y, orientation, type, 
+					bool_panne, nbUpdate, k_update_panne, file_success)
+{
 }
 
 Neutra_2::Neutra_2(double x, double y, double orientation, unsigned type,
-				std::string bool_panne, int nbUpdate, int k_update_panne, 
-				bool& file_success) : Neutraliseur(x, y, orientation, type, bool_panne,
-				nbUpdate,k_update_panne, file_success) {
+					std::string bool_panne, int nbUpdate, int k_update_panne, 
+					bool& file_success) : Neutraliseur(x, y, orientation, type, 
+					bool_panne, nbUpdate, k_update_panne, file_success)
+{
 }
 	
 void Robot::TestCollision(bool& file_success)
@@ -177,7 +178,6 @@ void decodage_neutraliseur(std::istringstream& data, int nbUpdate, bool& file_su
 
 	tab_robot.push_back(pt);
 }
-
 	 
 void decodage_reparateur(std::istringstream& data, bool& file_success) {
 	double x, y;
@@ -329,42 +329,16 @@ double Neutraliseur::get_data(std::string data_type) {
 	return NULL_DATA;
 }
 
-void Reparateur::move_to(S2d goal){
-	S2d pos_to_goal = {goal.x - forme.centre.x, goal.y - forme.centre.y} ;
-	double norm(norme(pos_to_goal));
-	
-	if (norm <= max_delta_tr) {
-		forme.centre = goal;
-	} else {
-		add_scaled_vector(forme.centre, pos_to_goal, max_delta_tr/norm);
-	}
-	return;
+void Neutraliseur::set_panne(bool p) {
+	panne = p;
 }
 
-void Neutra_0::move_to(S2d goal){
+bool in_desintegration_area(Carre particle, size_t i)
+{
+	return superposition_cerclecarre(particle, tab_robot[i]->getForme(), WITH_MARGIN);
 }
 
-void Neutra_1::move_to(S2d goal){
+void destroy_robot(size_t i)
+{
+	tab_robot[i]->set_panne(true);
 }
-
-void Neutra_2::move_to(S2d goal){
-	S2d init_pos_to_goal = {goal.x - forme.centre.x, goal.y - forme.centre.y};
-	S2d travel_dir    = {cos(orientation), sin(orientation)}; 
-	double proj_goal= prod_scalaire(init_pos_to_goal, travel_dir);
-
-    if(abs(proj_goal) > max_delta_tr){ 
-		proj_goal = ((proj_goal > 0) ? 1 : -1)*max_delta_tr;
-	}
-	add_scaled_vector(forme.centre, travel_dir, proj_goal);
-	S2d    updated_pos_to_goal = {goal.x - forme.centre.x, goal.y - forme.centre.y};
-	double goal_a(atan2(updated_pos_to_goal.y ,updated_pos_to_goal.x));
-	double delta_a(goal_a - orientation);
-	
-	if(abs(delta_a) <= max_delta_rt) {
-		orientation = goal_a;
-	} else {
-		orientation += ((delta_a > 0) ?  1. : -1.)*max_delta_rt;
-	}
-	return;
-}
-

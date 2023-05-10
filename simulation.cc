@@ -170,6 +170,12 @@ void Simulation::desintegration() {
 	for (size_t i = 0; i < vect_size; ++i) {
 		if (b(engine)) {
 			new_particules(i,file_success);
+			for (size_t j = s_getnbRs()+1; j <= s_getnbRs() + s_getnbNs(); ++j) {
+				if (in_desintegration_area(get_particle_shape(i), j))	{
+					destroy_robot(j);
+				}
+				
+			}
 		}
 	}
 	return;

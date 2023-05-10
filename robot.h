@@ -17,6 +17,7 @@ public :
 	virtual double get_data(std::string data_type)=0;
 	virtual void setnbUpdate(int value){};
 	virtual void move_to(S2d goal)=0;
+	virtual void set_panne(bool p){};
 	 
 protected : 
 	Cercle forme;
@@ -61,6 +62,7 @@ public :
 	void error_k_update(int nbUpdate, bool& file_success);
 	virtual double get_data(std::string data_type);
 	void move_to(S2d goal)=0;
+	void set_panne(bool p) override;
 
 protected :
 	double  orientation;
@@ -108,5 +110,7 @@ Cercle r_getForme(unsigned i);
 void draw_robots();
 void destroy_tab_robots();
 void sauvegarde_robots(std::ofstream& fichier);
+bool in_desintegration_area(Carre particle, size_t i);
+void destroy_robot(size_t i);
 
 #endif
