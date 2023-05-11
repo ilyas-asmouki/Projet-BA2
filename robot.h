@@ -14,17 +14,16 @@ public :
 	virtual ~Robot();
 	Cercle getForme() const;
 	void TestCollision(bool& file_success);
-	void set_goal(S2d dest);
 	virtual double get_data(std::string data_type)=0;
 	virtual void setnbUpdate(int value){};
 	virtual void move_to(S2d goal)=0;
 	virtual void set_panne(bool p){};
-	void set_goal(S2d* goal_ptr);
-	S2d* get_goal();
+	void set_goal(S2d new_goal);
+	S2d get_goal();
 	 
 protected : 
 	Cercle forme;
-	S2d* goal;
+	S2d goal;
 };
 
 class Spatial : public Robot {
@@ -114,5 +113,6 @@ Cercle r_getForme(unsigned i);
 void draw_robots();
 void destroy_tab_robots();
 void sauvegarde_robots(std::ofstream& fichier);
+void decision_reparateur();
 
 #endif
