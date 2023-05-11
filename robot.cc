@@ -337,11 +337,11 @@ void Neutraliseur::set_panne(bool p) {
 	panne = p;
 }
 
-void Robot::set_goal(S2d* goal_ptr) {
-	goal = new S2d (*goal_ptr);
+void Robot::set_goal(S2d new_goal) {
+	goal = new_goal;
 }
 
-S2d* Robot::get_goal() {
+S2d Robot::get_goal() {
 	return goal;
 }
 
@@ -422,60 +422,60 @@ void Neutraliseur::destroy_neutraliseurs(){
 	return;
 }
 
-void decision_reparateur()	{
-	std::vector<Robot*> tab_panne;
-	for (auto& robot : tab_robot) {
-		if (robot->get_data("panne"))
-			tab_panne.push_back(robot);
-	}
+//~ void decision_reparateur()	{
+	//~ std::vector<Robot*> tab_panne;
+	//~ for (auto& robot : tab_robot) {
+		//~ if (robot->get_data("panne"))
+			//~ tab_panne.push_back(robot);
+	//~ }
 	
-	for (size_t i = 0; i < tab_panne.size(); ++i)	{
-		int k = NO_REPARATEUR;
-		double dist_min;
-		S2d vect;
-		for (size_t m = 1; m < spatial_getnbRs() + 1; ++m) {
-			S2d vect = {tab_robot[i]->getForme().centre.x - 
-			tab_robot[m]->getForme().centre.x , tab_robot[i]->getForme().centre.y - 
-			tab_robot[m]->getForme().centre.y};
-			dist_min = norme(vect);
-			if (dist_min <= max_update - (spatial_getnbUpdate() -
-			tab_robot[m]->get_data("k_update_panne")) * vtran_max) {
-				S2d* ptr = new S2d({tab_panne[i]->getForme().centre.x, tab_panne[i]->getForme().centre.y});
-				tab_robot[m]->set_goal(ptr);
-				k = m;
-				vect = {tab_robot[i]->getForme().centre.x - 
-				tab_robot[k]->getForme().centre.x , tab_robot[i]->getForme().centre.y - 
-				tab_robot[k]->getForme().centre.y};
-				dist_min = norme(vect);
-				break;
-			}
-		}
-		if (k == NO_REPARATEUR) continue;
+	//~ for (size_t i = 0; i < tab_panne.size(); ++i)	{
+		//~ int k = NO_REPARATEUR;
+		//~ double dist_min;
+		//~ S2d vect;
+		//~ for (size_t m = 1; m < spatial_getnbRs() + 1; ++m) {
+			//~ vect = {tab_robot[i]->getForme().centre.x - 
+			//~ tab_robot[m]->getForme().centre.x , tab_robot[i]->getForme().centre.y - 
+			//~ tab_robot[m]->getForme().centre.y};
+			//~ dist_min = norme(vect);
+			//~ if ((dist_min <= max_update - (spatial_getnbUpdate() -
+			//~ tab_robot[m]->get_data("k_update_panne")) * vtran_max)) {
+				//~ S2d* ptr = new S2d({tab_panne[i]->getForme().centre.x, tab_panne[i]->getForme().centre.y});
+				//~ tab_robot[m]->set_goal(ptr);
+				//~ k = m;
+				//~ vect = {tab_robot[i]->getForme().centre.x - 
+				//~ tab_robot[k]->getForme().centre.x , tab_robot[i]->getForme().centre.y - 
+				//~ tab_robot[k]->getForme().centre.y};
+				//~ dist_min = norme(vect);
+				//~ break;
+			//~ }
+		//~ }
+		//~ if (k == NO_REPARATEUR) continue;
 		
-		for (size_t j = k + 1; j < spatial_getnbRs() + 1; ++j)	{
-			S2d vect2 = {tab_robot[i]->getForme().centre.x - 
-			tab_robot[j]->getForme().centre.x , tab_robot[i]->getForme().centre.y - 
-			tab_robot[j]->getForme().centre.y};
-			if (norme(vect2) < dist_min) {
-				if (tab_robot[j]->get_goal() == nullptr) {
-					dist_min = norme(vect2);
-					S2d* ptr = new S2d({tab_panne[i]->getForme().centre.x, tab_panne[i]->getForme().centre.y});
-					tab_robot[j]->set_goal(ptr);
+		//~ for (size_t j = k + 1; j < spatial_getnbRs() + 1; ++j)	{
+			//~ S2d vect2 = {tab_robot[i]->getForme().centre.x - 
+			//~ tab_robot[j]->getForme().centre.x , tab_robot[i]->getForme().centre.y - 
+			//~ tab_robot[j]->getForme().centre.y};
+			//~ if (norme(vect2) < dist_min) {
+				//~ if (tab_robot[j]->get_goal() == nullptr) {
+					//~ dist_min = norme(vect2);
+					//~ S2d* ptr = new S2d({tab_panne[i]->getForme().centre.x, tab_panne[i]->getForme().centre.y});
+					//~ tab_robot[j]->set_goal(ptr);
 					
-					tab_robot[k]->set_goal(nullptr);
-					k = j;
-				} else if (norme({tab_robot[j]->get_goal()->x - tab_robot[j]->getForme().x,
-								  tab_robot[j]->get_goal()->y - tab_robot[j]->getForme().y)
-									< dist_min) {
-					continue;
-				} else {
-					tab_robot[j]->set_goal());
+					//~ tab_robot[k]->set_goal(nullptr);
+					//~ k = j;
+				//~ } else if (norme({tab_robot[j]->get_goal()->x - tab_robot[j]->getForme().x,
+								  //~ tab_robot[j]->get_goal()->y - tab_robot[j]->getForme().y)
+									//~ < dist_min) {
+					//~ continue;
+				//~ } else {
+					//~ tab_robot[j]->set_goal());
 					
 					
-				}
-		}
-	}
-}
+				//~ }
+		//~ }
+	//~ }
+//~ }
 //~ void decision_reparateur(){
 	//~ int taken = 0;
 	//~ vector <array<double, 2>> reparateur_list;
@@ -502,3 +502,52 @@ void decision_reparateur()	{
 		//~ } while (spatial_getnbRs() != taken);
 					
 				
+void decision_reparateur(){
+	std::vector <bool> tab_reparateur(spatial_getnbRs(), true);
+	S2d vect;
+	double dist;
+	double dist_min;
+	int k = NO_REPARATEUR;
+	for (size_t i(spatial_getnbRs()+1); i < tab_robot.size(); ++i){
+		if (tab_robot[i]->get_data("panne")){
+			for (size_t j(0); j < tab_reparateur.size() ; ++j){
+				if (tab_reparateur[j]) {
+					vect = {tab_robot[i]->getForme().centre.x - 
+					tab_robot[j+1]->getForme().centre.x , tab_robot[j+1]->getForme().centre.y - 
+					tab_robot[j+1]->getForme().centre.y };
+					dist = norme(vect);
+					if (dist <= max_update - (spatial_getnbUpdate() -
+					tab_robot[i]->get_data("k_update_panne")) * vtran_max){
+						dist_min = dist;
+						k = j;
+						for (size_t l(k) ; l < tab_reparateur.size(); ++l){
+							vect = {tab_robot[i]->getForme().centre.x - 
+									tab_robot[l+1]->getForme().centre.x , 
+									tab_robot[l+1]->getForme().centre.y - 
+									tab_robot[l+1]->getForme().centre.y };
+							dist = norme(vect);
+							if (dist < dist_min) {
+								dist_min = dist;
+								k=l;
+							}
+						}
+					}
+				}
+			}	
+			if (k == NO_REPARATEUR){
+				continue;
+			} else {
+				tab_reparateur[k] = false;
+				tab_robot[k+1]->set_goal(tab_robot[i]->getForme().centre);
+			}
+		}
+	}
+	for (size_t i(0); i < tab_reparateur.size() ; ++i){
+		if (tab_reparateur[i])
+			tab_robot[i+1]->set_goal(tab_robot[0]->getForme().centre);
+	}
+}	
+		
+					
+			
+	
