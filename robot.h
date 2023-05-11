@@ -16,6 +16,7 @@ public :
 	void TestCollision(bool& file_success);
 	virtual double get_data(std::string data_type)=0;
 	virtual void setnbUpdate(int value){};
+	virtual S2d find_goal(Carre target);
 	virtual void move_to(S2d goal)=0;
 	virtual void set_panne(bool p){};
 	void set_goal(S2d new_goal);
@@ -78,6 +79,7 @@ public :
 			 std::string bool_panne, int nbUpdate, int k_update_panne, 
 			 bool& file_success);
 	~Neutra_0(){}
+	S2d find_goal(Carre target);
 	void move_to(S2d goal) override;
 };
 
@@ -87,6 +89,7 @@ public :
 			 std::string bool_panne, int nbUpdate, int k_update_panne, 
 			 bool& file_success);
 	~Neutra_1(){}
+	S2d find_goal(Carre target);
 	void move_to(S2d goal) override;
 };
 
@@ -114,5 +117,9 @@ void draw_robots();
 void destroy_tab_robots();
 void sauvegarde_robots(std::ofstream& fichier);
 void decision_reparateur();
+S2d find_goal_if_outside_desintegration_area(double angle, double xt, double yt,
+											 double xr, double yr, double c);
+S2d find_goal_if_inside_desintegration_area(double angle, double xt, double yt,
+											 double xr, double yr, double c);
 
 #endif

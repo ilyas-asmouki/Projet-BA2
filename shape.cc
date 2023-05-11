@@ -22,6 +22,10 @@ void add_scaled_vector(S2d& vect, S2d added_vect, double scalar)	{
 	vect.y += scalar * added_vect.y;
 }
 
+int sign(double value) {
+	return (( (value) < 0 ) ? -1 : ((value) > 0));
+}
+
 bool superposition_carres(const Carre s1, const Carre s2, MARGIN margin) {
 	double d1 = s1.cote, d2 = s2.cote;
 	return (abs(s2.centre.x - s1.centre.x) < d1/2 + d2/2 + shape::epsil_zero*margin)
@@ -65,3 +69,4 @@ void dessin_orientation(Cercle cercle, double orientation) {
 	draw_orientation(cercle.centre.x, cercle.centre.y, cercle.rayon, orientation);
 	return;
 }
+

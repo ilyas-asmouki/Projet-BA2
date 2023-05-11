@@ -6,6 +6,7 @@
 #include <iostream>
 #include <array>
 #include <fstream>
+#include <cmath>
 #include "robot.h"
 #include "message.h"
 #include "constantes.h"
@@ -16,7 +17,7 @@ enum {SPATIAL=2, REPARATEUR, NEUTRALISEUR};
 constexpr double NULL_DATA(0);
 constexpr double max_delta_tr(vtran_max*delta_t);
 constexpr double max_delta_rt(vrot_max*delta_t);
-constexpr int NO_REPARATEUR(-1);
+constexpr int NO_TARGET(-1);
 
 static std::vector<Robot*> tab_robot;
 
@@ -31,6 +32,26 @@ Robot::~Robot() {
 
 Cercle Robot::getForme() const {
 	return forme;
+}
+
+S2d Neutra_0::find_goal(Carre target) {
+	return target.centre;
+}
+
+S2d Neutra_1::find_goal(Carre target) {
+	double xr = forme.centre.x, yr = forme.centre.y;
+	double xt = target.centre.x, yt = target.centre.y;
+	double c = target.cote;
+	double angle = atan2(yr - yt, xr - xt);
+	
+	if (!superposition_cerclecarre(target, forme, WITH_MARGIN))
+	{
+		return find_goal_if_outside_desintegration_area(angle, xt, yt, xr, yr, c);
+	}
+	else {
+		return find_goal_if_inside_desintegration_area(angle, xt, yt, xr, yr, c);
+	}
+		
 }
 
 Spatial::Spatial(double x, double y, int nbUpdate, unsigned nbNr, unsigned nbNs,
@@ -169,13 +190,13 @@ void decodage_neutraliseur(std::istringstream& data, int nbUpdate, bool& file_su
 	int k_update_panne;
 	data >> x >> y >> orienta >> type >> panne >> k_update_panne;
 	Neutraliseur* pt = nullptr;
-	if (type == 0)	{
+	if (type == 1)	{
 		pt = new Neutra_0(x,y,orienta,type,panne,nbUpdate, k_update_panne,
 		file_success);
-	} else if (type == 1)	{
+	} else if (type == 2)	{
 		pt = new Neutra_1(x,y,orienta,type,panne,nbUpdate, k_update_panne,
 		file_success);
-	} else if (type == 2)	{
+	} else if (type == 3)	{
 		pt = new Neutra_2(x,y,orienta,type,panne,nbUpdate, k_update_panne,
 		file_success);
 	}
@@ -421,93 +442,13 @@ void Neutraliseur::destroy_neutraliseurs(){
 	}
 	return;
 }
-
-//~ void decision_reparateur()	{
-	//~ std::vector<Robot*> tab_panne;
-	//~ for (auto& robot : tab_robot) {
-		//~ if (robot->get_data("panne"))
-			//~ tab_panne.push_back(robot);
-	//~ }
-	
-	//~ for (size_t i = 0; i < tab_panne.size(); ++i)	{
-		//~ int k = NO_REPARATEUR;
-		//~ double dist_min;
-		//~ S2d vect;
-		//~ for (size_t m = 1; m < spatial_getnbRs() + 1; ++m) {
-			//~ vect = {tab_robot[i]->getForme().centre.x - 
-			//~ tab_robot[m]->getForme().centre.x , tab_robot[i]->getForme().centre.y - 
-			//~ tab_robot[m]->getForme().centre.y};
-			//~ dist_min = norme(vect);
-			//~ if ((dist_min <= max_update - (spatial_getnbUpdate() -
-			//~ tab_robot[m]->get_data("k_update_panne")) * vtran_max)) {
-				//~ S2d* ptr = new S2d({tab_panne[i]->getForme().centre.x, tab_panne[i]->getForme().centre.y});
-				//~ tab_robot[m]->set_goal(ptr);
-				//~ k = m;
-				//~ vect = {tab_robot[i]->getForme().centre.x - 
-				//~ tab_robot[k]->getForme().centre.x , tab_robot[i]->getForme().centre.y - 
-				//~ tab_robot[k]->getForme().centre.y};
-				//~ dist_min = norme(vect);
-				//~ break;
-			//~ }
-		//~ }
-		//~ if (k == NO_REPARATEUR) continue;
-		
-		//~ for (size_t j = k + 1; j < spatial_getnbRs() + 1; ++j)	{
-			//~ S2d vect2 = {tab_robot[i]->getForme().centre.x - 
-			//~ tab_robot[j]->getForme().centre.x , tab_robot[i]->getForme().centre.y - 
-			//~ tab_robot[j]->getForme().centre.y};
-			//~ if (norme(vect2) < dist_min) {
-				//~ if (tab_robot[j]->get_goal() == nullptr) {
-					//~ dist_min = norme(vect2);
-					//~ S2d* ptr = new S2d({tab_panne[i]->getForme().centre.x, tab_panne[i]->getForme().centre.y});
-					//~ tab_robot[j]->set_goal(ptr);
-					
-					//~ tab_robot[k]->set_goal(nullptr);
-					//~ k = j;
-				//~ } else if (norme({tab_robot[j]->get_goal()->x - tab_robot[j]->getForme().x,
-								  //~ tab_robot[j]->get_goal()->y - tab_robot[j]->getForme().y)
-									//~ < dist_min) {
-					//~ continue;
-				//~ } else {
-					//~ tab_robot[j]->set_goal());
-					
-					
-				//~ }
-		//~ }
-	//~ }
-//~ }
-//~ void decision_reparateur(){
-	//~ int taken = 0;
-	//~ vector <array<double, 2>> reparateur_list;
-	//~ do {
-		//~ for (size_t i(spatial_getnbRs()+1); i < tab_robot.size() ; ++i){
-			//~ if (tab_robot[i]->get_data("panne")){
-				//~ S2d vect = {tab_robot[i]->getForme().centre.x - 
-				//~ tab_robot[1]->getForme().centre.x , tab_robot[i]->getForme().centre.y - 
-				//~ tab_robot[1]->getForme().centre.y };
-				//~ double dist_min(norme(vect));
-				//~ reparateur_list.push_back({1 , dist_min});
-				//~ tab_robot[1]->set_goal(tab_robot[i]->getForme().centre);
-				
-				//~ for (size_t j(2); j < spatial_getnbRs()+1; ++j){
-					//~ dist = norme(tab_robot[i]->getForme().centre.x - 
-						//~ tab_robot[j]->getForme().centre.x , 
-						//~ tab_robot[i]->getForme().centre.y - 
-						//~ tab_robot[j]->getForme().centre.y);
-						//~ if (dist < dist_min){
-							//~ dist_min = dist;
-							//~ reparateur_list 
-					
-					
-		//~ } while (spatial_getnbRs() != taken);
-					
 				
 void decision_reparateur(){
 	std::vector <bool> tab_reparateur(spatial_getnbRs(), true);
 	S2d vect;
 	double dist;
 	double dist_min;
-	int k = NO_REPARATEUR;
+	int k = NO_TARGET;
 	for (size_t i(spatial_getnbRs()+1); i < tab_robot.size(); ++i){
 		if (tab_robot[i]->get_data("panne")){
 			for (size_t j(0); j < tab_reparateur.size() ; ++j){
@@ -520,34 +461,85 @@ void decision_reparateur(){
 					tab_robot[i]->get_data("k_update_panne")) * vtran_max){
 						dist_min = dist;
 						k = j;
-						for (size_t l(k) ; l < tab_reparateur.size(); ++l){
-							vect = {tab_robot[i]->getForme().centre.x - 
-									tab_robot[l+1]->getForme().centre.x , 
-									tab_robot[l+1]->getForme().centre.y - 
-									tab_robot[l+1]->getForme().centre.y };
-							dist = norme(vect);
-							if (dist < dist_min) {
-								dist_min = dist;
-								k=l;
-							}
-						}
+						break;
 					}
 				}
-			}	
-			if (k == NO_REPARATEUR){
+			}
+			for (size_t l(k) ; l < tab_reparateur.size(); ++l){
+				vect = {tab_robot[i]->getForme().centre.x - 
+						tab_robot[l+1]->getForme().centre.x , 
+						tab_robot[l+1]->getForme().centre.y - 
+						tab_robot[l+1]->getForme().centre.y };
+				dist = norme(vect);
+				if (dist < dist_min) {
+					dist_min = dist;
+					k=l;
+				}
+			}
+		}
+			if (k == NO_TARGET){
 				continue;
 			} else {
 				tab_reparateur[k] = false;
 				tab_robot[k+1]->set_goal(tab_robot[i]->getForme().centre);
 			}
 		}
-	}
 	for (size_t i(0); i < tab_reparateur.size() ; ++i){
 		if (tab_reparateur[i])
 			tab_robot[i+1]->set_goal(tab_robot[0]->getForme().centre);
 	}
 }	
 		
-					
-			
+S2d find_goal_if_outside_desintegration_area(double angle, double xt, double yt,
+											 double xr, double yr, double c) {
+	if ((angle > 0 and angle <= M_PI/4 and abs(yr - yt) <= c/2)
+		 or (angle <= 0 and angle >= -M_PI/4 and abs(yr - yt) <= c/2))
+		return {xt + (c/2)*risk_factor, yr};
+	else if (angle > 0 and angle <= M_PI/4 and abs(yr - yt) > c/2)
+		return {xt + (c/2)*risk_factor, yt + (c/2)};
+	else if (angle > M_PI/4 and angle <= M_PI/2 and abs(xr - xt) > c/2)
+		return {xt + (c/2), yt + (c/2)*risk_factor};
+	else if ((angle > M_PI/4 and angle <= M_PI/2 and abs(xr - xt) <= c/2)
+			  or (angle > M_PI/2 and angle <= 3*M_PI/4 and abs(xr - xt) <= c/2))
+		return {xr, yt + (c/2)*risk_factor};
+	else if (angle > M_PI/2 and angle <= 3*M_PI/4 and abs(xr - xt) > c/2)
+		return {xt - (c/2), yt + (c/2)*risk_factor};
+	else if (angle > 3*M_PI/4 and angle <= M_PI and abs(yr - yt) > c/2)
+		return {xt - (c/2)*risk_factor, yt + (c/2)};
+	else if ((angle > 3*M_PI/4 and angle <= M_PI and abs(yr - yt) <= c/2)
+			  or (angle < -3*M_PI/4 and angle >= -M_PI and abs(yr - yt) <= c/2))
+		return {xt - (c/2)*risk_factor, yr};
+	else if (angle < -3*M_PI/4 and angle >= -M_PI and abs(yr - yt) > c/2)
+		return {xt - (c/2)*risk_factor, yt - (c/2)};
+	else if (angle < -M_PI/2 and angle >= -3*M_PI/4 and abs(xr - xt) > c/2)
+		return {xt - (c/2), yt - (c/2)*risk_factor};
+	else if ((angle < -M_PI/2 and angle >= -3*M_PI/4 and abs(xr - xt) <= c/2)
+			  or (angle < -M_PI/4 and angle >= -M_PI/2 and abs(xr - xt) <= c/2))
+		return {xr, yt - (c/2)*risk_factor};
+	else if (angle < -M_PI/4 and angle >= -M_PI/2 and abs(xr - xt) > c/2)
+		return {xt + (c/2), yt - (c/2)*risk_factor};
+	else
+		return {xt + (c/2)*risk_factor, yt - (c/2)};
+	
+}
+
+S2d find_goal_if_inside_desintegration_area(double angle, double xt, double yt,
+											 double xr, double yr, double c) {
+	if (angle <= M_PI/4 and angle >= -M_PI/4 and abs(yr - yt) <= c/2)
+		return {xt + (c/2), yr};
+	else if (angle <= M_PI/4 and angle >= -M_PI/4 and abs(yr - yt) > c/2)
+		return {xt + (c/2), yt + sign(yr - yt)*(c/2)};
+	else if (angle <= 3*M_PI/4 and angle >= M_PI/4 and abs(xr - xt) <= c/2)
+		return {xr, yt + (c/2)};
+	else if (angle <= 3*M_PI/4 and angle >= M_PI/4 and abs(xr - xt) > c/2)
+		return {xt + sign(xr - xt)*(c/2), yt + (c/2)};
+	else if (abs(angle) >= 3*M_PI/4 and abs(yr - yt) <= c/2)
+		return {xt - (c/2), yr};
+	else if (abs(angle) >= 3*M_PI/4 and abs(yr - yt) > c/2)
+		return {xt - (c/2), yt + sign(yr - yt)*(c/2)};
+	else if (angle <= -M_PI/4 and angle >= -3*M_PI/4 and abs(xr - xt) <= c/2)
+		return {xr, yt - (c/2)};
+	else 
+		return {xt + sign(xr - xt)*(c/2), yt - (c/2)};
+}
 	
