@@ -34,7 +34,7 @@ Cercle Robot::getForme() const {
 	return forme;
 }
 
-S2d Neutra_0::find_goal(Carre target) {
+S2d Robot::find_goal(Carre target) {
 	return target.centre;
 }
 

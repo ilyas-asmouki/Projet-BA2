@@ -79,7 +79,6 @@ public :
 			 std::string bool_panne, int nbUpdate, int k_update_panne, 
 			 bool& file_success);
 	~Neutra_0(){}
-	S2d find_goal(Carre target);
 	void move_to(S2d goal) override;
 };
 
@@ -115,8 +114,11 @@ void spatial_setnbUpdate(int value);
 Cercle r_getForme(unsigned i);
 void draw_robots();
 void destroy_tab_robots();
+void destroy_robot(size_t i);
 void sauvegarde_robots(std::ofstream& fichier);
 void decision_reparateur();
+bool in_desintegration_area(Carre particle, size_t i);
+
 S2d find_goal_if_outside_desintegration_area(double angle, double xt, double yt,
 											 double xr, double yr, double c);
 S2d find_goal_if_inside_desintegration_area(double angle, double xt, double yt,
