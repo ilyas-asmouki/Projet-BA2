@@ -137,3 +137,13 @@ Carre get_particle_shape(size_t i) {
 void sort_particle_vector() {
 	sort(tab_particule.begin(), tab_particule.end());
 }
+
+bool superposition_particle_robot_sim(Cercle robot){
+	bool p(false);
+	for (size_t i(0); i < tab_particule.size(); ++i){
+		if (superposition_cerclecarre(tab_particule[i].getForme(), robot, WITH_MARGIN)){
+			p = true;
+		}
+	}
+	return p;
+}

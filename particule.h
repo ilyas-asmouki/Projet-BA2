@@ -34,5 +34,6 @@ void sauvegarde_particules(std::ofstream& fichier);
 void new_particules(unsigned i, bool file_success);
 void sort_particle_vector();
 Carre get_particle_shape(size_t i);
+bool superposition_particle_robot_sim(Cercle robot);
 
 #endif

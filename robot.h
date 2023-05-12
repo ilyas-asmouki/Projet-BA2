@@ -16,16 +16,20 @@ public :
 	Cercle getForme() const;
 	S2d get_goal();
 	void TestCollision(bool& file_success);
+	bool superposition_robots_sim();
 	
 	virtual double get_data(std::string data_type)=0;
 	virtual void move()=0;
 	virtual void set_data(std:: string data_type, double value)=0;
 	void set_goal(S2d new_goal);
 	virtual S2d find_goal(Carre target);
+	std::string getcolor();
 	 
 protected : 
 	Cercle forme;
+	std::string color;
 	S2d goal;
+	void cancel_movement(S2d temp);
 };
 
 class Spatial : public Robot {

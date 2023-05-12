@@ -38,27 +38,44 @@ S2d Robot::find_goal(Carre target) {
 	return target.centre;
 }
 
+//~ S2d Neutra_0::find_goal(Carre target) {
+	//~ double xr = forme.centre.x, yr = forme.centre.y;
+	//~ double xt = target.centre.x, yt = target.centre.y;
+	//~ double c = target.cote;
+	//~ double angle = atan2(yr - yt, xr - xt); 
+	//~ double delta_angle = angle - orientation;
+	//~ adjust_angle(delta_angle);
+	//~ if (!superposition_cerclecarre(c, forme, WITH_MARGIN)){
+		//~ return target.centre;
+	//~ else if (superposition_cerclecarre(c, forme, WITH_MARGIN)){
+		//~ return forme.centre;
+		
+
 S2d Neutra_1::find_goal(Carre target) {
 	double xr = forme.centre.x, yr = forme.centre.y;
 	double xt = target.centre.x, yt = target.centre.y;
 	double c = target.cote;
 	double angle = atan2(yr - yt, xr - xt);
 	Carre risk_zone = {{target.centre.x, target.centre.y}, target.cote * risk_factor}; 
+	double delta_angle = angle - orientation;
+	adjust_angle(delta_angle);
 	
 	if (!superposition_cerclecarre(risk_zone, forme, WITH_MARGIN))
 	{
 		return find_goal_if_outside_desintegration_area(angle, xt, yt, xr, yr, c);
-	}
-	else {
-		return find_goal_if_inside_desintegration_area(angle, xt, yt, xr, yr, c);
-	}
+	} else if ((superposition_cerclecarre(risk_zone, forme, WITH_MARGIN)) and (delta_angle > epsil_alignement)){
 		
+		return forme.centre;
+	} else {
+		return find_goal_if_inside_desintegration_area(angle, xt, yt, xr, yr, c);
+	}	
 }
 
 Spatial::Spatial(double x, double y, int nbUpdate, unsigned nbNr, unsigned nbNs,
 	  unsigned nbNd, unsigned nbRr, unsigned nbRs, bool& file_success): Robot(x, y), 
-	  nbUpdate(nbUpdate), nbNr(nbNr), nbNs(nbNs), nbNd(nbNd), nbRr(nbRr), nbRs(nbRs) {
+	  nbUpdate(nbUpdate), nbNr(nbNr), nbNs(nbNs), nbNd(nbNd), nbRr(nbRr), nbRs(nbRs){
 
+	color = "blue";
 	forme.rayon=r_spatial;
 	error_outside(file_success);
 	test_particle_robot_superposition(forme, file_success);
@@ -75,7 +92,8 @@ void Spatial::error_outside(bool& file_success) {
 	return;
 }
 
-Reparateur::Reparateur(double x, double y, bool& file_success): Robot(x, y) {
+Reparateur::Reparateur(double x, double y, bool& file_success): Robot(x,y) {
+	color = "green";
 	forme.rayon=r_reparateur; 
 	if (file_success){
 		TestCollision(file_success);
@@ -91,6 +109,7 @@ Neutraliseur::Neutraliseur(double x, double y, double orientation, unsigned type
 						   bool& file_success): Robot(x, y), orientation(orientation), 
 						   type(type), k_update_panne(k_update_panne) {
 	panne = ((bool_panne == "false") ? false : true);
+	color = ((panne) ? "orange" : "black");
 	forme.rayon=r_neutraliseur;
 	if (file_success){
 		TestCollision(file_success);
@@ -404,31 +423,37 @@ void Reparateur::move(){
 	S2d pos_to_goal = {goal.x - forme.centre.x, goal.y - forme.centre.y} ;
 	double norm(norme(pos_to_goal));
 	
+	S2d temp = forme.centre;
 	if (norm <= max_delta_tr) {
 		forme.centre = goal;
 	} else {
 		add_scaled_vector(forme.centre, pos_to_goal, max_delta_tr/norm);
+	}
+	if (superposition_particle_robot_sim(forme) and superposition_robots_sim()){
+		forme.centre = temp;	
 	}
 	return;
 }
 
 void Neutra_0::move(){
 	S2d pos_to_goal = {goal.x - forme.centre.x, goal.y - forme.centre.y};
-	
 	double goal_a(atan2(pos_to_goal.y ,pos_to_goal.x));
 	double delta_a(goal_a - orientation);
 	adjust_angle(delta_a);
-	
 	if((abs(delta_a) <= max_delta_rt) and (abs(delta_a) > 0)) {
 		orientation = goal_a;
-		goal = forme.centre;
 	} else if (abs(delta_a) > max_delta_rt) {
 		orientation += ((delta_a > 0) ?  1. : -1.)*max_delta_rt;
-		goal = forme.centre;
 	} else {
+		S2d temp=forme.centre;
 		S2d travel_dir = {cos(orientation), sin(orientation)}; 
 		add_scaled_vector(forme.centre, travel_dir, max_delta_tr);
+		if (superposition_particle_robot_sim(forme) and superposition_robots_sim()){
+			forme.centre = temp;
+			color = "purple";	
+		}
 	}
+	return;
 }
 
 void Neutra_1::move(){
@@ -665,4 +690,27 @@ S2d find_goal_if_inside_desintegration_area(double angle, double xt, double yt,
 		return {xt + sign(xr - xt)*(c/2), yt - (c/2)};
 }
 	
-	
+bool Robot::superposition_robots_sim() {
+	bool p(false);
+	for (size_t i(1); i < tab_robot.size(); ++i){
+		if (superposition_cercles(forme, tab_robot[i]->forme, WITH_MARGIN) and
+		 (forme.centre.x != tab_robot[i]->forme.centre.x or
+		 forme.centre.y != tab_robot[i]->forme.centre.y)){
+			p = true;
+		}
+	}
+	return p;
+}
+
+double set_orientation(S2d robot, Carre target) {
+    double xr = robot.x, yr = robot.y;
+    double xt = target.centre.x, yt = target.centre.y, c = target.cote;
+    if (abs(yt - yr) <= c/2)
+        return ((xr < xt) ? 0 : M_PI);
+    else if (abs(xt - xr) <= c/2)
+        return sign(yt - yr)*M_PI/2;
+    else
+        return atan2(yt - yr + sign(yr - yt + sign(yt - yr)*(c/2))*(c/2),
+                     xt - xr + sign(xr - xt + sign(xt - xr)*(c/2))*(c/2));
+}
+
