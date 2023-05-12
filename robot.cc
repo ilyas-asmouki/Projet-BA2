@@ -43,8 +43,9 @@ S2d Neutra_1::find_goal(Carre target) {
 	double xt = target.centre.x, yt = target.centre.y;
 	double c = target.cote;
 	double angle = atan2(yr - yt, xr - xt);
+	Carre risk_zone = {{target.centre.x, target.centre.y}, target.cote * risk_factor}; 
 	
-	if (!superposition_cerclecarre(target, forme, WITH_MARGIN))
+	if (!superposition_cerclecarre(risk_zone, forme, WITH_MARGIN))
 	{
 		return find_goal_if_outside_desintegration_area(angle, xt, yt, xr, yr, c);
 	}
@@ -268,17 +269,18 @@ void spatial_setnbUpdate(int value) {
 }
 
 void draw_robots() {
-    for (size_t i = 0; i < tab_robot.size(); ++i) {
-        if (i == 0)
-            dessin_cercle(tab_robot[i]->getForme(), "blue");
-        else if ((i >= 1) and (i <= spatial_getnbRs()))
-            dessin_cercle(tab_robot[i]->getForme(), "green");
-        else {
-            std::string color = (tab_robot[i]->get_data("panne") ? "orange" : "black");
-				dessin_cercle(tab_robot[i]->getForme(), color);
-				dessin_orientation(tab_robot[i]->getForme(), 
-								   tab_robot[i]->get_data("orientation"));
-        }
+	if (tab_robot.size() != 0){
+		for (size_t i = 1; i < tab_robot.size(); ++i) {
+			if (i <= spatial_getnbRs())
+				dessin_cercle(tab_robot[i]->getForme(), "green");
+			else {
+				std::string color = (tab_robot[i]->get_data("panne") ? "orange" : "black");
+					dessin_cercle(tab_robot[i]->getForme(), color);
+					dessin_orientation(tab_robot[i]->getForme(), 
+									   tab_robot[i]->get_data("orientation"));
+			}
+		}
+		dessin_cercle(tab_robot[0]->getForme(), "blue");
     }
 }
 
@@ -415,11 +417,14 @@ void Neutra_0::move(){
 	
 	double goal_a(atan2(pos_to_goal.y ,pos_to_goal.x));
 	double delta_a(goal_a - orientation);
+	adjust_angle(delta_a);
 	
 	if((abs(delta_a) <= max_delta_rt) and (abs(delta_a) > 0)) {
 		orientation = goal_a;
+		goal = forme.centre;
 	} else if (abs(delta_a) > max_delta_rt) {
 		orientation += ((delta_a > 0) ?  1. : -1.)*max_delta_rt;
+		goal = forme.centre;
 	} else {
 		S2d travel_dir = {cos(orientation), sin(orientation)}; 
 		add_scaled_vector(forme.centre, travel_dir, max_delta_tr);
@@ -517,10 +522,7 @@ void decision_reparateur(){
 
 void decision_neutraliseur(Carre prt, std::vector<bool>& tab_neutra) {
 	S2d vect;
-	double t_min;
-	double t;
-	double dist;
-	double d_angle;
+	double t_min, t, dist, d_angle;
 	int k = NO_TARGET;
 	for (size_t i(0); i < tab_neutra.size() ; ++i){
 		if (tab_neutra[i] and (!tab_robot[spatial_getnbRs()+1+i]->get_data("panne"))){
@@ -529,7 +531,7 @@ void decision_neutraliseur(Carre prt, std::vector<bool>& tab_neutra) {
 			dist = norme(vect);
 			d_angle = atan2(vect.y, vect.x) - 
 					  tab_robot[spatial_getnbRs()+1+i]->get_data("orientation");
-			//~ adjust_d_angle(d_angle);
+			adjust_angle(d_angle);
 			t_min = dist/vtran_max + d_angle/vrot_max;
 			k=i;
 			break;
@@ -543,7 +545,9 @@ void decision_neutraliseur(Carre prt, std::vector<bool>& tab_neutra) {
 			vect = {prt.centre.x-tab_robot[i+spatial_getnbRs()+1]->getForme().centre.x, 
 				prt.centre.y - tab_robot[i+spatial_getnbRs()+1]->getForme().centre.y };
 			dist = norme(vect);
-			d_angle = atan2(vect.y, vect.x) - tab_robot[spatial_getnbRs()+1+i]->get_data("orientation");
+			d_angle = atan2(vect.y, vect.x) - 
+					  tab_robot[spatial_getnbRs()+1+i]->get_data("orientation");
+			adjust_angle(d_angle);
 			t = dist/vtran_max + d_angle/vrot_max;
 			if (t < t_min) {
 				t = t_min;
@@ -552,7 +556,7 @@ void decision_neutraliseur(Carre prt, std::vector<bool>& tab_neutra) {
 		}
 	}
 	tab_neutra[k] = false;
-	tab_robot[k+spatial_getnbRs()+1]->set_goal(prt.centre);
+	tab_robot[k+spatial_getnbRs()+1]->set_goal(tab_robot[k+spatial_getnbRs()+1]->find_goal(prt));
 	return;
 }
 
@@ -562,6 +566,8 @@ void decision_neutra_restant(std::vector<bool>& tab_neutra) {
 			if (tab_neutra[i]){
 				tab_robot[spatial_getnbRs()+1+i]->set_goal(tab_robot[0]->getForme().centre);
 			}
+		} else {
+			tab_robot[spatial_getnbRs()+1+i]->set_goal(tab_robot[spatial_getnbRs()+1+i]->getForme().centre);
 		}
 	}
 	return;
@@ -659,4 +665,4 @@ S2d find_goal_if_inside_desintegration_area(double angle, double xt, double yt,
 		return {xt + sign(xr - xt)*(c/2), yt - (c/2)};
 }
 	
-		
+	

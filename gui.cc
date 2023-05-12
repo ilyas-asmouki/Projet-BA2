@@ -6,10 +6,12 @@
 #include "constantes.h"
 #include "graphic.h"
 
+#include <iostream>
+
 constexpr unsigned taille_dessin = 500;
 constexpr unsigned taille_fenetre = 600;
 constexpr unsigned aspect_ratio = 1.0;
-constexpr unsigned timer_update = 250;
+constexpr unsigned timer_update = 10;
 
 static std::ifstream empty;
 static void orthographic_projection(const Cairo::RefPtr<Cairo::Context>& cr, 
@@ -81,7 +83,6 @@ Fenetre::Fenetre(char* file, int argc) :
 	set_title("Propre en ordre");
 	set_child(m_Box_All);
 	set_interface();	
-	
 	m_Button_exit.signal_clicked().connect(sigc::mem_fun(*this, 
 										   &Fenetre::on_button_clicked_exit));
 	m_Button_open.signal_clicked().connect(sigc::mem_fun(*this, 
@@ -268,7 +269,7 @@ bool Fenetre::on_timeout() {
 		}
 		maj_data.set_text(std::to_string(val)); 
 		Propre_en_Ordre->s_setnbUpdate(++val);
-		Propre_en_Ordre->desintegration();
+		Propre_en_Ordre->mise_a_jour();
 		monde.clear();
 		monde.draw();
 		set_data();
