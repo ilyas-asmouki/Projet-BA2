@@ -9,6 +9,8 @@
 #include <vector>
 #include "shape.h"
 
+enum SIDE {R, U, L, D};
+
 class Robot {
 public :
 	Robot(double x, double y);
@@ -76,6 +78,7 @@ protected :
 	unsigned type;
 	bool panne;
 	int k_update_panne;
+	SIDE find_side(S2d particle);
 };
 
 class Neutra_0 : public Neutraliseur {

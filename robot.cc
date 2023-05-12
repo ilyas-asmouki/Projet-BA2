@@ -410,7 +410,8 @@ S2d Robot::get_goal() {
 
 bool in_desintegration_area(Carre particle, size_t i)
 {
-	return superposition_cerclecarre(particle, tab_robot[i]->getForme(), WITH_MARGIN);
+	return superposition_cerclecarre({{particle.centre.x, particle.centre.y}, 
+			particle.cote*risk_factor}, tab_robot[i]->getForme(), WITH_MARGIN);
 }
 
 void set_panne_robot(size_t i){
@@ -463,20 +464,65 @@ void Neutra_2::move(){
 	S2d init_pos_to_goal = {goal.x - forme.centre.x, goal.y - forme.centre.y};
 	S2d travel_dir    = {cos(orientation), sin(orientation)}; 
 	double proj_goal= prod_scalaire(init_pos_to_goal, travel_dir);
-
-    if(abs(proj_goal) > max_delta_tr){ 
-		proj_goal = ((proj_goal > 0) ? 1 : -1)*max_delta_tr;
+	double delta_a, goal_a;
+	SIDE side=find_side(goal);
+	switch (side) {
+		case R :
+			delta_a = orientation;
+			goal_a = M_PI;
+			break;
+		case U :
+			delta_a = M_PI/2 - orientation;
+			goal_a = -M_PI/2;
+			break;
+		case L : 
+			delta_a = M_PI - orientation;
+			goal_a = 0;
+			break;
+		case D :
+			delta_a = -M_PI/2 - orientation;
+			goal_a = M_PI/2;
+			break;
 	}
-	add_scaled_vector(forme.centre, travel_dir, proj_goal);
-	S2d    updated_pos_to_goal = {goal.x - forme.centre.x, goal.y - forme.centre.y};
-	double goal_a(atan2(updated_pos_to_goal.y ,updated_pos_to_goal.x));
-	double delta_a(goal_a - orientation);
-	
-	if(abs(delta_a) <= max_delta_rt) {
-		orientation = goal_a;
+	adjust_angle(delta_a);	
+	if (abs(delta_a) >= M_PI/3){
+		if (abs(goal_a - orientation) <= max_delta_rt){
+			orientation = goal_a;
+			return;
+		} else {
+			orientation += ((delta_a > 0) ?  1. : -1.)*max_delta_rt;
+			return;
+		}
+	} else if (abs(delta_a) < epsil_alignement) {
+		if(abs(proj_goal) > max_delta_tr){ 
+			proj_goal = ((proj_goal > 0) ? 1 : -1)*max_delta_tr;
+		}
+		add_scaled_vector(forme.centre, travel_dir, proj_goal);
+		S2d    updated_pos_to_goal = {goal.x - forme.centre.x, goal.y - forme.centre.y};
+		double goal_a(atan2(updated_pos_to_goal.y ,updated_pos_to_goal.x));
+		double alpha(goal_a - orientation);
+		
+		if(abs(alpha) <= max_delta_rt) {
+			orientation = goal_a;
+		} else {
+			orientation += ((alpha > 0) ?  1. : -1.)*max_delta_rt;
+		}
 	} else {
-		orientation += ((delta_a > 0) ?  1. : -1.)*max_delta_rt;
-	}
+		double v_tran = abs(proj_goal)*vrot_max/delta_a;
+		if(abs(proj_goal) > v_tran*delta_t){ 
+			proj_goal = ((proj_goal > 0) ? 1 : -1)*v_tran*delta_t;
+		}
+		add_scaled_vector(forme.centre, travel_dir, proj_goal);
+		S2d    updated_pos_to_goal = {goal.x - forme.centre.x, goal.y - forme.centre.y};
+		double goal_a(atan2(updated_pos_to_goal.y ,updated_pos_to_goal.x));
+		double alpha(goal_a - orientation);
+		
+		if(abs(alpha) <= max_delta_rt) {
+			orientation = goal_a;
+		} else {
+			orientation += ((alpha > 0) ?  1. : -1.)*max_delta_rt;
+		}
+	}	
 	return;
 }
 
@@ -487,9 +533,9 @@ void destroy_neutraliseurs(){
 			if (spatial_getnbUpdate() - tab_robot[i]->get_data("k_update_panne") >= 
 				max_update){
 				delete tab_robot[i];
-				std::swap(tab_robot.back(), tab_robot[i]);
-				tab_robot.pop_back();
+				tab_robot.erase(tab_robot.begin() + i);
 				tab_robot[0]->set_data("nbNd", spatial_getnbNd()+1);
+				tab_robot[0]->set_data("nbNs", spatial_getnbNs()-1);
 			}
 		}
 	}
@@ -714,3 +760,15 @@ double set_orientation(S2d robot, Carre target) {
                      xt - xr + sign(xr - xt + sign(xt - xr)*(c/2))*(c/2));
 }
 
+SIDE Neutraliseur::find_side(S2d particle){
+	double angle(atan2(particle.y-forme.centre.y, particle.x-forme.centre.x));
+	if (angle >= -M_PI/4 and angle < M_PI/4)
+		return R;
+	else if (angle >= M_PI/4 and angle < 3*M_PI/4)
+		return U;
+	else if (angle >= 3*M_PI/4 or angle < -3*M_PI/4)
+		return L;
+	else 
+		return D;
+}
+	
