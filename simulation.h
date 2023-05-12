@@ -26,11 +26,12 @@ public :
 	void s_setnbUpdate(int value);
 	void sauvegarde(std::string file);
 	void destroy_data();
-	void desintegration();
+	void mise_a_jour();
 	
 private : 
 	bool file_success=true;
 	std::ifstream fichier;	
+	void desintegration();
 };
 
 void draw_world();

@@ -6,6 +6,7 @@
 
 #include <string>
 #include <sstream>
+#include <vector>
 #include "shape.h"
 
 class Robot {
@@ -13,14 +14,14 @@ public :
 	Robot(double x, double y);
 	virtual ~Robot();
 	Cercle getForme() const;
-	void TestCollision(bool& file_success);
-	virtual double get_data(std::string data_type)=0;
-	virtual void setnbUpdate(int value){};
-	virtual S2d find_goal(Carre target);
-	virtual void move_to(S2d goal)=0;
-	virtual void set_panne(bool p){};
-	void set_goal(S2d new_goal);
 	S2d get_goal();
+	void TestCollision(bool& file_success);
+	
+	virtual double get_data(std::string data_type)=0;
+	virtual void move()=0;
+	virtual void set_data(std:: string data_type, double value)=0;
+	void set_goal(S2d new_goal);
+	virtual S2d find_goal(Carre target);
 	 
 protected : 
 	Cercle forme;
@@ -33,9 +34,9 @@ public:
 			unsigned nbNd, unsigned nbRr ,unsigned nbRs, bool& file_success);
 	~Spatial();
 	void error_outside(bool& file_success);
-	virtual void setnbUpdate(int value);
 	virtual double get_data(std::string data_type);
-	void move_to(S2d goal){}; 
+	virtual void set_data(std:: string data_type, double value);
+	void move(){}; 
 	 
 private :
 	int nbUpdate=0;
@@ -51,7 +52,8 @@ public :
 	Reparateur(double x, double y, bool& file_success);
 	~Reparateur();
 	virtual double get_data(std::string data_type);
-	void move_to(S2d goal) override;
+	void move() override;
+	virtual void set_data(std:: string data_type, double value);
 };
 
 class Neutraliseur : public Robot {
@@ -62,9 +64,8 @@ public :
 	virtual ~Neutraliseur();
 	void error_k_update(int nbUpdate, bool& file_success);
 	virtual double get_data(std::string data_type);
-	void move_to(S2d goal)=0;
-	void destroy_neutraliseurs();
-	virtual void set_panne(bool p);
+	void move()=0;
+	virtual void set_data(std:: string data_type, double value);
 
 protected :
 	double  orientation;
@@ -79,7 +80,7 @@ public :
 			 std::string bool_panne, int nbUpdate, int k_update_panne, 
 			 bool& file_success);
 	~Neutra_0(){}
-	void move_to(S2d goal) override;
+	void move() override;
 };
 
 class Neutra_1 : public Neutraliseur {
@@ -88,8 +89,8 @@ public :
 			 std::string bool_panne, int nbUpdate, int k_update_panne, 
 			 bool& file_success);
 	~Neutra_1(){}
-	S2d find_goal(Carre target);
-	void move_to(S2d goal) override;
+	void move() override;
+	virtual S2d find_goal(Carre target);
 };
 
 class Neutra_2 : public Neutraliseur {
@@ -98,7 +99,7 @@ public :
 			 std::string bool_panne, int nbUpdate, int k_update_panne, 
 			 bool& file_success);
 	~Neutra_2(){}
-	void move_to(S2d goal) override;
+	void move() override;
 };
 
 void decodage_robot(std::istringstream& lig, int type, int& compteur1, int& compteur2,
@@ -114,14 +115,20 @@ void spatial_setnbUpdate(int value);
 Cercle r_getForme(unsigned i);
 void draw_robots();
 void destroy_tab_robots();
-void destroy_robot(size_t i);
 void sauvegarde_robots(std::ofstream& fichier);
 void decision_reparateur();
+void decision_neutra_restant(std::vector<bool>& tab_neutra);
 bool in_desintegration_area(Carre particle, size_t i);
-
+void set_panne_robot(size_t i);
+void decision_creation_robot();
+void deplacement_robot();
+void decision_neutraliseur(Carre prt, std::vector<bool>& tab_neutra);
+void destroy_neutraliseurs();
 S2d find_goal_if_outside_desintegration_area(double angle, double xt, double yt,
 											 double xr, double yr, double c);
 S2d find_goal_if_inside_desintegration_area(double angle, double xt, double yt,
 											 double xr, double yr, double c);
+											
+
 
 #endif

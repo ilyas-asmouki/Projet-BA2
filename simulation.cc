@@ -37,7 +37,6 @@ void decodage_ligne(std::string line, bool& file_success) {
 		++i;
 		if (compteur1==i) {
 			etat = SPATIAL;
-			sort_particle_vector();
 		}
 		break;
 	case SPATIAL :
@@ -175,9 +174,8 @@ void Simulation::desintegration() {
 			new_particules(i,file_success);
 			for (size_t j = s_getnbRs()+1; j <= s_getnbRs() + s_getnbNs(); ++j) {
 				if (in_desintegration_area(get_particle_shape(i), j))	{
-					destroy_robot(j);
-				}
-				
+					set_panne_robot(j);
+				}	
 			}
 		}
 	}
@@ -187,6 +185,21 @@ void Simulation::desintegration() {
 	}
 	return;
 }
+
+void Simulation::mise_a_jour(){
+	desintegration();
+	destroy_neutraliseurs();
+	decision_creation_robot();
+	decision_reparateur();
+	std::vector<bool> tab_neutra(spatial_getnbNs(), true);
+	for (size_t i(0); i < getnbP(); ++i) {
+		decision_neutraliseur(get_particle_shape(i), tab_neutra);
+	}
+	decision_neutra_restant(tab_neutra);
+	deplacement_robot();
+	return;
+}
+	
 		
 	
 

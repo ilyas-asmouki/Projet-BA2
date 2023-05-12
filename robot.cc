@@ -2,11 +2,9 @@
 //LAHLOU SAAD 361150 65%
 //ASMOUKI ILYAS 356263 35%
 
-#include <vector>
 #include <iostream>
 #include <array>
 #include <fstream>
-#include <cmath>
 #include "robot.h"
 #include "message.h"
 #include "constantes.h"
@@ -15,6 +13,8 @@
 enum {SPATIAL=2, REPARATEUR, NEUTRALISEUR};
 
 constexpr double NULL_DATA(0);
+constexpr double default_orientation(0);
+constexpr double default_k_update(0);
 constexpr double max_delta_tr(vtran_max*delta_t);
 constexpr double max_delta_rt(vrot_max*delta_t);
 constexpr int NO_TARGET(-1);
@@ -74,17 +74,12 @@ void Spatial::error_outside(bool& file_success) {
 	return;
 }
 
-void Spatial::setnbUpdate(int value) {
-	if (value > 0) {
-		nbUpdate = value;
-	}
-	return;
-}
-
 Reparateur::Reparateur(double x, double y, bool& file_success): Robot(x, y) {
 	forme.rayon=r_reparateur; 
-	TestCollision(file_success);
-	test_particle_robot_superposition(forme, file_success);
+	if (file_success){
+		TestCollision(file_success);
+		test_particle_robot_superposition(forme, file_success);
+	}
 }
 		
 Reparateur::~Reparateur() {
@@ -96,9 +91,11 @@ Neutraliseur::Neutraliseur(double x, double y, double orientation, unsigned type
 						   type(type), k_update_panne(k_update_panne) {
 	panne = ((bool_panne == "false") ? false : true);
 	forme.rayon=r_neutraliseur;
-	TestCollision(file_success);
-	test_particle_robot_superposition(forme, file_success);
-	error_k_update(nbUpdate, file_success);
+	if (file_success){
+		TestCollision(file_success);
+		test_particle_robot_superposition(forme, file_success);
+		error_k_update(nbUpdate, file_success);
+	}
 }
 	
 Neutraliseur::~Neutraliseur() {
@@ -266,7 +263,7 @@ unsigned spatial_getnbNp() {
 }
 
 void spatial_setnbUpdate(int value) {
-	tab_robot[0]->setnbUpdate(value);
+	tab_robot[0]->set_data("nbUpdate", value);
 	return;
 }
 
@@ -354,8 +351,32 @@ double Neutraliseur::get_data(std::string data_type) {
 	return NULL_DATA;
 }
 
-void Neutraliseur::set_panne(bool p) {
-	panne = p;
+void Spatial::set_data(std:: string data_type, double value) {
+	if (data_type == "nbUpdate")
+		nbUpdate = value;
+	if (data_type == "nbNs")
+		nbNs = value;
+	if (data_type == "nbNr")
+		nbNr = value;
+	if (data_type == "nbRr")
+		nbRr = value;
+	if (data_type == "nbRs")
+		nbRs = value;
+	if (data_type == "nbNd")
+		nbNd = value;
+	return;
+}
+
+void Neutraliseur::set_data(std::string data_type, double value){
+	if (data_type == "panne")
+		panne = value;
+	if (data_type == "k_update_panne")
+		k_update_panne = value;
+	return;
+}
+
+void Reparateur::set_data(std::string data_type, double value) {
+	return;
 }
 
 void Robot::set_goal(S2d new_goal) {
@@ -371,12 +392,13 @@ bool in_desintegration_area(Carre particle, size_t i)
 	return superposition_cerclecarre(particle, tab_robot[i]->getForme(), WITH_MARGIN);
 }
 
-void destroy_robot(size_t i)
-{
-	tab_robot[i]->set_panne(true);
+void set_panne_robot(size_t i){
+	tab_robot[i]->set_data("panne",true);
+	tab_robot[i]->set_data("k_update_panne",spatial_getnbUpdate());
+	tab_robot[i]->set_goal(tab_robot[i]->getForme().centre); 
 }
 
-void Reparateur::move_to(S2d goal){
+void Reparateur::move(){
 	S2d pos_to_goal = {goal.x - forme.centre.x, goal.y - forme.centre.y} ;
 	double norm(norme(pos_to_goal));
 	
@@ -388,7 +410,7 @@ void Reparateur::move_to(S2d goal){
 	return;
 }
 
-void Neutra_0::move_to(S2d goal){
+void Neutra_0::move(){
 	S2d pos_to_goal = {goal.x - forme.centre.x, goal.y - forme.centre.y};
 	
 	double goal_a(atan2(pos_to_goal.y ,pos_to_goal.x));
@@ -404,10 +426,10 @@ void Neutra_0::move_to(S2d goal){
 	}
 }
 
-void Neutra_1::move_to(S2d goal){
+void Neutra_1::move(){
 }
 
-void Neutra_2::move_to(S2d goal){
+void Neutra_2::move(){
 	S2d init_pos_to_goal = {goal.x - forme.centre.x, goal.y - forme.centre.y};
 	S2d travel_dir    = {cos(orientation), sin(orientation)}; 
 	double proj_goal= prod_scalaire(init_pos_to_goal, travel_dir);
@@ -428,7 +450,7 @@ void Neutra_2::move_to(S2d goal){
 	return;
 }
 
-void Neutraliseur::destroy_neutraliseurs(){
+void destroy_neutraliseurs(){
 	for (size_t i(spatial_getnbRs()+1); i < spatial_getnbRs() + spatial_getnbNs() + 1 ;
 		++i){
 		if (tab_robot[i]->get_data("panne")){
@@ -437,12 +459,13 @@ void Neutraliseur::destroy_neutraliseurs(){
 				delete tab_robot[i];
 				std::swap(tab_robot.back(), tab_robot[i]);
 				tab_robot.pop_back();
+				tab_robot[0]->set_data("nbNd", spatial_getnbNd()+1);
 			}
 		}
 	}
 	return;
 }
-				
+			
 void decision_reparateur(){
 	std::vector <bool> tab_reparateur(spatial_getnbRs(), true);
 	S2d vect;
@@ -454,7 +477,7 @@ void decision_reparateur(){
 			for (size_t j(0); j < tab_reparateur.size() ; ++j){
 				if (tab_reparateur[j]) {
 					vect = {tab_robot[i]->getForme().centre.x - 
-					tab_robot[j+1]->getForme().centre.x , tab_robot[j+1]->getForme().centre.y - 
+					tab_robot[j+1]->getForme().centre.x , tab_robot[i]->getForme().centre.y - 
 					tab_robot[j+1]->getForme().centre.y };
 					dist = norme(vect);
 					if (dist <= max_update - (spatial_getnbUpdate() -
@@ -464,32 +487,125 @@ void decision_reparateur(){
 						break;
 					}
 				}
-			}
-			for (size_t l(k) ; l < tab_reparateur.size(); ++l){
-				vect = {tab_robot[i]->getForme().centre.x - 
+			 } 
+			 for (size_t l(k+1) ; l < tab_reparateur.size(); ++l){
+				 if (tab_reparateur[l]){
+					vect = {tab_robot[i]->getForme().centre.x - 
 						tab_robot[l+1]->getForme().centre.x , 
 						tab_robot[l+1]->getForme().centre.y - 
 						tab_robot[l+1]->getForme().centre.y };
-				dist = norme(vect);
-				if (dist < dist_min) {
-					dist_min = dist;
-					k=l;
+					dist = norme(vect);
+					if (dist < dist_min) {
+						dist_min = dist;
+						k=l;
+					}
 				}
-			}
+			}	
+		}		
+		if (k == NO_TARGET){
+			continue;
+		} else {
+			tab_reparateur[k] = false;
+			tab_robot[k+1]->set_goal(tab_robot[i]->getForme().centre);
 		}
-			if (k == NO_TARGET){
-				continue;
-			} else {
-				tab_reparateur[k] = false;
-				tab_robot[k+1]->set_goal(tab_robot[i]->getForme().centre);
-			}
-		}
+	}
 	for (size_t i(0); i < tab_reparateur.size() ; ++i){
 		if (tab_reparateur[i])
 			tab_robot[i+1]->set_goal(tab_robot[0]->getForme().centre);
 	}
 }	
-		
+
+void decision_neutraliseur(Carre prt, std::vector<bool>& tab_neutra) {
+	S2d vect;
+	double t_min;
+	double t;
+	double dist;
+	double d_angle;
+	int k = NO_TARGET;
+	for (size_t i(0); i < tab_neutra.size() ; ++i){
+		if (tab_neutra[i] and (!tab_robot[spatial_getnbRs()+1+i]->get_data("panne"))){
+			vect = {prt.centre.x-tab_robot[i+spatial_getnbRs()+1]->getForme().centre.x, 
+				prt.centre.y - tab_robot[i+spatial_getnbRs()+1]->getForme().centre.y };
+			dist = norme(vect);
+			d_angle = atan2(vect.y, vect.x) - 
+					  tab_robot[spatial_getnbRs()+1+i]->get_data("orientation");
+			//~ adjust_d_angle(d_angle);
+			t_min = dist/vtran_max + d_angle/vrot_max;
+			k=i;
+			break;
+		}
+	}
+	if (k == NO_TARGET){
+		return;
+	}
+	for (size_t i(k+1); i < tab_neutra.size() ; ++i){
+		if (tab_neutra[i] and (!tab_robot[spatial_getnbRs()+1+i]->get_data("panne"))){
+			vect = {prt.centre.x-tab_robot[i+spatial_getnbRs()+1]->getForme().centre.x, 
+				prt.centre.y - tab_robot[i+spatial_getnbRs()+1]->getForme().centre.y };
+			dist = norme(vect);
+			d_angle = atan2(vect.y, vect.x) - tab_robot[spatial_getnbRs()+1+i]->get_data("orientation");
+			t = dist/vtran_max + d_angle/vrot_max;
+			if (t < t_min) {
+				t = t_min;
+				k=i;
+			}
+		}
+	}
+	tab_neutra[k] = false;
+	tab_robot[k+spatial_getnbRs()+1]->set_goal(prt.centre);
+	return;
+}
+
+void decision_neutra_restant(std::vector<bool>& tab_neutra) {
+	for (size_t i(0); i < tab_neutra.size(); ++i){
+		if (!(tab_robot[spatial_getnbRs()+1+i]->get_data("panne"))){
+			if (tab_neutra[i]){
+				tab_robot[spatial_getnbRs()+1+i]->set_goal(tab_robot[0]->getForme().centre);
+			}
+		}
+	}
+	return;
+}
+			
+void decision_creation_robot(){
+	bool p(false);
+	if (spatial_getnbUpdate() % modulo_update ==0){
+		if ((spatial_getnbNp() > spatial_getnbRs()) and (spatial_getnbRr() !=0)){
+			Reparateur* pt = new Reparateur(tab_robot[0]->getForme().centre.x, 
+											tab_robot[0]->getForme().centre.y, p);
+			tab_robot.insert(tab_robot.begin()+1,pt);
+			tab_robot[0]->set_data("nbRs", spatial_getnbRs()+1);
+			tab_robot[0]->set_data("nbRr", spatial_getnbRr()-1);
+		} 
+		if (getnbP() > 3*spatial_getnbNs() and spatial_getnbNr() != 0){
+			double type((spatial_getnbNd()+spatial_getnbNs())%3);
+			Neutraliseur* pt = nullptr;
+			bool p=false;
+			S2d centre(tab_robot[0]->getForme().centre);
+				if (type == 1)	{
+					pt = new Neutra_0(centre.x, centre.y, default_orientation ,type ,
+								"false", spatial_getnbUpdate(), default_k_update,p);
+				} else if (type == 2) {
+					pt = new Neutra_1(centre.x, centre.y, default_orientation ,type ,
+								"false", spatial_getnbUpdate(), default_k_update,p);
+				} else if (type == 3) {
+					pt = new Neutra_2(centre.x, centre.y, default_orientation ,type ,
+								"false", spatial_getnbUpdate(), default_k_update,p);
+				}	
+			tab_robot.push_back(pt);
+			tab_robot[0]->set_data("nbNs", spatial_getnbNs()+1);
+			tab_robot[0]->set_data("nbNr", spatial_getnbNr()-1);
+		}
+	}
+	return;
+}
+			
+void deplacement_robot(){
+	for (size_t i(1); i < spatial_getnbRs()+spatial_getnbNs()+1 ; ++i){
+		tab_robot[i]->move();
+	}
+}
+
 S2d find_goal_if_outside_desintegration_area(double angle, double xt, double yt,
 											 double xr, double yr, double c) {
 	if ((angle > 0 and angle <= M_PI/4 and abs(yr - yt) <= c/2)
@@ -543,3 +659,4 @@ S2d find_goal_if_inside_desintegration_area(double angle, double xt, double yt,
 		return {xt + sign(xr - xt)*(c/2), yt - (c/2)};
 }
 	
+		

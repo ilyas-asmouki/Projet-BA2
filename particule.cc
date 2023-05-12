@@ -4,10 +4,10 @@
 
 #include <fstream>
 #include <iostream>
-#include <algorithm>
 #include "particule.h"
 #include "message.h"
 #include "constantes.h"
+#include <algorithm>
 
 static std::vector<Particule> tab_particule;
 
@@ -130,7 +130,7 @@ void new_particules(unsigned i, bool file_success) {
 	}
 }
 
-Carre get_particle_shape(size_t i)	{
+Carre get_particle_shape(size_t i) {
 	return tab_particule[i].getForme();
 }
 
