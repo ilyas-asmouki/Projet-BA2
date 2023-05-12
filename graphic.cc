@@ -25,7 +25,12 @@ void set_world() {
 
 void draw_circle(double xc, double yc, double radius, std::string color) {
     if (color == "blue")
+    {
+		(*ptcr)->set_source_rgb(1., 1., 1.);
+		(*ptcr)->arc(xc, yc, radius, 0, 2*M_PI);
+		(*ptcr)->fill();
         (*ptcr)->set_source_rgb(0.67, 0.85, 0.9);
+    }
     else if (color == "purple")
         (*ptcr)->set_source_rgb(0.5, 0., 1.);
     else if (color == "orange")
@@ -53,6 +58,9 @@ void draw_square(double xc, double yc, double length) {
 	(*ptcr)->set_line_width(0.5);
 	(*ptcr)->set_source_rgb(1, 0., 0.);
     (*ptcr)->rectangle(xc - length/2, yc - length/2, length, length);
+	(*ptcr)->stroke();
+	(*ptcr)->set_source_rgb(0, 0, 0);			// provisoire
+	(*ptcr)->rectangle(xc - length*risk_factor/2, yc - length*risk_factor/2, length*risk_factor, length*risk_factor);
 	(*ptcr)->stroke();
 	return;
 }
