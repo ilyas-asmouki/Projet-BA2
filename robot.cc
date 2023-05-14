@@ -835,7 +835,7 @@ void decontaminate()	{
 			tab_robot[i]->set_color(in_contact_with_particle(tab_robot[i]->getForme().centre) ? "purple" : "black");
 			SIDE side = tab_robot[i]->find_side(particle_to_destroy(tab_robot[i]->getForme().centre));
 			double angle = side*M_PI/2;
-			if (tab_robot[i]->get_data("orientation") - angle <= epsil_alignement)	{
+			if (abs(tab_robot[i]->get_data("orientation") - angle) <= epsil_alignement)	{
 				destroy_particle(particle_to_destroy(tab_robot[i]->getForme().centre));
 			}
 		}
