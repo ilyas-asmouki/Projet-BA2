@@ -52,7 +52,10 @@ S2d Robot::find_goal(Carre target) {
 		//~ return target.centre;
 	//~ else if (superposition_cerclecarre(c, forme, WITH_MARGIN)){
 		//~ return forme.centre;
-		
+
+void Robot::set_color(std::string c)	{
+	color = c;
+}
 
 S2d Neutra_1::find_goal(Carre target) {
 	double xr = forme.centre.x, yr = forme.centre.y;
@@ -572,6 +575,7 @@ unsigned find_indice(S2d temp){
 			return i;
 		}
 	}
+	return NULL_DATA;
 }
 
 void decision_reparateur(){
@@ -583,21 +587,7 @@ void decision_reparateur(){
 	for (size_t i(spatial_getnbRs()+1); i < tab_robot.size(); ++i){
 		if (tab_robot[i]->get_data("panne")){
 			S2d temp = LIMIT;
-			for (size_t j(0); j < tab_distance.size() ; ++j){
-				vect = {tab_robot[i]->getForme().centre.x - 
-					tab_robot[j+1]->getForme().centre.x , tab_robot[i]->getForme().centre.y - 
-					tab_robot[j+1]->getForme().centre.y };
-				dist = norme(vect);
-				if ((dist < tab_distance[j]) and  
-				dist < ((max_update - (spatial_getnbUpdate() - 
-				tab_robot[i]->get_data("k_update_panne"))) * vtran_max)){
-					tab_distance[j] = dist;
-					temp = tab_goal[j];
-					tab_goal[j] = tab_robot[i]->getForme().centre;	
-					k = j;
-					break;
-				}
-			}
+			find_first_repairer(tab_distance, tab_goal, k, i, temp);
 			if (temp.x != INFINI and temp.y != INFINI) {
 					i = find_indice(temp);
 					continue;
@@ -624,14 +614,39 @@ void decision_reparateur(){
 				continue;
 		}
 	}
-	for (size_t i(0); i < tab_distance.size() ; ++i){	
-			if (tab_distance[i] == INFINI)
-				tab_robot[i+1]->set_goal(tab_robot[0]->getForme().centre);
-			else 
-				tab_robot[i+1]->set_goal(tab_goal[i]);
+	give_goal_repairer(tab_distance, tab_goal);
+}
+
+void find_first_repairer(std::vector<double>& tab_distance,
+						 std::vector<S2d>& tab_goal, int& k, size_t i, S2d& temp)	{
+	S2d vect;
+	double dist;
+	for (size_t j(0); j < tab_distance.size() ; ++j){
+		vect = {tab_robot[i]->getForme().centre.x - 
+			tab_robot[j+1]->getForme().centre.x , tab_robot[i]->getForme().centre.y - 
+			tab_robot[j+1]->getForme().centre.y };
+		dist = norme(vect);
+		if ((dist < tab_distance[j]) and  
+		dist < ((max_update - (spatial_getnbUpdate() - 
+		tab_robot[i]->get_data("k_update_panne"))) * vtran_max)){
+			tab_distance[j] = dist;
+			temp = tab_goal[j];
+			tab_goal[j] = tab_robot[i]->getForme().centre;	
+			k = j;
+			return;
+		}
 	}
 }
-			
+
+void give_goal_repairer(std::vector<double>& tab_distance,
+						 std::vector<S2d>& tab_goal)	{
+	for (size_t i(0); i < tab_distance.size() ; ++i){	
+		if (tab_distance[i] == INFINI)
+			tab_robot[i+1]->set_goal(tab_robot[0]->getForme().centre);
+		else 
+			tab_robot[i+1]->set_goal(tab_goal[i]);
+	}
+}
 
 void decision_neutraliseur(Carre prt, std::vector<bool>& tab_neutra) {
 	S2d vect;
@@ -802,7 +817,7 @@ double set_orientation(S2d robot, Carre target) {
                      xt - xr + sign(xr - xt + sign(xt - xr)*(c/2))*(c/2));
 }
 
-SIDE Neutraliseur::find_side(S2d particle){
+SIDE Robot::find_side(S2d particle){
 	double angle(atan2(particle.y-forme.centre.y, particle.x-forme.centre.x));
 	if (angle >= -M_PI/4 and angle < M_PI/4)
 		return R;
@@ -813,4 +828,18 @@ SIDE Neutraliseur::find_side(S2d particle){
 	else 
 		return D;
 }
-	
+
+void decontaminate()	{
+	for (size_t i = spatial_getnbRs()+1; i < tab_robot.size(); ++i)	{
+		if (not tab_robot[i]->get_data("panne"))	{
+			tab_robot[i]->set_color(in_contact_with_particle(tab_robot[i]->getForme().centre) ? "purple" : "black");
+			SIDE side = tab_robot[i]->find_side(particle_to_destroy(tab_robot[i]->getForme().centre));
+			double angle = side*M_PI/2;
+			if (tab_robot[i]->get_data("orientation") - angle <= epsil_alignement)	{
+				destroy_particle(particle_to_destroy(tab_robot[i]->getForme().centre));
+			}
+		}
+	}
+}
+
+

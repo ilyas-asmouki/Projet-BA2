@@ -147,3 +147,35 @@ bool superposition_particle_robot_sim(Cercle robot){
 	}
 	return p;
 }
+
+bool in_contact_with_particle(S2d robot) {
+	bool collision = false;
+	for (size_t i = 0; i < tab_particule.size(); ++i)	{
+		if (superposition_cerclecarre(tab_particule[i].getForme(), {robot, r_neutraliseur}, WITH_MARGIN)) {
+			collision = true;
+			break;
+		}
+	}
+	return collision;
+}
+
+S2d particle_to_destroy(S2d robot)	{
+	S2d particle;
+	for (size_t i = 0; i < tab_particule.size(); ++i)	{
+		if (superposition_cerclecarre(tab_particule[i].getForme(), {robot, r_neutraliseur}, WITH_MARGIN)) {
+			particle = tab_particule[i].getForme().centre;
+			break;
+		}
+	}
+	return particle;
+}
+
+void destroy_particle(S2d particle)	{
+	for (size_t i = 0; i < tab_particule.size(); ++i)	{
+		if (tab_particule[i].getForme().centre.x == particle.x
+		and tab_particule[i].getForme().centre.y == particle.y)	{
+			tab_particule.erase(tab_particule.begin()+i);
+			return;
+		}
+	}
+}

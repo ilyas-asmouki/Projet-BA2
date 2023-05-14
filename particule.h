@@ -35,5 +35,8 @@ void new_particules(unsigned i, bool file_success);
 void sort_particle_vector();
 Carre get_particle_shape(size_t i);
 bool superposition_particle_robot_sim(Cercle robot);
+bool in_contact_with_particle(S2d robot);
+S2d particle_to_destroy(S2d robot);
+void destroy_particle(S2d particle);
 
 #endif

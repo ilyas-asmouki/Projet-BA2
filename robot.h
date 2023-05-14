@@ -9,7 +9,7 @@
 #include <vector>
 #include "shape.h"
 
-enum SIDE {R, U, L, D};
+enum SIDE {D=-1, R, U, L};
 
 class Robot {
 public :
@@ -26,6 +26,9 @@ public :
 	void set_goal(S2d new_goal);
 	virtual S2d find_goal(Carre target);
 	std::string getcolor();
+	void set_color(std::string c);
+	SIDE find_side(S2d particle);
+
 	 
 protected : 
 	Cercle forme;
@@ -81,7 +84,6 @@ protected :
 	unsigned type;
 	bool panne;
 	int k_update_panne;
-	SIDE find_side(S2d particle);
 };
 
 class Neutra_0 : public Neutraliseur {
@@ -138,7 +140,10 @@ S2d find_goal_if_outside_desintegration_area(double angle, double xt, double yt,
 											 double xr, double yr, double c);
 S2d find_goal_if_inside_desintegration_area(double angle, double xt, double yt,
 											 double xr, double yr, double c);
-											
-
+void find_first_repairer(std::vector<double>& tab_distance,
+						 std::vector<S2d>& tab_goal, int& k, size_t i, S2d& temp);
+void  give_goal_repairer(std::vector<double>& tab_distance,
+						 std::vector<S2d>& tab_goal);
+void decontaminate();
 
 #endif
