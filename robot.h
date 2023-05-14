@@ -78,6 +78,7 @@ public :
 	virtual double get_data(std::string data_type);
 	void move()=0;
 	virtual void set_data(std:: string data_type, double value);
+	void decontaminate();
 
 protected :
 	double  orientation;
@@ -144,6 +145,5 @@ void find_first_repairer(std::vector<double>& tab_distance,
 						 std::vector<S2d>& tab_goal, int& k, size_t i, S2d& temp);
 void  give_goal_repairer(std::vector<double>& tab_distance,
 						 std::vector<S2d>& tab_goal);
-void decontaminate();
 
 #endif

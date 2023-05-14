@@ -829,15 +829,13 @@ SIDE Robot::find_side(S2d particle){
 		return D;
 }
 
-void decontaminate()	{
-	for (size_t i = spatial_getnbRs()+1; i < tab_robot.size(); ++i)	{
-		if (not tab_robot[i]->get_data("panne"))	{
-			tab_robot[i]->set_color(in_contact_with_particle(tab_robot[i]->getForme().centre) ? "purple" : "black");
-			SIDE side = tab_robot[i]->find_side(particle_to_destroy(tab_robot[i]->getForme().centre));
-			double angle = side*M_PI/2;
-			if (abs(tab_robot[i]->get_data("orientation") - angle) <= epsil_alignement)	{
-				destroy_particle(particle_to_destroy(tab_robot[i]->getForme().centre));
-			}
+void Neutraliseur::decontaminate()	{
+	if (not panne)	{
+		set_color(in_contact_with_particle(forme.centre) ? "purple" : "black");
+		SIDE side = find_side(particle_to_destroy(forme.centre));
+		double angle = side*M_PI/2;
+		if (abs(orientation - angle) <= epsil_alignement)	{
+			destroy_particle(particle_to_destroy(forme.centre));
 		}
 	}
 }
