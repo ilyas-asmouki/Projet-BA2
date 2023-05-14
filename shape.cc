@@ -26,6 +26,18 @@ int sign(double value) {
 	return (( (value) < 0 ) ? -1 : ((value) > 0));
 }
 
+void adjust_angle(double& d_angle){
+	if (abs(d_angle) > M_PI){
+		while (d_angle < -M_PI){
+			d_angle = d_angle + M_PI;
+		}
+		while (d_angle > M_PI){
+			d_angle = d_angle - M_PI;
+		}
+	}
+	return;
+}
+
 bool superposition_carres(const Carre s1, const Carre s2, MARGIN margin) {
 	double d1 = s1.cote, d2 = s2.cote;
 	return (abs(s2.centre.x - s1.centre.x) < d1/2 + d2/2 + shape::epsil_zero*margin)
@@ -69,4 +81,3 @@ void dessin_orientation(Cercle cercle, double orientation) {
 	draw_orientation(cercle.centre.x, cercle.centre.y, cercle.rayon, orientation);
 	return;
 }
-
