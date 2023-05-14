@@ -817,7 +817,7 @@ double set_orientation(S2d robot, Carre target) {
                      xt - xr + sign(xr - xt + sign(xt - xr)*(c/2))*(c/2));
 }
 
-SIDE Robot::find_side(S2d particle){
+SIDE Neutraliseur::find_side(S2d particle){
 	double angle(atan2(particle.y-forme.centre.y, particle.x-forme.centre.x));
 	if (angle >= -M_PI/4 and angle < M_PI/4)
 		return R;

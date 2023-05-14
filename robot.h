@@ -27,8 +27,6 @@ public :
 	virtual S2d find_goal(Carre target);
 	std::string getcolor();
 	void set_color(std::string c);
-	SIDE find_side(S2d particle);
-
 	 
 protected : 
 	Cercle forme;
@@ -78,6 +76,7 @@ public :
 	virtual double get_data(std::string data_type);
 	void move()=0;
 	virtual void set_data(std:: string data_type, double value);
+	SIDE find_side(S2d particle);
 	void decontaminate();
 
 protected :
