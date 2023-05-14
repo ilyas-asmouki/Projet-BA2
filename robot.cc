@@ -12,6 +12,9 @@
 
 enum {SPATIAL=2, REPARATEUR, NEUTRALISEUR};
 
+constexpr double INFINI(9999999);
+constexpr S2d LIMIT({INFINI, INFINI});
+
 constexpr double NULL_DATA(0);
 constexpr double default_orientation(0);
 constexpr double default_k_update(0);
@@ -151,8 +154,7 @@ Neutra_2::Neutra_2(double x, double y, double orientation, unsigned type,
 {
 }
 	
-void Robot::TestCollision(bool& file_success)
-{
+void Robot::TestCollision(bool& file_success){
 	for (size_t i(1); i < tab_robot.size(); ++i) {
 		if (superposition_cercles(forme, tab_robot[i]->getForme(),NO_MARGIN)) {
 			if (forme.rayon == r_reparateur) {
@@ -207,13 +209,13 @@ void decodage_neutraliseur(std::istringstream& data, int nbUpdate, bool& file_su
 	int k_update_panne;
 	data >> x >> y >> orienta >> type >> panne >> k_update_panne;
 	Neutraliseur* pt = nullptr;
-	if (type == 1)	{
+	if (type == 0)	{
 		pt = new Neutra_0(x,y,orienta,type,panne,nbUpdate, k_update_panne,
 		file_success);
-	} else if (type == 2)	{
+	} else if (type == 1)	{
 		pt = new Neutra_1(x,y,orienta,type,panne,nbUpdate, k_update_panne,
 		file_success);
-	} else if (type == 3)	{
+	} else if (type == 2)	{
 		pt = new Neutra_2(x,y,orienta,type,panne,nbUpdate, k_update_panne,
 		file_success);
 	}
@@ -368,7 +370,6 @@ double Neutraliseur::get_data(std::string data_type) {
 		return panne;
 	else if (data_type == "k_update_panne")
 		return k_update_panne;
-	
 	return NULL_DATA;
 }
 
@@ -430,13 +431,31 @@ void Reparateur::move(){
 	} else {
 		add_scaled_vector(forme.centre, pos_to_goal, max_delta_tr/norm);
 	}
-	if (superposition_particle_robot_sim(forme) and superposition_robots_sim()){
+	if (superposition_particle_robot_sim(forme)){
 		forme.centre = temp;	
+	}
+	if (superposition_robots_sim()){
+		forme.centre = temp;
+		repair_neutra(goal);
 	}
 	return;
 }
 
+void Reparateur::repair_neutra(S2d goal){
+	for (size_t i(1 + spatial_getnbRs()); i < tab_robot.size(); ++i){
+		if (tab_robot[i]->get_data("panne") 
+		and goal.x == tab_robot[i]->getForme().centre.x 
+		and goal.y == tab_robot[i]->getForme().centre.y){
+			tab_robot[i]->set_data("panne", false);
+		}
+	}
+}
+				
+	
+
 void Neutra_0::move(){
+	if (forme.centre.x == goal.x and forme.centre.y == goal.y) 
+		return;
 	S2d pos_to_goal = {goal.x - forme.centre.x, goal.y - forme.centre.y};
 	double goal_a(atan2(pos_to_goal.y ,pos_to_goal.x));
 	double delta_a(goal_a - orientation);
@@ -449,7 +468,7 @@ void Neutra_0::move(){
 		S2d temp=forme.centre;
 		S2d travel_dir = {cos(orientation), sin(orientation)}; 
 		add_scaled_vector(forme.centre, travel_dir, max_delta_tr);
-		if (superposition_particle_robot_sim(forme) and superposition_robots_sim()){
+		if (superposition_particle_robot_sim(forme) or superposition_robots_sim()){
 			forme.centre = temp;
 			color = "purple";	
 		}
@@ -461,6 +480,8 @@ void Neutra_1::move(){
 }
 
 void Neutra_2::move(){
+	if (forme.centre.x == goal.x and forme.centre.y == goal.y) 
+		return;
 	S2d init_pos_to_goal = {goal.x - forme.centre.x, goal.y - forme.centre.y};
 	S2d travel_dir    = {cos(orientation), sin(orientation)}; 
 	double proj_goal= prod_scalaire(init_pos_to_goal, travel_dir);
@@ -542,54 +563,75 @@ void destroy_neutraliseurs(){
 	return;
 }
 			
+
+
+unsigned find_indice(S2d temp){
+	for (size_t i(1+spatial_getnbRs()); i < tab_robot.size(); ++i){
+		if (tab_robot[i]->getForme().centre.x == temp.x and 
+		tab_robot[i]->getForme().centre.y == temp.y) {
+			return i;
+		}
+	}
+}
+
 void decision_reparateur(){
-	std::vector <bool> tab_reparateur(spatial_getnbRs(), true);
+	std::vector <double> tab_distance(spatial_getnbRs(), INFINI);
+	std::vector <S2d> tab_goal(spatial_getnbRs(), LIMIT);
 	S2d vect;
 	double dist;
-	double dist_min;
 	int k = NO_TARGET;
 	for (size_t i(spatial_getnbRs()+1); i < tab_robot.size(); ++i){
 		if (tab_robot[i]->get_data("panne")){
-			for (size_t j(0); j < tab_reparateur.size() ; ++j){
-				if (tab_reparateur[j]) {
-					vect = {tab_robot[i]->getForme().centre.x - 
+			S2d temp = LIMIT;
+			for (size_t j(0); j < tab_distance.size() ; ++j){
+				vect = {tab_robot[i]->getForme().centre.x - 
 					tab_robot[j+1]->getForme().centre.x , tab_robot[i]->getForme().centre.y - 
 					tab_robot[j+1]->getForme().centre.y };
-					dist = norme(vect);
-					if (dist <= max_update - (spatial_getnbUpdate() -
-					tab_robot[i]->get_data("k_update_panne")) * vtran_max){
-						dist_min = dist;
-						k = j;
-						break;
-					}
+				dist = norme(vect);
+				if ((dist < tab_distance[j]) and  
+				dist < ((max_update - (spatial_getnbUpdate() - 
+				tab_robot[i]->get_data("k_update_panne"))) * vtran_max)){
+					tab_distance[j] = dist;
+					temp = tab_goal[j];
+					tab_goal[j] = tab_robot[i]->getForme().centre;	
+					k = j;
+					break;
 				}
-			 } 
-			 for (size_t l(k+1) ; l < tab_reparateur.size(); ++l){
-				 if (tab_reparateur[l]){
+			}
+			if (temp.x != INFINI and temp.y != INFINI) {
+					i = find_indice(temp);
+					continue;
+			} 
+			if (k != NO_TARGET){
+				for (size_t l(k+1) ; l < tab_distance.size(); ++l){
 					vect = {tab_robot[i]->getForme().centre.x - 
-						tab_robot[l+1]->getForme().centre.x , 
-						tab_robot[l+1]->getForme().centre.y - 
-						tab_robot[l+1]->getForme().centre.y };
+							tab_robot[l+1]->getForme().centre.x , 
+							tab_robot[l+1]->getForme().centre.y - 
+							tab_robot[l+1]->getForme().centre.y };
 					dist = norme(vect);
-					if (dist < dist_min) {
-						dist_min = dist;
+					if (dist < tab_distance[l]) {
 						k=l;
+						temp = tab_goal[l];
+						tab_distance[l] = dist;
+						tab_goal[l] = tab_robot[i]->getForme().centre;
 					}
-				}
-			}	
-		}		
-		if (k == NO_TARGET){
-			continue;
-		} else {
-			tab_reparateur[k] = false;
-			tab_robot[k+1]->set_goal(tab_robot[i]->getForme().centre);
+					if (temp.x != INFINI and temp.y != INFINI) {
+						i = find_indice(temp);
+						continue;
+					}
+				}	
+			} else
+				continue;
 		}
 	}
-	for (size_t i(0); i < tab_reparateur.size() ; ++i){
-		if (tab_reparateur[i])
-			tab_robot[i+1]->set_goal(tab_robot[0]->getForme().centre);
+	for (size_t i(0); i < tab_distance.size() ; ++i){	
+			if (tab_distance[i] == INFINI)
+				tab_robot[i+1]->set_goal(tab_robot[0]->getForme().centre);
+			else 
+				tab_robot[i+1]->set_goal(tab_goal[i]);
 	}
-}	
+}
+			
 
 void decision_neutraliseur(Carre prt, std::vector<bool>& tab_neutra) {
 	S2d vect;
@@ -654,18 +696,18 @@ void decision_creation_robot(){
 			tab_robot[0]->set_data("nbRs", spatial_getnbRs()+1);
 			tab_robot[0]->set_data("nbRr", spatial_getnbRr()-1);
 		} 
-		if (getnbP() > 3*spatial_getnbNs() and spatial_getnbNr() != 0){
+		if ((getnbP() > 3*spatial_getnbNs()) and (spatial_getnbNr() != 0)){
 			double type((spatial_getnbNd()+spatial_getnbNs())%3);
 			Neutraliseur* pt = nullptr;
 			bool p=false;
 			S2d centre(tab_robot[0]->getForme().centre);
-				if (type == 1)	{
+				if (type == 0)	{
 					pt = new Neutra_0(centre.x, centre.y, default_orientation ,type ,
 								"false", spatial_getnbUpdate(), default_k_update,p);
-				} else if (type == 2) {
+				} else if (type == 1) {
 					pt = new Neutra_1(centre.x, centre.y, default_orientation ,type ,
 								"false", spatial_getnbUpdate(), default_k_update,p);
-				} else if (type == 3) {
+				} else if (type == 2) {
 					pt = new Neutra_2(centre.x, centre.y, default_orientation ,type ,
 								"false", spatial_getnbUpdate(), default_k_update,p);
 				}	

@@ -60,6 +60,9 @@ public :
 	virtual double get_data(std::string data_type);
 	void move() override;
 	virtual void set_data(std:: string data_type, double value);
+
+private : 
+	void repair_neutra(S2d goal);
 };
 
 class Neutraliseur : public Robot {

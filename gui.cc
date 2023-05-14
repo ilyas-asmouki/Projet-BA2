@@ -11,7 +11,7 @@
 constexpr unsigned taille_dessin = 500;
 constexpr unsigned taille_fenetre = 600;
 constexpr unsigned aspect_ratio = 1.0;
-constexpr unsigned timer_update = 10;
+constexpr unsigned timer_update = 50;
 
 static std::ifstream empty;
 static void orthographic_projection(const Cairo::RefPtr<Cairo::Context>& cr, 
