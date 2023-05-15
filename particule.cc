@@ -148,7 +148,7 @@ bool superposition_particle_robot_sim(Cercle robot){
 	return p;
 }
 
-S2d particle_to_destroy(S2d robot)	{
+S2d particle_to_destroy(S2d robot) {
 	S2d particle;
 	for (size_t i = 0; i < tab_particule.size(); ++i)	{
 		if (superposition_cerclecarre(tab_particule[i].getForme(), {robot, r_neutraliseur}, WITH_MARGIN)) {

@@ -19,7 +19,6 @@ public :
 	S2d get_goal();
 	void TestCollision(bool& file_success);
 	bool superposition_robots_sim();
-	
 	virtual double get_data(std::string data_type)=0;
 	virtual void move()=0;
 	virtual void set_data(std:: string data_type, double value)=0;
@@ -68,22 +67,23 @@ private :
 
 class Neutraliseur : public Robot {
 public :
+	void decontaminate();
 	Neutraliseur(double x, double y, double orientation, unsigned type,
 				 std::string bool_panne, int nbUpdate, int k_update_panne, 
 				 bool& file_success);
 	virtual ~Neutraliseur();
 	void error_k_update(int nbUpdate, bool& file_success);
 	virtual double get_data(std::string data_type);
-	void move()=0;
+	void move();
 	virtual void set_data(std:: string data_type, double value);
-	SIDE find_side(S2d particle);
-	void decontaminate();
+	S2d find_goal(Carre target);
 
 protected :
 	double  orientation;
 	unsigned type;
 	bool panne;
 	int k_update_panne;
+	SIDE find_side(S2d particle);
 };
 
 class Neutra_0 : public Neutraliseur {
@@ -92,7 +92,7 @@ public :
 			 std::string bool_panne, int nbUpdate, int k_update_panne, 
 			 bool& file_success);
 	~Neutra_0(){}
-	void move() override;
+	//~ void move() override;
 };
 
 class Neutra_1 : public Neutraliseur {
@@ -101,7 +101,7 @@ public :
 			 std::string bool_panne, int nbUpdate, int k_update_panne, 
 			 bool& file_success);
 	~Neutra_1(){}
-	void move() override;
+	//~ void move() override;
 	virtual S2d find_goal(Carre target);
 };
 
@@ -140,9 +140,9 @@ S2d find_goal_if_outside_desintegration_area(double angle, double xt, double yt,
 											 double xr, double yr, double c);
 S2d find_goal_if_inside_desintegration_area(double angle, double xt, double yt,
 											 double xr, double yr, double c);
-void find_first_repairer(std::vector<double>& tab_distance,
-						 std::vector<S2d>& tab_goal, int& k, size_t i, S2d& temp);
-void  give_goal_repairer(std::vector<double>& tab_distance,
-						 std::vector<S2d>& tab_goal);
+											
+void find_first_repairer(std::vector<double>& tab_distance, 
+						 std::vector<S2d>& tab_goal ,int& k, size_t i, S2d& temp);
+void give_goal_repairer(std::vector<double>& tab_distance, std::vector<S2d>& tab_goal);
 
 #endif
