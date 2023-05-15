@@ -5,11 +5,11 @@
 #include <iostream>
 #include <array>
 #include <fstream>
+#include <cmath>
 #include "robot.h"
 #include "message.h"
 #include "constantes.h"
 #include "particule.h"
-#include <cmath>
 
 enum {SPATIAL=2, REPARATEUR, NEUTRALISEUR};
 
@@ -52,7 +52,6 @@ S2d Neutraliseur::find_goal(Carre target) {
 			return target.centre;
 	} else {
 		color = "purple";
-		//~ std::cout<<"qqqqqq"<<std::endl;
 		return forme.centre;
 	}
 }
@@ -468,7 +467,7 @@ void Neutraliseur::move(){
 	adjust_angle(delta_a);
 	if((fabs(delta_a) <= max_delta_rt) and (delta_a != 0)) {
 		orientation = goal_a;
-	} else if (abs(delta_a) > max_delta_rt) {
+	} else if (fabs(delta_a) > max_delta_rt) {
 		orientation += ((delta_a > 0) ?  1. : -1.)*max_delta_rt;
 	} else {
 		S2d temp=forme.centre;
@@ -483,7 +482,7 @@ void Neutraliseur::move(){
 			color = "purple";
 			decontaminate();
 		}
-	}		
+	}
 	return;
 }
 
