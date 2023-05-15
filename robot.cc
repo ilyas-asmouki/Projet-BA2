@@ -9,6 +9,7 @@
 #include "message.h"
 #include "constantes.h"
 #include "particule.h"
+#include <cmath>
 
 enum {SPATIAL=2, REPARATEUR, NEUTRALISEUR};
 
@@ -51,6 +52,7 @@ S2d Neutraliseur::find_goal(Carre target) {
 			return target.centre;
 	} else {
 		color = "purple";
+		//~ std::cout<<"qqqqqq"<<std::endl;
 		return forme.centre;
 	}
 }
@@ -457,13 +459,14 @@ void Reparateur::repair_neutra(S2d goal){
 }
 				
 void Neutraliseur::move(){
+	color = "black";
 	//~ if (forme.centre.x == goal.x and forme.centre.y == goal.y) 
 		//~ return;
 	S2d pos_to_goal = {goal.x - forme.centre.x, goal.y - forme.centre.y};
 	double goal_a(atan2(pos_to_goal.y ,pos_to_goal.x));
 	double delta_a(goal_a - orientation);
 	adjust_angle(delta_a);
-	if((abs(delta_a) <= max_delta_rt)) {
+	if((fabs(delta_a) <= max_delta_rt) and (delta_a != 0)) {
 		orientation = goal_a;
 	} else if (abs(delta_a) > max_delta_rt) {
 		orientation += ((delta_a > 0) ?  1. : -1.)*max_delta_rt;
@@ -480,7 +483,7 @@ void Neutraliseur::move(){
 			color = "purple";
 			decontaminate();
 		}
-	}
+	}		
 	return;
 }
 

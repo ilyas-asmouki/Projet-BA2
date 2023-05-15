@@ -28,7 +28,7 @@ int sign(double value) {
 
 void adjust_angle(double& d_angle){
 	if (abs(d_angle) > M_PI){
-		while (d_angle < -M_PI){
+		while (d_angle <= -M_PI){
 			d_angle = d_angle + M_PI;
 		}
 		while (d_angle > M_PI){
