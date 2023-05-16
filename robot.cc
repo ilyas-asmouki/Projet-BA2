@@ -5,11 +5,11 @@
 #include <iostream>
 #include <array>
 #include <fstream>
-#include <cmath>
 #include "robot.h"
 #include "message.h"
 #include "constantes.h"
 #include "particule.h"
+#include <cmath>
 
 enum {SPATIAL=2, REPARATEUR, NEUTRALISEUR};
 
@@ -44,7 +44,7 @@ S2d Robot::find_goal(Carre target) {
 
 S2d Neutraliseur::find_goal(Carre target) {
 	if (!superposition_cerclecarre(target, forme, WITH_MARGIN)){
-		color = "black";
+		//~ color = "black";
 		if (superposition_robots_sim()){
 			color = "purple";
 			return forme.centre;
@@ -79,7 +79,6 @@ S2d Neutra_1::find_goal(Carre target) {
 Spatial::Spatial(double x, double y, int nbUpdate, unsigned nbNr, unsigned nbNs,
 	  unsigned nbNd, unsigned nbRr, unsigned nbRs, bool& file_success): Robot(x, y), 
 	  nbUpdate(nbUpdate), nbNr(nbNr), nbNs(nbNs), nbNd(nbNd), nbRr(nbRr), nbRs(nbRs){
-
 	color = "blue";
 	forme.rayon=r_spatial;
 	error_outside(file_success);
@@ -395,6 +394,9 @@ void Neutraliseur::set_data(std::string data_type, double value){
 		panne = value;
 	if (data_type == "k_update_panne")
 		k_update_panne = value;
+	if (data_type == "orientation"){
+		orientation = value;
+	}
 	return;
 }
 
@@ -458,17 +460,29 @@ void Reparateur::repair_neutra(S2d goal){
 }
 				
 void Neutraliseur::move(){
-	color = "black";
-	//~ if (forme.centre.x == goal.x and forme.centre.y == goal.y) 
-		//~ return;
 	S2d pos_to_goal = {goal.x - forme.centre.x, goal.y - forme.centre.y};
 	double goal_a(atan2(pos_to_goal.y ,pos_to_goal.x));
 	double delta_a(goal_a - orientation);
-	adjust_angle(delta_a);
-	if((fabs(delta_a) <= max_delta_rt) and (delta_a != 0)) {
+	//~ adjust_angle(delta_a);
+	//~ std::cout<<goal_a<<std::endl;
+	//~ std::cout<<delta_a<<std::endl;
+	if (delta_a > M_PI)
+		delta_a = 2*M_PI - delta_a;
+	else if (delta_a < -1*M_PI)
+		delta_a = 2*M_PI + delta_a;
+	if((fabs(delta_a) <= max_delta_rt) and (delta_a != 0) and color != "purple"){
 		orientation = goal_a;
-	} else if (fabs(delta_a) > max_delta_rt) {
-		orientation += ((delta_a > 0) ?  1. : -1.)*max_delta_rt;
+	} else if (fabs(delta_a) > max_delta_rt and color != "purple") {
+		if (orientation < 0 and goal_a > 0){
+			//~ if (goal_a < M_PI/2){
+				if (fabs(orientation > goal_a))
+					orientation += ((goal_a < M_PI + orientation) ?  1. : -1.)*max_delta_rt;
+				else
+					orientation += ((goal_a > M_PI + orientation) ?  -1. : 1.)*max_delta_rt;
+			//~ } else {
+				
+		} else
+			orientation += ((delta_a > 0) ?  1. : -1.)*max_delta_rt;
 	} else {
 		S2d temp=forme.centre;
 		S2d travel_dir = {cos(orientation), sin(orientation)}; 
@@ -482,23 +496,32 @@ void Neutraliseur::move(){
 			color = "purple";
 			decontaminate();
 		}
-	}
+	}		
 	return;
 }
 
 void Neutraliseur::decontaminate() {
 	if (not panne)	{
-		//~ SIDE side = find_side(particle_to_destroy(forme.centre));
-		SIDE side = find_side(particle_to_destroy(goal));
-		double angle = M_PI - side*M_PI/2;
-		//~ std::cout<<side<<","<<angle<<std::endl;
-		if (abs(orientation - angle) <= epsil_alignement){
-			//~ std::cout<<"zzzzzz"<<std::endl;
-			//~ destroy_particle(particle_to_destroy(forme.centre));
+		//~ SIDE side = find_side(particle_to_destroy(goal));
+		SIDE side = find_side(goal);
+		double angle =(M_PI + (side*M_PI/2));
+		if (angle == 2*M_PI)
+			angle = 0;
+		double delta_a(orientation - angle);
+		adjust_angle(delta_a);
+		if (fabs(delta_a) <= epsil_alignement){
 			destroy_particle(goal);
-		}
+			color = "black";
+		} else {
+			if((fabs(delta_a) <= max_delta_rt)) {
+				orientation = angle;
+			} else if (fabs(delta_a) > max_delta_rt) {
+				orientation += ((delta_a > 0) ?  -1. : 1.)*max_delta_rt;	
+			}
+		}		
 	}
 }
+
 
 //~ void Neutra_1::move(){
 //~ }
@@ -513,15 +536,15 @@ void Neutra_2::move(){
 	SIDE side=find_side(goal);
 	delta_a = side*M_PI/2 - orientation;
 	adjust_angle(delta_a);	
-	if (abs(delta_a) >= M_PI/3){
+	if (fabs(delta_a) >= M_PI/3){
 		//~ if (abs(goal_a - orientation) <= max_delta_rt){
 			//~ orientation = goal_a;
 			//~ return;
 		//~ } else {
 			orientation += ((delta_a > 0) ?  1. : -1.)*max_delta_rt;
 			return;
-	} else if (abs(delta_a) < epsil_alignement) {
-		if(abs(proj_goal) > max_delta_tr){ 
+	} else if (fabs(delta_a) < epsil_alignement) {
+		if(fabs(proj_goal) > max_delta_tr){ 
 			proj_goal = ((proj_goal > 0) ? 1 : -1)*max_delta_tr;
 		}
 		add_scaled_vector(forme.centre, travel_dir, proj_goal);
@@ -535,8 +558,8 @@ void Neutra_2::move(){
 			//~ orientation += ((alpha > 0) ?  1. : -1.)*max_delta_rt;
 		//~ }
 	} else {
-		double v_tran = abs(proj_goal)*vrot_max/abs(delta_a);
-		if(abs(proj_goal) > v_tran*delta_t){ 
+		double v_tran = fabs(proj_goal)*vrot_max/fabs(delta_a);
+		if(fabs(proj_goal) > v_tran*delta_t){ 
 			proj_goal = ((proj_goal > 0) ? 1 : -1)*v_tran*delta_t;
 		}
 		S2d temp = forme.centre;
@@ -552,12 +575,12 @@ void Neutra_2::move(){
 		}
 		//~ S2d updated_pos_to_goal = {goal.x - forme.centre.x, goal.y - forme.centre.y};
 		//~ double goal_a(atan2(updated_pos_to_goal.y ,updated_pos_to_goal.x));
-		if(abs(delta_a) <= max_delta_rt) {
-			orientation = side*M_PI/2 + M_PI - delta_a;
-			adjust_angle(orientation);
-		} else {
-			orientation += ((delta_a > 0) ?  1. : -1.)*max_delta_rt;
-		}
+		//~ if(fabs(delta_a) <= max_delta_rt) {
+			//~ orientation = side*M_PI/2 + M_PI - delta_a;
+			//~ adjust_angle(orientation);
+		//~ } else {
+			//~ orientation += ((delta_a > 0) ?  1. : -1.)*max_delta_rt;
+		//~ }
 	}	
 	return;
 }
@@ -752,31 +775,31 @@ void deplacement_robot(){
 
 S2d find_goal_if_outside_desintegration_area(double angle, double xt, double yt,
 											 double xr, double yr, double c) {
-	if ((angle > 0 and angle <= M_PI/4 and abs(yr - yt) <= c/2)
-		 or (angle <= 0 and angle >= -M_PI/4 and abs(yr - yt) <= c/2))
+	if ((angle > 0 and angle <= M_PI/4 and fabs(yr - yt) <= c/2)
+		 or (angle <= 0 and angle >= -M_PI/4 and fabs(yr - yt) <= c/2))
 		return {xt + (c/2)*risk_factor, yr};
-	else if (angle > 0 and angle <= M_PI/4 and abs(yr - yt) > c/2)
+	else if (angle > 0 and angle <= M_PI/4 and fabs(yr - yt) > c/2)
 		return {xt + (c/2)*risk_factor, yt + (c/2)};
-	else if (angle > M_PI/4 and angle <= M_PI/2 and abs(xr - xt) > c/2)
+	else if (angle > M_PI/4 and angle <= M_PI/2 and fabs(xr - xt) > c/2)
 		return {xt + (c/2), yt + (c/2)*risk_factor};
-	else if ((angle > M_PI/4 and angle <= M_PI/2 and abs(xr - xt) <= c/2)
-			  or (angle > M_PI/2 and angle <= 3*M_PI/4 and abs(xr - xt) <= c/2))
+	else if ((angle > M_PI/4 and angle <= M_PI/2 and fabs(xr - xt) <= c/2)
+			  or (angle > M_PI/2 and angle <= 3*M_PI/4 and fabs(xr - xt) <= c/2))
 		return {xr, yt + (c/2)*risk_factor};
-	else if (angle > M_PI/2 and angle <= 3*M_PI/4 and abs(xr - xt) > c/2)
+	else if (angle > M_PI/2 and angle <= 3*M_PI/4 and fabs(xr - xt) > c/2)
 		return {xt - (c/2), yt + (c/2)*risk_factor};
-	else if (angle > 3*M_PI/4 and angle <= M_PI and abs(yr - yt) > c/2)
+	else if (angle > 3*M_PI/4 and angle <= M_PI and fabs(yr - yt) > c/2)
 		return {xt - (c/2)*risk_factor, yt + (c/2)};
-	else if ((angle > 3*M_PI/4 and angle <= M_PI and abs(yr - yt) <= c/2)
-			  or (angle < -3*M_PI/4 and angle >= -M_PI and abs(yr - yt) <= c/2))
+	else if ((angle > 3*M_PI/4 and angle <= M_PI and fabs(yr - yt) <= c/2)
+			  or (angle < -3*M_PI/4 and angle >= -M_PI and fabs(yr - yt) <= c/2))
 		return {xt - (c/2)*risk_factor, yr};
-	else if (angle < -3*M_PI/4 and angle >= -M_PI and abs(yr - yt) > c/2)
+	else if (angle < -3*M_PI/4 and angle >= -M_PI and fabs(yr - yt) > c/2)
 		return {xt - (c/2)*risk_factor, yt - (c/2)};
-	else if (angle < -M_PI/2 and angle >= -3*M_PI/4 and abs(xr - xt) > c/2)
+	else if (angle < -M_PI/2 and angle >= -3*M_PI/4 and fabs(xr - xt) > c/2)
 		return {xt - (c/2), yt - (c/2)*risk_factor};
-	else if ((angle < -M_PI/2 and angle >= -3*M_PI/4 and abs(xr - xt) <= c/2)
-			  or (angle < -M_PI/4 and angle >= -M_PI/2 and abs(xr - xt) <= c/2))
+	else if ((angle < -M_PI/2 and angle >= -3*M_PI/4 and fabs(xr - xt) <= c/2)
+			  or (angle < -M_PI/4 and angle >= -M_PI/2 and fabs(xr - xt) <= c/2))
 		return {xr, yt - (c/2)*risk_factor};
-	else if (angle < -M_PI/4 and angle >= -M_PI/2 and abs(xr - xt) > c/2)
+	else if (angle < -M_PI/4 and angle >= -M_PI/2 and fabs(xr - xt) > c/2)
 		return {xt + (c/2), yt - (c/2)*risk_factor};
 	else
 		return {xt + (c/2)*risk_factor, yt - (c/2)};
@@ -785,19 +808,19 @@ S2d find_goal_if_outside_desintegration_area(double angle, double xt, double yt,
 
 S2d find_goal_if_inside_desintegration_area(double angle, double xt, double yt,
 											 double xr, double yr, double c) {
-	if (angle <= M_PI/4 and angle >= -M_PI/4 and abs(yr - yt) <= c/2)
+	if (angle <= M_PI/4 and angle >= -M_PI/4 and fabs(yr - yt) <= c/2)
 		return {xt + (c/2), yr};
-	else if (angle <= M_PI/4 and angle >= -M_PI/4 and abs(yr - yt) > c/2)
+	else if (angle <= M_PI/4 and angle >= -M_PI/4 and fabs(yr - yt) > c/2)
 		return {xt + (c/2), yt + sign(yr - yt)*(c/2)};
-	else if (angle <= 3*M_PI/4 and angle >= M_PI/4 and abs(xr - xt) <= c/2)
+	else if (angle <= 3*M_PI/4 and angle >= M_PI/4 and fabs(xr - xt) <= c/2)
 		return {xr, yt + (c/2)};
-	else if (angle <= 3*M_PI/4 and angle >= M_PI/4 and abs(xr - xt) > c/2)
+	else if (angle <= 3*M_PI/4 and angle >= M_PI/4 and fabs(xr - xt) > c/2)
 		return {xt + sign(xr - xt)*(c/2), yt + (c/2)};
-	else if (abs(angle) >= 3*M_PI/4 and abs(yr - yt) <= c/2)
+	else if (fabs(angle) >= 3*M_PI/4 and fabs(yr - yt) <= c/2)
 		return {xt - (c/2), yr};
-	else if (abs(angle) >= 3*M_PI/4 and abs(yr - yt) > c/2)
+	else if (fabs(angle) >= 3*M_PI/4 and fabs(yr - yt) > c/2)
 		return {xt - (c/2), yt + sign(yr - yt)*(c/2)};
-	else if (angle <= -M_PI/4 and angle >= -3*M_PI/4 and abs(xr - xt) <= c/2)
+	else if (angle <= -M_PI/4 and angle >= -3*M_PI/4 and fabs(xr - xt) <= c/2)
 		return {xr, yt - (c/2)};
 	else 
 		return {xt + sign(xr - xt)*(c/2), yt - (c/2)};
@@ -815,17 +838,17 @@ bool Robot::superposition_robots_sim() {
 	return p;
 }
 
-double set_orientation(S2d robot, Carre target) {
-    double xr = robot.x, yr = robot.y;
-    double xt = target.centre.x, yt = target.centre.y, c = target.cote;
-    if (abs(yt - yr) <= c/2)
-        return ((xr < xt) ? 0 : M_PI);
-    else if (abs(xt - xr) <= c/2)
-        return sign(yt - yr)*M_PI/2;
-    else
-        return atan2(yt - yr + sign(yr - yt + sign(yt - yr)*(c/2))*(c/2),
-                     xt - xr + sign(xr - xt + sign(xt - xr)*(c/2))*(c/2));
-}
+//~ double set_orientation(S2d robot, Carre target) {
+    //~ double xr = robot.x, yr = robot.y;
+    //~ double xt = target.centre.x, yt = target.centre.y, c = target.cote;
+    //~ if (fabs(yt - yr) <= c/2)
+        //~ return ((xr < xt) ? 0 : M_PI);
+    //~ else if (fabs(xt - xr) <= c/2)
+        //~ return sign(yt - yr)*M_PI/2;
+    //~ else
+        //~ return atan2(yt - yr + sign(yr - yt + sign(yt - yr)*(c/2))*(c/2),
+                     //~ xt - xr + sign(xr - xt + sign(xt - xr)*(c/2))*(c/2));
+//~ }
 
 SIDE Neutraliseur::find_side(S2d particle){
 	double angle(atan2(forme.centre.y-particle.y, forme.centre.x-particle.x));

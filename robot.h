@@ -79,7 +79,7 @@ public :
 	S2d find_goal(Carre target);
 
 protected :
-	double  orientation;
+	double orientation;
 	unsigned type;
 	bool panne;
 	int k_update_panne;
@@ -144,5 +144,6 @@ S2d find_goal_if_inside_desintegration_area(double angle, double xt, double yt,
 void find_first_repairer(std::vector<double>& tab_distance, 
 						 std::vector<S2d>& tab_goal ,int& k, size_t i, S2d& temp);
 void give_goal_repairer(std::vector<double>& tab_distance, std::vector<S2d>& tab_goal);
+unsigned find_indice(S2d temp);
 
 #endif
