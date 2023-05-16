@@ -37,5 +37,6 @@ Carre get_particle_shape(size_t i);
 bool superposition_particle_robot_sim(Cercle robot);
 S2d particle_to_destroy(S2d robot);
 void destroy_particle(S2d particle);
+Carre find_particule(S2d prt);
 
 #endif

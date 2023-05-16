@@ -56,25 +56,59 @@ S2d Neutraliseur::find_goal(Carre target) {
 	}
 }
 		
-S2d Neutra_1::find_goal(Carre target) {
-	double xr = forme.centre.x, yr = forme.centre.y;
-	double xt = target.centre.x, yt = target.centre.y;
-	double c = target.cote;
-	double angle = atan2(yr - yt, xr - xt);
-	Carre risk_zone = {{target.centre.x, target.centre.y}, target.cote * risk_factor}; 
-	double delta_angle = angle - orientation;
-	adjust_angle(delta_angle);
+//~ S2d Neutra_1::find_goal(Carre target) {
+	//~ double xr = forme.centre.x, yr = forme.centre.y;
+	//~ double xt = target.centre.x, yt = target.centre.y;
+	//~ double c = target.cote;
+	//~ double angle = atan2(yr - yt, xr - xt);
+	//~ Carre risk_zone = {{target.centre.x, target.centre.y}, target.cote * risk_factor}; 
+	//~ double delta_angle = angle - orientation;
+	//~ if (delta_angle > M_PI)
+		//~ delta_angle = 2*M_PI - delta_angle;
+	//~ else if (delta_angle < -1*M_PI)
+		//~ delta_angle = 2*M_PI + delta_angle;
+	//~ adjust_angle(delta_angle);
 	
-	if (!superposition_cerclecarre(risk_zone, forme, WITH_MARGIN)){
-		color = "black";
-		return find_goal_if_outside_desintegration_area(angle, xt, yt, xr, yr, c);
-	} else if ((superposition_cerclecarre(risk_zone, forme, WITH_MARGIN)) 
-				and (delta_angle > epsil_alignement)){
-		return forme.centre;
+	//~ if (!superposition_cerclecarre(risk_zone, forme, WITH_MARGIN)){
+		//~ color = "black";
+		//~ return find_goal_if_outside_desintegration_area(angle, xt, yt, xr, yr, c);
+	//~ } else if ((superposition_cerclecarre(risk_zone, forme, WITH_MARGIN)) 
+				//~ and (delta_angle > epsil_alignement)){
+		//~ return target.centre;
+	//~ } else {
+		//~ return find_goal_if_inside_desintegration_area(angle, xt, yt, xr, yr, c);
+	//~ }	
+//~ }
+
+S2d Neutra_1::find_goal(Carre target){
+	double xt = target.centre.x, yt = target.centre.y, c = target.cote;
+	double xr = forme.centre.x, yr = forme.centre.y;
+	SIDE side(find_side(target.centre));
+	double angle = M_PI + side*M_PI/2;
+	if (angle == 2*M_PI)
+		angle = 0;
+	Carre risk_zone = {{xt, yt}, c*risk_factor +50*shape::epsil_zero};
+	std::cout<<(superposition_cerclecarre(risk_zone, forme, WITH_MARGIN))<<std::endl;
+	if (xr != goal.x and yr != goal.y and !superposition_cerclecarre(risk_zone, forme, WITH_MARGIN)){ 
+		if (side == D)
+			return {xt, yt - risk_factor * c/2 - 50*shape::epsil_zero};
+		else if (side == R)
+			return {xt + c/2 *risk_factor + 50*shape::epsil_zero, yt};
+		else if (side == U)
+			return {xt, yt + risk_factor * c/2 + 50*shape::epsil_zero};
+		else
+			return {xt - c/2 *risk_factor - 50*shape::epsil_zero, yt};
 	} else {
-		return find_goal_if_inside_desintegration_area(angle, xt, yt, xr, yr, c);
-	}	
-}	
+		if (side == D)
+			return {xr, yt - c/2};
+		else if (side == R)
+			return {xt + c/2, yr};
+		else if (side == U)
+			return {xr, yt + c/2};
+		else
+			return {xt - c/2 , yr};
+	}
+}
 
 Spatial::Spatial(double x, double y, int nbUpdate, unsigned nbNr, unsigned nbNs,
 	  unsigned nbNd, unsigned nbRr, unsigned nbRs, bool& file_success): Robot(x, y), 
@@ -463,9 +497,6 @@ void Neutraliseur::move(){
 	S2d pos_to_goal = {goal.x - forme.centre.x, goal.y - forme.centre.y};
 	double goal_a(atan2(pos_to_goal.y ,pos_to_goal.x));
 	double delta_a(goal_a - orientation);
-	//~ adjust_angle(delta_a);
-	//~ std::cout<<goal_a<<std::endl;
-	//~ std::cout<<delta_a<<std::endl;
 	if (delta_a > M_PI)
 		delta_a = 2*M_PI - delta_a;
 	else if (delta_a < -1*M_PI)
@@ -474,13 +505,10 @@ void Neutraliseur::move(){
 		orientation = goal_a;
 	} else if (fabs(delta_a) > max_delta_rt and color != "purple") {
 		if (orientation < 0 and goal_a > 0){
-			//~ if (goal_a < M_PI/2){
-				if (fabs(orientation > goal_a))
-					orientation += ((goal_a < M_PI + orientation) ?  1. : -1.)*max_delta_rt;
-				else
-					orientation += ((goal_a > M_PI + orientation) ?  -1. : 1.)*max_delta_rt;
-			//~ } else {
-				
+			if (fabs(orientation > goal_a))
+				orientation += ((goal_a < M_PI + orientation) ?  1. : -1.)*max_delta_rt;
+			else
+				orientation += ((goal_a > M_PI + orientation) ?  -1. : 1.)*max_delta_rt;
 		} else
 			orientation += ((delta_a > 0) ?  1. : -1.)*max_delta_rt;
 	} else {
@@ -490,11 +518,16 @@ void Neutraliseur::move(){
 		if  (superposition_robots_sim()){
 			forme.centre = temp;
 			color = "purple";	
+		} else {
+			color = "black";
 		}
 		if (superposition_particle_robot_sim(forme)){
+			goal = particle_to_destroy(forme.centre);
 			forme.centre = temp;
 			color = "purple";
 			decontaminate();
+		} else {
+			color = "black";
 		}
 	}		
 	return;
@@ -502,16 +535,13 @@ void Neutraliseur::move(){
 
 void Neutraliseur::decontaminate() {
 	if (not panne)	{
-		//~ SIDE side = find_side(particle_to_destroy(goal));
-		SIDE side = find_side(goal);
-		double angle =(M_PI + (side*M_PI/2));
-		if (angle == 2*M_PI)
-			angle = 0;
+		Carre prt(find_particule(goal));
+		double angle = set_orientation(forme.centre, prt);
 		double delta_a(orientation - angle);
 		adjust_angle(delta_a);
+		std::cout<<delta_a<<std::endl;
 		if (fabs(delta_a) <= epsil_alignement){
 			destroy_particle(goal);
-			color = "black";
 		} else {
 			if((fabs(delta_a) <= max_delta_rt)) {
 				orientation = angle;
@@ -522,13 +552,48 @@ void Neutraliseur::decontaminate() {
 	}
 }
 
-
 //~ void Neutra_1::move(){
+	//~ S2d pos_to_goal = {goal.x - forme.centre.x, goal.y - forme.centre.y};
+	//~ double goal_a(atan2(pos_to_goal.y ,pos_to_goal.x));
+	//~ double delta_a(goal_a - orientation);
+	//~ if (delta_a > M_PI)
+		//~ delta_a = 2*M_PI - delta_a;
+	//~ else if (delta_a < -1*M_PI)
+		//~ delta_a = 2*M_PI + delta_a;
+	//~ if((fabs(delta_a) <= max_delta_rt) and (delta_a != 0) and color != "purple"){
+		//~ orientation = goal_a;
+	//~ } else if (fabs(delta_a) > max_delta_rt and color != "purple") {
+		//~ if (orientation < 0 and goal_a > 0){
+			//~ if (fabs(orientation > goal_a))
+				//~ orientation += ((goal_a < M_PI + orientation) ?  1. : -1.)*max_delta_rt;
+			//~ else
+				//~ orientation += ((goal_a > M_PI + orientation) ?  -1. : 1.)*max_delta_rt;
+		//~ } else
+			//~ orientation += ((delta_a > 0) ?  1. : -1.)*max_delta_rt;
+	//~ } else {
+		//~ S2d temp=forme.centre;
+		//~ S2d travel_dir = {cos(orientation), sin(orientation)}; 
+		//~ add_scaled_vector(forme.centre, travel_dir, max_delta_tr);
+		//~ if  (superposition_robots_sim()){
+			//~ forme.centre = temp;
+			//~ color = "purple";	
+		//~ } else {
+			//~ color = "black";
+		//~ }
+		//~ if (superposition_particle_robot_sim(forme)){
+			//~ goal = particle_to_destroy(forme.centre);
+			//~ forme.centre = temp;
+			//~ color = "purple";
+			//~ decontaminate();
+		//~ } else {
+			//~ color = "black";
+		//~ }
+	//~ }		
+	//~ return;
 //~ }
+	
 
 void Neutra_2::move(){
-	//~ if (forme.centre.x == goal.x and forme.centre.y == goal.y) 
-		//~ return;
 	S2d init_pos_to_goal = {goal.x - forme.centre.x, goal.y - forme.centre.y};
 	S2d travel_dir    = {cos(orientation), sin(orientation)}; 
 	double proj_goal= prod_scalaire(init_pos_to_goal, travel_dir);
@@ -779,30 +844,30 @@ S2d find_goal_if_outside_desintegration_area(double angle, double xt, double yt,
 		 or (angle <= 0 and angle >= -M_PI/4 and fabs(yr - yt) <= c/2))
 		return {xt + (c/2)*risk_factor, yr};
 	else if (angle > 0 and angle <= M_PI/4 and fabs(yr - yt) > c/2)
-		return {xt + (c/2)*risk_factor, yt + (c/2)};
+		return {xt + (c/2)*risk_factor, yt + (c/2)- r_neutraliseur - c/6};
 	else if (angle > M_PI/4 and angle <= M_PI/2 and fabs(xr - xt) > c/2)
-		return {xt + (c/2), yt + (c/2)*risk_factor};
+		return {xt + (c/2) - r_neutraliseur - c/6 , yt + (c/2)*risk_factor}; 
 	else if ((angle > M_PI/4 and angle <= M_PI/2 and fabs(xr - xt) <= c/2)
 			  or (angle > M_PI/2 and angle <= 3*M_PI/4 and fabs(xr - xt) <= c/2))
 		return {xr, yt + (c/2)*risk_factor};
 	else if (angle > M_PI/2 and angle <= 3*M_PI/4 and fabs(xr - xt) > c/2)
-		return {xt - (c/2), yt + (c/2)*risk_factor};
+		return {xt - (c/2) + r_neutraliseur + c/6, yt + (c/2)*risk_factor};
 	else if (angle > 3*M_PI/4 and angle <= M_PI and fabs(yr - yt) > c/2)
-		return {xt - (c/2)*risk_factor, yt + (c/2)};
+		return {xt - (c/2)*risk_factor, yt + (c/2) - r_neutraliseur - c/6};
 	else if ((angle > 3*M_PI/4 and angle <= M_PI and fabs(yr - yt) <= c/2)
 			  or (angle < -3*M_PI/4 and angle >= -M_PI and fabs(yr - yt) <= c/2))
 		return {xt - (c/2)*risk_factor, yr};
 	else if (angle < -3*M_PI/4 and angle >= -M_PI and fabs(yr - yt) > c/2)
-		return {xt - (c/2)*risk_factor, yt - (c/2)};
+		return {xt - (c/2)*risk_factor, yt - (c/2) + r_neutraliseur + c/6};
 	else if (angle < -M_PI/2 and angle >= -3*M_PI/4 and fabs(xr - xt) > c/2)
-		return {xt - (c/2), yt - (c/2)*risk_factor};
+		return {xt - (c/2) + r_neutraliseur + c/6, yt - (c/2)*risk_factor};
 	else if ((angle < -M_PI/2 and angle >= -3*M_PI/4 and fabs(xr - xt) <= c/2)
 			  or (angle < -M_PI/4 and angle >= -M_PI/2 and fabs(xr - xt) <= c/2))
 		return {xr, yt - (c/2)*risk_factor};
 	else if (angle < -M_PI/4 and angle >= -M_PI/2 and fabs(xr - xt) > c/2)
-		return {xt + (c/2), yt - (c/2)*risk_factor};
+		return {xt + (c/2) - r_neutraliseur - c/6, yt - (c/2)*risk_factor};
 	else
-		return {xt + (c/2)*risk_factor, yt - (c/2)};
+		return {xt + (c/2)*risk_factor, yt - (c/2) + r_neutraliseur + c/6};
 	
 }
 
@@ -838,17 +903,19 @@ bool Robot::superposition_robots_sim() {
 	return p;
 }
 
-//~ double set_orientation(S2d robot, Carre target) {
-    //~ double xr = robot.x, yr = robot.y;
-    //~ double xt = target.centre.x, yt = target.centre.y, c = target.cote;
-    //~ if (fabs(yt - yr) <= c/2)
-        //~ return ((xr < xt) ? 0 : M_PI);
-    //~ else if (fabs(xt - xr) <= c/2)
-        //~ return sign(yt - yr)*M_PI/2;
-    //~ else
+double set_orientation(S2d robot, Carre target) {
+    double xr = robot.x, yr = robot.y;
+    double xt = target.centre.x, yt = target.centre.y, c = target.cote;
+    if (fabs(yt - yr) <= c/2){
+        return ((xr < xt) ? 0 : M_PI);
+       }
+    else if (fabs(xt - xr) <= c/2)
+        return sign(yt - yr)*M_PI/2;
+    else
         //~ return atan2(yt - yr + sign(yr - yt + sign(yt - yr)*(c/2))*(c/2),
                      //~ xt - xr + sign(xr - xt + sign(xt - xr)*(c/2))*(c/2));
-//~ }
+         return atan2(yt - yr, xt - xr );
+}
 
 SIDE Neutraliseur::find_side(S2d particle){
 	double angle(atan2(forme.centre.y-particle.y, forme.centre.x-particle.x));

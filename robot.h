@@ -145,5 +145,6 @@ void find_first_repairer(std::vector<double>& tab_distance,
 						 std::vector<S2d>& tab_goal ,int& k, size_t i, S2d& temp);
 void give_goal_repairer(std::vector<double>& tab_distance, std::vector<S2d>& tab_goal);
 unsigned find_indice(S2d temp);
+double set_orientation(S2d robot, Carre target);
 
 #endif
