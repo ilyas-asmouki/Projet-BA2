@@ -44,7 +44,6 @@ S2d Robot::find_goal(Carre target) {
 
 S2d Neutraliseur::find_goal(Carre target) {
 	if (!superposition_cerclecarre(target, forme, WITH_MARGIN)){
-		//~ color = "black";
 		if (superposition_robots_sim()){
 			color = "purple";
 			return forme.centre;
@@ -55,30 +54,6 @@ S2d Neutraliseur::find_goal(Carre target) {
 		return forme.centre;
 	}
 }
-		
-//~ S2d Neutra_1::find_goal(Carre target) {
-	//~ double xr = forme.centre.x, yr = forme.centre.y;
-	//~ double xt = target.centre.x, yt = target.centre.y;
-	//~ double c = target.cote;
-	//~ double angle = atan2(yr - yt, xr - xt);
-	//~ Carre risk_zone = {{target.centre.x, target.centre.y}, target.cote * risk_factor}; 
-	//~ double delta_angle = angle - orientation;
-	//~ if (delta_angle > M_PI)
-		//~ delta_angle = 2*M_PI - delta_angle;
-	//~ else if (delta_angle < -1*M_PI)
-		//~ delta_angle = 2*M_PI + delta_angle;
-	//~ adjust_angle(delta_angle);
-	
-	//~ if (!superposition_cerclecarre(risk_zone, forme, WITH_MARGIN)){
-		//~ color = "black";
-		//~ return find_goal_if_outside_desintegration_area(angle, xt, yt, xr, yr, c);
-	//~ } else if ((superposition_cerclecarre(risk_zone, forme, WITH_MARGIN)) 
-				//~ and (delta_angle > epsil_alignement)){
-		//~ return target.centre;
-	//~ } else {
-		//~ return find_goal_if_inside_desintegration_area(angle, xt, yt, xr, yr, c);
-	//~ }	
-//~ }
 
 S2d Neutra_1::find_goal(Carre target){
 	double xt = target.centre.x, yt = target.centre.y, c = target.cote;
@@ -498,15 +473,14 @@ void Reparateur::repair_neutra(S2d goal){
 }
 				
 void Neutraliseur::move(){
-	if (panne)
+	if (panne){
+		color = "orange";
 		return;
+	}
 	S2d pos_to_goal = {goal.x - forme.centre.x, goal.y - forme.centre.y};
 	double goal_a(atan2(pos_to_goal.y ,pos_to_goal.x));
 	double delta_a(goal_a - orientation);
-	if (delta_a > M_PI)
-		delta_a = 2*M_PI - delta_a;
-	else if (delta_a < -1*M_PI)
-		delta_a = 2*M_PI + delta_a;
+	adjust_angle(delta_a);
 	if((fabs(delta_a) <= max_delta_rt) and (delta_a != 0) and color != "purple"){
 		orientation = goal_a;
 	} else if (fabs(delta_a) > max_delta_rt and color != "purple") {
@@ -518,17 +492,15 @@ void Neutraliseur::move(){
 		} else
 			orientation += ((delta_a > 0) ?  1. : -1.)*max_delta_rt;
 	} else {
-		//~ if (color != "purple"){
-			S2d temp=forme.centre;
-			S2d travel_dir = {cos(orientation), sin(orientation)}; 
-			add_scaled_vector(forme.centre, travel_dir, max_delta_tr);
-			if  (superposition_robots_sim()){
-				forme.centre = temp;
-				color = "purple";	
-			} else {
-				color = "black";
-			}
-		//~ }
+		S2d temp=forme.centre;
+		S2d travel_dir = {cos(orientation), sin(orientation)}; 
+		add_scaled_vector(forme.centre, travel_dir, max_delta_tr);
+		if  (superposition_robots_sim()){
+			forme.centre = temp;
+			color = "purple";	
+		} else {
+			color = "black";
+		}
 		if (superposition_particle_robot_sim(forme)){
 			goal = particle_to_destroy(forme.centre);
 			forme.centre = temp;
@@ -549,6 +521,7 @@ void Neutraliseur::decontaminate() {
 		adjust_angle(delta_a);
 		if (fabs(delta_a) <= epsil_alignement){
 			destroy_particle(goal);
+			color = "black";
 		} else {
 			if((fabs(delta_a) <= max_delta_rt)) {
 				orientation = angle;
@@ -559,103 +532,51 @@ void Neutraliseur::decontaminate() {
 	}
 }
 
-//~ void Neutra_1::move(){
-	//~ S2d pos_to_goal = {goal.x - forme.centre.x, goal.y - forme.centre.y};
-	//~ double goal_a(atan2(pos_to_goal.y ,pos_to_goal.x));
-	//~ double delta_a(goal_a - orientation);
-	//~ if (delta_a > M_PI)
-		//~ delta_a = 2*M_PI - delta_a;
-	//~ else if (delta_a < -1*M_PI)
-		//~ delta_a = 2*M_PI + delta_a;
-	//~ if((fabs(delta_a) <= max_delta_rt) and (delta_a != 0) and color != "purple"){
-		//~ orientation = goal_a;
-	//~ } else if (fabs(delta_a) > max_delta_rt and color != "purple") {
-		//~ if (orientation < 0 and goal_a > 0){
-			//~ if (fabs(orientation > goal_a))
-				//~ orientation += ((goal_a < M_PI + orientation) ?  1. : -1.)*max_delta_rt;
-			//~ else
-				//~ orientation += ((goal_a > M_PI + orientation) ?  -1. : 1.)*max_delta_rt;
-		//~ } else
-			//~ orientation += ((delta_a > 0) ?  1. : -1.)*max_delta_rt;
-	//~ } else {
-		//~ S2d temp=forme.centre;
-		//~ S2d travel_dir = {cos(orientation), sin(orientation)}; 
-		//~ add_scaled_vector(forme.centre, travel_dir, max_delta_tr);
-		//~ if  (superposition_robots_sim()){
-			//~ forme.centre = temp;
-			//~ color = "purple";	
-		//~ } else {
-			//~ color = "black";
-		//~ }
-		//~ if (superposition_particle_robot_sim(forme)){
-			//~ goal = particle_to_destroy(forme.centre);
-			//~ forme.centre = temp;
-			//~ color = "purple";
-			//~ decontaminate();
-		//~ } else {
-			//~ color = "black";
-		//~ }
-	//~ }		
-	//~ return;
-//~ }
-	
-
 void Neutra_2::move(){
-	//~ Neutraliseur::move();
-	//~ return;
+	if (panne){
+		color = "orange";
+		return;
+	}
 	S2d init_pos_to_goal = {goal.x - forme.centre.x, goal.y - forme.centre.y};
 	S2d travel_dir    = {cos(orientation), sin(orientation)}; 
 	double proj_goal= prod_scalaire(init_pos_to_goal, travel_dir);
-	double delta_a;
-	SIDE side=find_side(goal);
-	delta_a = side*M_PI/2 - orientation;
+	double angle = atan2(goal.y - forme.centre.y , goal.x - forme.centre.x);
+	double delta_a = angle - orientation;
 	adjust_angle(delta_a);	
-	if (fabs(delta_a) >= M_PI/3){
-		//~ if (abs(goal_a - orientation) <= max_delta_rt){
-			//~ orientation = goal_a;
-			//~ return;
-		//~ } else {
+	if (fabs(delta_a) >= M_PI/3 and !(superposition_particle_robot_sim(forme))){
+		orientation += ((delta_a > 0) ?  1. : -1.)*max_delta_rt;
+		color = "black";
+		return;
+	}
+	double v_tran = fabs(proj_goal)*vrot_max/fabs(delta_a);
+	if (v_tran > vtran_max)
+		v_tran = vtran_max;
+	if(fabs(proj_goal) > v_tran*delta_t){ 
+		proj_goal = ((proj_goal > 0) ? 1 : -1)*v_tran*delta_t;
+	}
+	S2d temp = forme.centre;
+	add_scaled_vector(forme.centre, travel_dir, proj_goal);
+	if  (superposition_robots_sim()){
+		forme.centre = temp;
+		color = "purple";	
+	} else 
+		color = "black";
+	if (superposition_particle_robot_sim(forme)){
+		forme.centre = temp;
+		color = "purple";
+		decontaminate();
+	} else 
+		color = "black";
+	if (color != "purple"){
+		S2d updated_pos_to_goal = {goal.x - forme.centre.x, goal.y - forme.centre.y};
+		double goal_a(atan2(updated_pos_to_goal.y ,updated_pos_to_goal.x));
+		delta_a = goal_a - orientation;
+		if(fabs(delta_a) <= max_delta_rt) {
+			orientation = goal_a;
+		} else {
 			orientation += ((delta_a > 0) ?  1. : -1.)*max_delta_rt;
-			return;
-	} else if (fabs(delta_a) < epsil_alignement) {
-		if(fabs(proj_goal) > max_delta_tr){ 
-			proj_goal = ((proj_goal > 0) ? 1 : -1)*max_delta_tr;
 		}
-		add_scaled_vector(forme.centre, travel_dir, proj_goal);
-		//~ S2d    updated_pos_to_goal = {goal.x - forme.centre.x, goal.y - forme.centre.y};
-		//~ double goal_a(atan2(updated_pos_to_goal.y ,updated_pos_to_goal.x));
-		//~ double alpha(goal_a - orientation);
-		
-		//~ if(abs(alpha) <= max_delta_rt) {
-			//~ orientation = goal_a;
-		//~ } else {
-			//~ orientation += ((alpha > 0) ?  1. : -1.)*max_delta_rt;
-		//~ }
-	} else {
-		double v_tran = fabs(proj_goal)*vrot_max/fabs(delta_a);
-		if(fabs(proj_goal) > v_tran*delta_t){ 
-			proj_goal = ((proj_goal > 0) ? 1 : -1)*v_tran*delta_t;
-		}
-		S2d temp = forme.centre;
-		add_scaled_vector(forme.centre, travel_dir, proj_goal);
-		if  (superposition_robots_sim()){
-			forme.centre = temp;
-			color = "purple";	
-		}
-		if (superposition_particle_robot_sim(forme)){
-			forme.centre = temp;
-			color = "purple";
-			decontaminate();
-		}
-		//~ S2d updated_pos_to_goal = {goal.x - forme.centre.x, goal.y - forme.centre.y};
-		//~ double goal_a(atan2(updated_pos_to_goal.y ,updated_pos_to_goal.x));
-		//~ if(fabs(delta_a) <= max_delta_rt) {
-			//~ orientation = side*M_PI/2 + M_PI - delta_a;
-			//~ adjust_angle(orientation);
-		//~ } else {
-			//~ orientation += ((delta_a > 0) ?  1. : -1.)*max_delta_rt;
-		//~ }
-	}	
+	}
 	return;
 }
 
@@ -772,7 +693,6 @@ void find_first_neutraliser(Carre prt, std::vector<bool>& tab_neutra, double& t_
 	}
 	return;
 }
-			
 
 void decision_neutraliseur(Carre prt, std::vector<bool>& tab_neutra) {
 	S2d vect;
@@ -785,7 +705,7 @@ void decision_neutraliseur(Carre prt, std::vector<bool>& tab_neutra) {
 		return;
 	}
 	unsigned m = k;
-	for (size_t i(m+1); i < tab_neutra.size() ; ++i){
+	for (size_t i(m); i < tab_neutra.size() ; ++i){
 		if (tab_neutra[i] and (!tab_robot[spatial_getnbRs()+1+i]->get_data("panne"))){
 			vect = {prt.centre.x-tab_robot[i+spatial_getnbRs()+1]->getForme().centre.x, 
 				prt.centre.y - tab_robot[i+spatial_getnbRs()+1]->getForme().centre.y };
@@ -841,7 +761,7 @@ void decision_creation_robot(){
 					pt = new Neutra_1(centre.x, centre.y, angle ,type ,
 								"false", spatial_getnbUpdate(), default_k_update,p);
 				} else if (type == 2) {
-					pt = new Neutra_2(centre.x, centre.y, angle ,type ,
+					pt = new Neutra_2(centre.x, centre.y, angle-M_PI/3 ,type ,
 								"false", spatial_getnbUpdate(), default_k_update,p);
 				}	
 			tab_robot.push_back(pt);
@@ -854,7 +774,7 @@ void decision_creation_robot(){
 			
 void deplacement_robot(){
 	for (size_t i(1); i < spatial_getnbRs()+spatial_getnbNs()+1 ; ++i){
-		tab_robot[i]->move(); 
+		tab_robot[i]->move();
 	}
 }
 
@@ -953,6 +873,26 @@ std::string Robot::getcolor(){
 	return color;
 }
 
+int get_tab_robot_NbNs(){
+	int compteur(0);
+	for (size_t i(0); i < tab_robot.size(); ++i){
+		if (tab_robot[i]->getForme().rayon == r_neutraliseur){
+			++compteur;
+		}
+	}
+	return compteur;
+}
+
+int get_tab_robot_NbRs(){
+	int compteur(0);
+	for (size_t i(0); i < tab_robot.size(); ++i){
+		if (tab_robot[i]->getForme().rayon == r_reparateur){
+			++compteur;
+		}
+	}
+	return compteur;
+}
+	
 void delete_robots()	{
 	S2d centre = tab_robot[0]->getForme().centre;
 	for (size_t i = 1; i < tab_robot.size(); ++i)	{
@@ -978,7 +918,3 @@ void delete_robots()	{
 unsigned robots_left()	{
 	return tab_robot.size();
 }
-	
-	
-	
-	
