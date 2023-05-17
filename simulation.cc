@@ -37,6 +37,7 @@ void decodage_ligne(std::string line, bool& file_success) {
 		++i;
 		if (compteur1==i) {
 			etat = SPATIAL;
+			sort_particle_vector();
 		}
 		break;
 	case SPATIAL :
@@ -197,9 +198,11 @@ void Simulation::mise_a_jour(){
 	}
 	decision_neutra_restant(tab_neutra);
 	deplacement_robot();
+	//~ end_of_simulation();
 	return;
 }
 	
-		
+//~ void end_of_simulation(){
+	//~ if (getnbP() == 0 and s_getnbNp() == 0 and 	
 	
 
