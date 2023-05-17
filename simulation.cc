@@ -170,14 +170,16 @@ void Simulation::desintegration() {
 	bool desintegration_occurred = false;
 	
 	for (size_t i = 0; i < vect_size; ++i) {
-		if (b(engine)) {
-			desintegration_occurred = true;
-			for (size_t j = s_getnbRs()+1; j <= s_getnbRs() + s_getnbNs(); ++j) {
-				if (in_desintegration_area(get_particle_shape(i), j))	{
-					set_panne_robot(j);
-				}	
+		if (get_particle_shape(i).cote >= 2*(d_particule_min + 3*shape::epsil_zero)){
+			if (b(engine)) {
+				desintegration_occurred = true;
+				for (size_t j = s_getnbRs()+1; j <= s_getnbRs() + s_getnbNs(); ++j) {
+					if (in_desintegration_area(get_particle_shape(i), j))	{
+						set_panne_robot(j);
+					}	
+				}
+				new_particules(i,file_success);
 			}
-			new_particules(i,file_success);
 		}
 	}
 	
@@ -206,4 +208,3 @@ bool simulation_over()	{
 	return ((robots_left() == 1 and getnbP() == 0) ? true : false);
 }
 	
-
