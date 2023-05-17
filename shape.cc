@@ -26,13 +26,25 @@ int sign(double value) {
 	return (( (value) < 0 ) ? -1 : ((value) > 0));
 }
 
+//~ void adjust_angle(double& d_angle){
+	//~ if (abs(d_angle) >= M_PI){
+		//~ while (d_angle <= -M_PI){
+			//~ d_angle = d_angle + M_PI;
+		//~ }
+		//~ while (d_angle > M_PI){
+			//~ d_angle = d_angle - M_PI;
+		//~ }
+	//~ }
+	//~ return;
+//~ }
+
 void adjust_angle(double& d_angle){
 	if (abs(d_angle) > M_PI){
-		while (d_angle <= -M_PI){
-			d_angle = d_angle + M_PI;
+		if (d_angle < -M_PI){
+			d_angle = 2*M_PI + d_angle;
 		}
-		while (d_angle > M_PI){
-			d_angle = d_angle - M_PI;
+		else if (d_angle > M_PI){
+			d_angle = 2*M_PI - d_angle;
 		}
 	}
 	return;
