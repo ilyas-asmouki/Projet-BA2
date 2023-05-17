@@ -85,19 +85,23 @@ S2d Neutra_1::find_goal(Carre target){
 	double xr = forme.centre.x, yr = forme.centre.y;
 	SIDE side(find_side(target.centre));
 	double angle = M_PI + side*M_PI/2;
-	if (angle == 2*M_PI)
+	if (angle == 2*M_PI){
 		angle = 0;
-	Carre risk_zone = {{xt, yt}, c*risk_factor +50*shape::epsil_zero};
-	std::cout<<(superposition_cerclecarre(risk_zone, forme, WITH_MARGIN))<<std::endl;
-	if (xr != goal.x and yr != goal.y and !superposition_cerclecarre(risk_zone, forme, WITH_MARGIN)){ 
-		if (side == D)
-			return {xt, yt - risk_factor * c/2 - 50*shape::epsil_zero};
-		else if (side == R)
-			return {xt + c/2 *risk_factor + 50*shape::epsil_zero, yt};
-		else if (side == U)
-			return {xt, yt + risk_factor * c/2 + 50*shape::epsil_zero};
-		else
-			return {xt - c/2 *risk_factor - 50*shape::epsil_zero, yt};
+	}
+	Carre risk_zone = {{xt, yt}, c*risk_factor +40*shape::epsil_zero};
+	if ((xr != xt) and (yr != yt) and (!superposition_cerclecarre(risk_zone, forme, WITH_MARGIN))){ 
+		if (side == D){
+			return {xt, yt - risk_factor * c/2 - 40*shape::epsil_zero};
+		}
+		else if (side == R){
+			return {xt + c/2 *risk_factor + 40*shape::epsil_zero, yt};
+		}
+		else if (side == U){
+			return {xt, yt + risk_factor * c/2 + 40*shape::epsil_zero};
+		}
+		else {
+			return {xt - c/2 *risk_factor - 40*shape::epsil_zero, yt};
+		}
 	} else {
 		if (side == D)
 			return {xr, yt - c/2};
@@ -597,6 +601,8 @@ void Neutraliseur::decontaminate() {
 	
 
 void Neutra_2::move(){
+	//~ Neutraliseur::move();
+	//~ return;
 	S2d init_pos_to_goal = {goal.x - forme.centre.x, goal.y - forme.centre.y};
 	S2d travel_dir    = {cos(orientation), sin(orientation)}; 
 	double proj_goal= prod_scalaire(init_pos_to_goal, travel_dir);
@@ -747,12 +753,10 @@ void find_first_repairer(std::vector<double>& tab_distance,
 		}
 	}
 }
-			
 
-void decision_neutraliseur(Carre prt, std::vector<bool>& tab_neutra) {
+void find_first_neutraliser(Carre prt, std::vector<bool>& tab_neutra, double& t_min, int& k){
 	S2d vect;
-	double t_min, t, dist, d_angle;
-	int k = NO_TARGET;
+	double dist, d_angle;
 	for (size_t i(0); i < tab_neutra.size() ; ++i){
 		if (tab_neutra[i] and (!tab_robot[spatial_getnbRs()+1+i]->get_data("panne"))){
 			vect = {prt.centre.x-tab_robot[i+spatial_getnbRs()+1]->getForme().centre.x, 
@@ -763,13 +767,25 @@ void decision_neutraliseur(Carre prt, std::vector<bool>& tab_neutra) {
 			adjust_angle(d_angle);
 			t_min = dist/vtran_max + d_angle/vrot_max;
 			k=i;
-			break;
+			return;
 		}
 	}
+	return;
+}
+			
+
+void decision_neutraliseur(Carre prt, std::vector<bool>& tab_neutra) {
+	S2d vect;
+	double t_min, t, dist, d_angle;
+	int k = NO_TARGET;
+	
+	find_first_neutraliser(prt, tab_neutra, t_min, k);
+	
 	if (k == NO_TARGET){
 		return;
 	}
-	for (size_t i(k+1); i < tab_neutra.size() ; ++i){
+	unsigned m = k;
+	for (size_t i(m+1); i < tab_neutra.size() ; ++i){
 		if (tab_neutra[i] and (!tab_robot[spatial_getnbRs()+1+i]->get_data("panne"))){
 			vect = {prt.centre.x-tab_robot[i+spatial_getnbRs()+1]->getForme().centre.x, 
 				prt.centre.y - tab_robot[i+spatial_getnbRs()+1]->getForme().centre.y };
@@ -779,22 +795,23 @@ void decision_neutraliseur(Carre prt, std::vector<bool>& tab_neutra) {
 			adjust_angle(d_angle);
 			t = dist/vtran_max + d_angle/vrot_max;
 			if (t < t_min) {
-				t = t_min;
+				t_min = t;
 				k=i;
 			}
 		}
 	}
-	tab_neutra[k] = false;
 	tab_robot[k+spatial_getnbRs()+1]->set_goal(tab_robot[k+spatial_getnbRs()+1]->find_goal(prt));
+	tab_neutra[k] = false;
+	//~ std::cout<<k<<", "<<tab_robot[k+spatial_getnbRs()+1]->get_goal().x<<","<<
+	//~ tab_robot[k+spatial_getnbRs()+1]->get_goal().y<<std::endl;
 	return;
 }
 
 void decision_neutra_restant(std::vector<bool>& tab_neutra) {
 	for (size_t i(0); i < tab_neutra.size(); ++i){
 		if (!(tab_robot[spatial_getnbRs()+1+i]->get_data("panne"))){
-			if (tab_neutra[i]){
+			if (tab_neutra[i])
 				tab_robot[spatial_getnbRs()+1+i]->set_goal(tab_robot[0]->getForme().centre);
-			}
 		} else {
 			tab_robot[spatial_getnbRs()+1+i]->set_goal(tab_robot[spatial_getnbRs()+1+i]->getForme().centre);
 		}
@@ -818,7 +835,8 @@ void decision_creation_robot(){
 			Neutraliseur* pt = nullptr;
 			bool p=false;
 			S2d centre(tab_robot[0]->getForme().centre);
-			double angle = set_orientation(tab_robot[0]->getForme().centre, get_particle_shape(0));
+			double angle = set_orientation(centre, get_particle_shape(spatial_getnbNs()));
+			//~ std::cout<<angle<<std::endl;
 				if (type == 0)	{
 					pt = new Neutra_0(centre.x, centre.y, angle ,type ,
 								"false", spatial_getnbUpdate(), default_k_update,p);
@@ -843,58 +861,58 @@ void deplacement_robot(){
 	}
 }
 
-S2d find_goal_if_outside_desintegration_area(double angle, double xt, double yt,
-											 double xr, double yr, double c) {
-	if ((angle > 0 and angle <= M_PI/4 and fabs(yr - yt) <= c/2)
-		 or (angle <= 0 and angle >= -M_PI/4 and fabs(yr - yt) <= c/2))
-		return {xt + (c/2)*risk_factor, yr};
-	else if (angle > 0 and angle <= M_PI/4 and fabs(yr - yt) > c/2)
-		return {xt + (c/2)*risk_factor, yt + (c/2)- r_neutraliseur - c/6};
-	else if (angle > M_PI/4 and angle <= M_PI/2 and fabs(xr - xt) > c/2)
-		return {xt + (c/2) - r_neutraliseur - c/6 , yt + (c/2)*risk_factor}; 
-	else if ((angle > M_PI/4 and angle <= M_PI/2 and fabs(xr - xt) <= c/2)
-			  or (angle > M_PI/2 and angle <= 3*M_PI/4 and fabs(xr - xt) <= c/2))
-		return {xr, yt + (c/2)*risk_factor};
-	else if (angle > M_PI/2 and angle <= 3*M_PI/4 and fabs(xr - xt) > c/2)
-		return {xt - (c/2) + r_neutraliseur + c/6, yt + (c/2)*risk_factor};
-	else if (angle > 3*M_PI/4 and angle <= M_PI and fabs(yr - yt) > c/2)
-		return {xt - (c/2)*risk_factor, yt + (c/2) - r_neutraliseur - c/6};
-	else if ((angle > 3*M_PI/4 and angle <= M_PI and fabs(yr - yt) <= c/2)
-			  or (angle < -3*M_PI/4 and angle >= -M_PI and fabs(yr - yt) <= c/2))
-		return {xt - (c/2)*risk_factor, yr};
-	else if (angle < -3*M_PI/4 and angle >= -M_PI and fabs(yr - yt) > c/2)
-		return {xt - (c/2)*risk_factor, yt - (c/2) + r_neutraliseur + c/6};
-	else if (angle < -M_PI/2 and angle >= -3*M_PI/4 and fabs(xr - xt) > c/2)
-		return {xt - (c/2) + r_neutraliseur + c/6, yt - (c/2)*risk_factor};
-	else if ((angle < -M_PI/2 and angle >= -3*M_PI/4 and fabs(xr - xt) <= c/2)
-			  or (angle < -M_PI/4 and angle >= -M_PI/2 and fabs(xr - xt) <= c/2))
-		return {xr, yt - (c/2)*risk_factor};
-	else if (angle < -M_PI/4 and angle >= -M_PI/2 and fabs(xr - xt) > c/2)
-		return {xt + (c/2) - r_neutraliseur - c/6, yt - (c/2)*risk_factor};
-	else
-		return {xt + (c/2)*risk_factor, yt - (c/2) + r_neutraliseur + c/6};
+//~ S2d find_goal_if_outside_desintegration_area(double angle, double xt, double yt,
+											 //~ double xr, double yr, double c) {
+	//~ if ((angle > 0 and angle <= M_PI/4 and fabs(yr - yt) <= c/2)
+		 //~ or (angle <= 0 and angle >= -M_PI/4 and fabs(yr - yt) <= c/2))
+		//~ return {xt + (c/2)*risk_factor, yr};
+	//~ else if (angle > 0 and angle <= M_PI/4 and fabs(yr - yt) > c/2)
+		//~ return {xt + (c/2)*risk_factor, yt + (c/2)- r_neutraliseur - c/6};
+	//~ else if (angle > M_PI/4 and angle <= M_PI/2 and fabs(xr - xt) > c/2)
+		//~ return {xt + (c/2) - r_neutraliseur - c/6 , yt + (c/2)*risk_factor}; 
+	//~ else if ((angle > M_PI/4 and angle <= M_PI/2 and fabs(xr - xt) <= c/2)
+			  //~ or (angle > M_PI/2 and angle <= 3*M_PI/4 and fabs(xr - xt) <= c/2))
+		//~ return {xr, yt + (c/2)*risk_factor};
+	//~ else if (angle > M_PI/2 and angle <= 3*M_PI/4 and fabs(xr - xt) > c/2)
+		//~ return {xt - (c/2) + r_neutraliseur + c/6, yt + (c/2)*risk_factor};
+	//~ else if (angle > 3*M_PI/4 and angle <= M_PI and fabs(yr - yt) > c/2)
+		//~ return {xt - (c/2)*risk_factor, yt + (c/2) - r_neutraliseur - c/6};
+	//~ else if ((angle > 3*M_PI/4 and angle <= M_PI and fabs(yr - yt) <= c/2)
+			  //~ or (angle < -3*M_PI/4 and angle >= -M_PI and fabs(yr - yt) <= c/2))
+		//~ return {xt - (c/2)*risk_factor, yr};
+	//~ else if (angle < -3*M_PI/4 and angle >= -M_PI and fabs(yr - yt) > c/2)
+		//~ return {xt - (c/2)*risk_factor, yt - (c/2) + r_neutraliseur + c/6};
+	//~ else if (angle < -M_PI/2 and angle >= -3*M_PI/4 and fabs(xr - xt) > c/2)
+		//~ return {xt - (c/2) + r_neutraliseur + c/6, yt - (c/2)*risk_factor};
+	//~ else if ((angle < -M_PI/2 and angle >= -3*M_PI/4 and fabs(xr - xt) <= c/2)
+			  //~ or (angle < -M_PI/4 and angle >= -M_PI/2 and fabs(xr - xt) <= c/2))
+		//~ return {xr, yt - (c/2)*risk_factor};
+	//~ else if (angle < -M_PI/4 and angle >= -M_PI/2 and fabs(xr - xt) > c/2)
+		//~ return {xt + (c/2) - r_neutraliseur - c/6, yt - (c/2)*risk_factor};
+	//~ else
+		//~ return {xt + (c/2)*risk_factor, yt - (c/2) + r_neutraliseur + c/6};
 	
-}
+//~ }
 
-S2d find_goal_if_inside_desintegration_area(double angle, double xt, double yt,
-											 double xr, double yr, double c) {
-	if (angle <= M_PI/4 and angle >= -M_PI/4 and fabs(yr - yt) <= c/2)
-		return {xt + (c/2), yr};
-	else if (angle <= M_PI/4 and angle >= -M_PI/4 and fabs(yr - yt) > c/2)
-		return {xt + (c/2), yt + sign(yr - yt)*(c/2)};
-	else if (angle <= 3*M_PI/4 and angle >= M_PI/4 and fabs(xr - xt) <= c/2)
-		return {xr, yt + (c/2)};
-	else if (angle <= 3*M_PI/4 and angle >= M_PI/4 and fabs(xr - xt) > c/2)
-		return {xt + sign(xr - xt)*(c/2), yt + (c/2)};
-	else if (fabs(angle) >= 3*M_PI/4 and fabs(yr - yt) <= c/2)
-		return {xt - (c/2), yr};
-	else if (fabs(angle) >= 3*M_PI/4 and fabs(yr - yt) > c/2)
-		return {xt - (c/2), yt + sign(yr - yt)*(c/2)};
-	else if (angle <= -M_PI/4 and angle >= -3*M_PI/4 and fabs(xr - xt) <= c/2)
-		return {xr, yt - (c/2)};
-	else 
-		return {xt + sign(xr - xt)*(c/2), yt - (c/2)};
-}
+//~ S2d find_goal_if_inside_desintegration_area(double angle, double xt, double yt,
+											 //~ double xr, double yr, double c) {
+	//~ if (angle <= M_PI/4 and angle >= -M_PI/4 and fabs(yr - yt) <= c/2)
+		//~ return {xt + (c/2), yr};
+	//~ else if (angle <= M_PI/4 and angle >= -M_PI/4 and fabs(yr - yt) > c/2)
+		//~ return {xt + (c/2), yt + sign(yr - yt)*(c/2)};
+	//~ else if (angle <= 3*M_PI/4 and angle >= M_PI/4 and fabs(xr - xt) <= c/2)
+		//~ return {xr, yt + (c/2)};
+	//~ else if (angle <= 3*M_PI/4 and angle >= M_PI/4 and fabs(xr - xt) > c/2)
+		//~ return {xt + sign(xr - xt)*(c/2), yt + (c/2)};
+	//~ else if (fabs(angle) >= 3*M_PI/4 and fabs(yr - yt) <= c/2)
+		//~ return {xt - (c/2), yr};
+	//~ else if (fabs(angle) >= 3*M_PI/4 and fabs(yr - yt) > c/2)
+		//~ return {xt - (c/2), yt + sign(yr - yt)*(c/2)};
+	//~ else if (angle <= -M_PI/4 and angle >= -3*M_PI/4 and fabs(xr - xt) <= c/2)
+		//~ return {xr, yt - (c/2)};
+	//~ else 
+		//~ return {xt + sign(xr - xt)*(c/2), yt - (c/2)};
+//~ }
 	
 bool Robot::superposition_robots_sim() {
 	bool p(false);
