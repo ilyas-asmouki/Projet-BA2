@@ -272,6 +272,10 @@ bool Fenetre::on_timeout() {
 		Propre_en_Ordre->mise_a_jour();
 		monde.clear();
 		monde.draw();
+		if (simulation_over())	{
+			disconnect = true;
+			timer_added = false;
+		}
 		set_data();
 	}
 	return true; 

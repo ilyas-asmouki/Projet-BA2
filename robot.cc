@@ -765,7 +765,7 @@ void find_first_neutraliser(Carre prt, std::vector<bool>& tab_neutra, double& t_
 			d_angle = atan2(vect.y, vect.x) - 
 					  tab_robot[spatial_getnbRs()+1+i]->get_data("orientation");
 			adjust_angle(d_angle);
-			t_min = dist/vtran_max + d_angle/vrot_max;
+			t_min = dist/vtran_max + fabs(d_angle)/vrot_max;
 			k=i;
 			return;
 		}
@@ -793,7 +793,7 @@ void decision_neutraliseur(Carre prt, std::vector<bool>& tab_neutra) {
 			d_angle = atan2(vect.y, vect.x) - 
 					  tab_robot[spatial_getnbRs()+1+i]->get_data("orientation");
 			adjust_angle(d_angle);
-			t = dist/vtran_max + d_angle/vrot_max;
+			t = dist/vtran_max + fabs(d_angle)/vrot_max;
 			if (t < t_min) {
 				t_min = t;
 				k=i;
@@ -802,8 +802,6 @@ void decision_neutraliseur(Carre prt, std::vector<bool>& tab_neutra) {
 	}
 	tab_robot[k+spatial_getnbRs()+1]->set_goal(tab_robot[k+spatial_getnbRs()+1]->find_goal(prt));
 	tab_neutra[k] = false;
-	//~ std::cout<<k<<", "<<tab_robot[k+spatial_getnbRs()+1]->get_goal().x<<","<<
-	//~ tab_robot[k+spatial_getnbRs()+1]->get_goal().y<<std::endl;
 	return;
 }
 
@@ -830,13 +828,12 @@ void decision_creation_robot(){
 			tab_robot[0]->set_data("nbRr", spatial_getnbRr()-1);
 		} 
 		if ((getnbP() > 3*spatial_getnbNs() or spatial_getnbNs() < 3) 
-		and (spatial_getnbNr() != 0)){
+		and (spatial_getnbNr() != 0) and (getnbP() != 0)){
 			double type((spatial_getnbNd()+spatial_getnbNs())%3);
 			Neutraliseur* pt = nullptr;
 			bool p=false;
 			S2d centre(tab_robot[0]->getForme().centre);
 			double angle = set_orientation(centre, get_particle_shape(spatial_getnbNs()));
-			//~ std::cout<<angle<<std::endl;
 				if (type == 0)	{
 					pt = new Neutra_0(centre.x, centre.y, angle ,type ,
 								"false", spatial_getnbUpdate(), default_k_update,p);
@@ -857,7 +854,7 @@ void decision_creation_robot(){
 			
 void deplacement_robot(){
 	for (size_t i(1); i < spatial_getnbRs()+spatial_getnbNs()+1 ; ++i){
-		tab_robot[i]->move();
+		tab_robot[i]->move(); 
 	}
 }
 
@@ -955,3 +952,33 @@ SIDE Neutraliseur::find_side(S2d particle){
 std::string Robot::getcolor(){
 	return color;
 }
+
+void delete_robots()	{
+	S2d centre = tab_robot[0]->getForme().centre;
+	for (size_t i = 1; i < tab_robot.size(); ++i)	{
+		if (superposition_cercles(tab_robot[i]->getForme(),{centre, shape::epsil_zero}, WITH_MARGIN)
+		and spatial_getnbNp() < spatial_getnbRs() and i <= spatial_getnbRs())	{
+			tab_robot.erase(tab_robot.begin() + i);
+			tab_robot[0]->set_data("nbRr", spatial_getnbRr()+1);
+			tab_robot[0]->set_data("nbRs", spatial_getnbRs()-1);
+			continue;
+		}
+		if (superposition_cercles(tab_robot[i]->getForme(),{centre, shape::epsil_zero}, WITH_MARGIN)
+		and tab_robot[i]->get_goal().x == tab_robot[0]->getForme().centre.x
+		and tab_robot[i]->get_goal().y == tab_robot[0]->getForme().centre.y
+		and i > spatial_getnbRs())	{
+			tab_robot.erase(tab_robot.begin() + i);
+			tab_robot[0]->set_data("nbNr", spatial_getnbNr()+1);
+			tab_robot[0]->set_data("nbNs", spatial_getnbNs()-1);
+			continue;
+		}
+	}
+}
+	
+unsigned robots_left()	{
+	return tab_robot.size();
+}
+	
+	
+	
+	

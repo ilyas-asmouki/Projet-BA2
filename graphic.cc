@@ -25,12 +25,7 @@ void set_world() {
 
 void draw_circle(double xc, double yc, double radius, std::string color) {
     if (color == "blue")
-    {
-		(*ptcr)->set_source_rgb(1., 1., 1.);
-		(*ptcr)->arc(xc, yc, radius, 0, 2*M_PI);
-		(*ptcr)->fill();
         (*ptcr)->set_source_rgb(0.67, 0.85, 0.9);
-    }
     else if (color == "purple")
         (*ptcr)->set_source_rgb(0.5, 0., 1.);
     else if (color == "orange")

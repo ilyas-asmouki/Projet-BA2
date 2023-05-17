@@ -35,5 +35,6 @@ private :
 };
 
 void draw_world();
+bool simulation_over();
 
 #endif

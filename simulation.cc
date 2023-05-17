@@ -198,11 +198,12 @@ void Simulation::mise_a_jour(){
 	}
 	decision_neutra_restant(tab_neutra);
 	deplacement_robot();
-	//~ end_of_simulation();
+	delete_robots();
 	return;
 }
 	
-//~ void end_of_simulation(){
-	//~ if (getnbP() == 0 and s_getnbNp() == 0 and 	
+bool simulation_over()	{
+	return ((robots_left() == 1 and getnbP() == 0) ? true : false);
+}
 	
 
