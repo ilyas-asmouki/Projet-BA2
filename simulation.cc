@@ -168,7 +168,7 @@ void Simulation::desintegration() {
 	double p = desintegration_rate;
 	std::bernoulli_distribution b(p / getnbP());
 	bool desintegration_occurred = false;
-	
+	//~ std::cout<<p<<std::endl;	
 	for (size_t i = 0; i < vect_size; ++i) {
 		if (get_particle_shape(i).cote >= 2*(d_particule_min + 3*shape::epsil_zero)){
 			if (b(engine)) {
@@ -198,6 +198,7 @@ void Simulation::mise_a_jour(){
 	for (size_t i(0); i < getnbP(); ++i) {
 		decision_neutraliseur(get_particle_shape(i), tab_neutra);
 	}
+	//~ decision_retour_spatial();
 	decision_neutra_restant(tab_neutra);
 	deplacement_robot();
 	delete_robots();

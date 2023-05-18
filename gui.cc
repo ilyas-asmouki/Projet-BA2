@@ -275,6 +275,7 @@ bool Fenetre::on_timeout() {
 		if (simulation_over())	{
 			disconnect = true;
 			timer_added = false;
+			m_Button_startstop.set_label("start");
 		}
 		set_data();
 	}

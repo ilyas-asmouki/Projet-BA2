@@ -148,5 +148,5 @@ unsigned find_indice(S2d temp);
 double set_orientation(S2d robot, Carre target);
 void delete_robots();
 unsigned robots_left();
-
+void decision_retour_spatial();
 #endif

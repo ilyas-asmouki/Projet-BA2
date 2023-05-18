@@ -60,9 +60,13 @@ S2d Neutra_1::find_goal(Carre target){
 	double xr = forme.centre.x, yr = forme.centre.y;
 	SIDE side(find_side(target.centre));
 	double angle = M_PI + side*M_PI/2;
+	if (side == U)
+		angle = -M_PI/2;
 	if (angle == 2*M_PI){
 		angle = 0;
 	}
+	double delta_a(orientation - angle);
+	adjust_angle(delta_a); 
 	Carre risk_zone = {{xt, yt}, c*risk_factor +40*shape::epsil_zero};
 	if ((xr != xt) and (yr != yt) and (!superposition_cerclecarre(risk_zone, forme, WITH_MARGIN))){ 
 		if (side == D){
@@ -77,7 +81,7 @@ S2d Neutra_1::find_goal(Carre target){
 		else {
 			return {xt - c/2 *risk_factor - 40*shape::epsil_zero, yt};
 		}
-	} else {
+	} else if (superposition_cerclecarre(risk_zone, forme, WITH_MARGIN) and (delta_a <=epsil_alignement)){ 
 		if (side == D)
 			return {xr, yt - c/2};
 		else if (side == R)
@@ -86,6 +90,8 @@ S2d Neutra_1::find_goal(Carre target){
 			return {xr, yt + c/2};
 		else
 			return {xt - c/2 , yr};
+	} else {
+			return target.centre;
 	}
 }
 
@@ -458,6 +464,8 @@ void Reparateur::move(){
 		forme.centre = temp;
 		repair_neutra(goal);
 	}
+	//~ if (superposition_cercles(forme, {goal, r_neutraliseur + 2*shape::epsil_zero}, WITH_MARGIN))
+		//~ repair_neutra(goal);
 	return;
 }
 
@@ -477,6 +485,7 @@ void Neutraliseur::move(){
 		color = "orange";
 		return;
 	}
+	bool not_collision_robot(true);
 	S2d pos_to_goal = {goal.x - forme.centre.x, goal.y - forme.centre.y};
 	double goal_a(atan2(pos_to_goal.y ,pos_to_goal.x));
 	double delta_a(goal_a - orientation);
@@ -496,6 +505,7 @@ void Neutraliseur::move(){
 		S2d travel_dir = {cos(orientation), sin(orientation)}; 
 		add_scaled_vector(forme.centre, travel_dir, max_delta_tr);
 		if  (superposition_robots_sim()){
+			not_collision_robot = false;
 			forme.centre = temp;
 			color = "purple";	
 		} else {
@@ -506,7 +516,7 @@ void Neutraliseur::move(){
 			forme.centre = temp;
 			color = "purple";
 			decontaminate();
-		} else {
+		} else if (not_collision_robot) {
 			color = "black";
 		}
 	}		
@@ -518,6 +528,7 @@ void Neutraliseur::decontaminate() {
 		Carre prt(find_particule(goal));
 		double angle = set_orientation(forme.centre, prt);
 		double delta_a(orientation - angle);
+		mod_2pi(orientation);
 		adjust_angle(delta_a);
 		if (fabs(delta_a) <= epsil_alignement){
 			destroy_particle(goal);
@@ -537,13 +548,14 @@ void Neutra_2::move(){
 		color = "orange";
 		return;
 	}
+	bool not_collision_robot(true);
 	S2d init_pos_to_goal = {goal.x - forme.centre.x, goal.y - forme.centre.y};
 	S2d travel_dir    = {cos(orientation), sin(orientation)}; 
-	double proj_goal= prod_scalaire(init_pos_to_goal, travel_dir);
+	double proj_goal = prod_scalaire(init_pos_to_goal, travel_dir);
 	double angle = atan2(goal.y - forme.centre.y , goal.x - forme.centre.x);
 	double delta_a = angle - orientation;
 	adjust_angle(delta_a);	
-	if (fabs(delta_a) >= M_PI/3 and !(superposition_particle_robot_sim(forme))){
+	if (fabs(delta_a) >= M_PI/3 + epsil_alignement and color != "purple"){
 		orientation += ((delta_a > 0) ?  1. : -1.)*max_delta_rt;
 		color = "black";
 		return;
@@ -554,27 +566,38 @@ void Neutra_2::move(){
 	if(fabs(proj_goal) > v_tran*delta_t){ 
 		proj_goal = ((proj_goal > 0) ? 1 : -1)*v_tran*delta_t;
 	}
-	S2d temp = forme.centre;
+	Cercle temp_cercle = forme;
 	add_scaled_vector(forme.centre, travel_dir, proj_goal);
 	if  (superposition_robots_sim()){
-		forme.centre = temp;
+		not_collision_robot = false;
+		forme.centre = temp_cercle.centre;
 		color = "purple";	
-	} else 
+	} else {
 		color = "black";
-	if (superposition_particle_robot_sim(forme)){
-		forme.centre = temp;
+	}
+	if (superposition_particle_robot_sim(temp_cercle)){
+		goal = particle_to_destroy(forme.centre);
+		forme.centre = temp_cercle.centre;
 		color = "purple";
 		decontaminate();
-	} else 
+	} else if (not_collision_robot) {
 		color = "black";
+	}
 	if (color != "purple"){
 		S2d updated_pos_to_goal = {goal.x - forme.centre.x, goal.y - forme.centre.y};
 		double goal_a(atan2(updated_pos_to_goal.y ,updated_pos_to_goal.x));
 		delta_a = goal_a - orientation;
+		adjust_angle(delta_a);
 		if(fabs(delta_a) <= max_delta_rt) {
 			orientation = goal_a;
 		} else {
-			orientation += ((delta_a > 0) ?  1. : -1.)*max_delta_rt;
+			if (orientation < 0 and goal_a > 0){
+				if (fabs(orientation > goal_a))
+					orientation += ((goal_a < M_PI + orientation) ?  1. : -1.)*max_delta_rt;
+				else
+					orientation += ((goal_a > M_PI + orientation) ?  -1. : 1.)*max_delta_rt;
+			} else
+				orientation += ((delta_a > 0) ?  1. : -1.)*max_delta_rt;
 		}
 	}
 	return;
@@ -761,7 +784,7 @@ void decision_creation_robot(){
 					pt = new Neutra_1(centre.x, centre.y, angle ,type ,
 								"false", spatial_getnbUpdate(), default_k_update,p);
 				} else if (type == 2) {
-					pt = new Neutra_2(centre.x, centre.y, angle-M_PI/3 ,type ,
+					pt = new Neutra_2(centre.x, centre.y, angle-M_PI/6 ,type ,
 								"false", spatial_getnbUpdate(), default_k_update,p);
 				}	
 			tab_robot.push_back(pt);
@@ -777,59 +800,6 @@ void deplacement_robot(){
 		tab_robot[i]->move();
 	}
 }
-
-//~ S2d find_goal_if_outside_desintegration_area(double angle, double xt, double yt,
-											 //~ double xr, double yr, double c) {
-	//~ if ((angle > 0 and angle <= M_PI/4 and fabs(yr - yt) <= c/2)
-		 //~ or (angle <= 0 and angle >= -M_PI/4 and fabs(yr - yt) <= c/2))
-		//~ return {xt + (c/2)*risk_factor, yr};
-	//~ else if (angle > 0 and angle <= M_PI/4 and fabs(yr - yt) > c/2)
-		//~ return {xt + (c/2)*risk_factor, yt + (c/2)- r_neutraliseur - c/6};
-	//~ else if (angle > M_PI/4 and angle <= M_PI/2 and fabs(xr - xt) > c/2)
-		//~ return {xt + (c/2) - r_neutraliseur - c/6 , yt + (c/2)*risk_factor}; 
-	//~ else if ((angle > M_PI/4 and angle <= M_PI/2 and fabs(xr - xt) <= c/2)
-			  //~ or (angle > M_PI/2 and angle <= 3*M_PI/4 and fabs(xr - xt) <= c/2))
-		//~ return {xr, yt + (c/2)*risk_factor};
-	//~ else if (angle > M_PI/2 and angle <= 3*M_PI/4 and fabs(xr - xt) > c/2)
-		//~ return {xt - (c/2) + r_neutraliseur + c/6, yt + (c/2)*risk_factor};
-	//~ else if (angle > 3*M_PI/4 and angle <= M_PI and fabs(yr - yt) > c/2)
-		//~ return {xt - (c/2)*risk_factor, yt + (c/2) - r_neutraliseur - c/6};
-	//~ else if ((angle > 3*M_PI/4 and angle <= M_PI and fabs(yr - yt) <= c/2)
-			  //~ or (angle < -3*M_PI/4 and angle >= -M_PI and fabs(yr - yt) <= c/2))
-		//~ return {xt - (c/2)*risk_factor, yr};
-	//~ else if (angle < -3*M_PI/4 and angle >= -M_PI and fabs(yr - yt) > c/2)
-		//~ return {xt - (c/2)*risk_factor, yt - (c/2) + r_neutraliseur + c/6};
-	//~ else if (angle < -M_PI/2 and angle >= -3*M_PI/4 and fabs(xr - xt) > c/2)
-		//~ return {xt - (c/2) + r_neutraliseur + c/6, yt - (c/2)*risk_factor};
-	//~ else if ((angle < -M_PI/2 and angle >= -3*M_PI/4 and fabs(xr - xt) <= c/2)
-			  //~ or (angle < -M_PI/4 and angle >= -M_PI/2 and fabs(xr - xt) <= c/2))
-		//~ return {xr, yt - (c/2)*risk_factor};
-	//~ else if (angle < -M_PI/4 and angle >= -M_PI/2 and fabs(xr - xt) > c/2)
-		//~ return {xt + (c/2) - r_neutraliseur - c/6, yt - (c/2)*risk_factor};
-	//~ else
-		//~ return {xt + (c/2)*risk_factor, yt - (c/2) + r_neutraliseur + c/6};
-	
-//~ }
-
-//~ S2d find_goal_if_inside_desintegration_area(double angle, double xt, double yt,
-											 //~ double xr, double yr, double c) {
-	//~ if (angle <= M_PI/4 and angle >= -M_PI/4 and fabs(yr - yt) <= c/2)
-		//~ return {xt + (c/2), yr};
-	//~ else if (angle <= M_PI/4 and angle >= -M_PI/4 and fabs(yr - yt) > c/2)
-		//~ return {xt + (c/2), yt + sign(yr - yt)*(c/2)};
-	//~ else if (angle <= 3*M_PI/4 and angle >= M_PI/4 and fabs(xr - xt) <= c/2)
-		//~ return {xr, yt + (c/2)};
-	//~ else if (angle <= 3*M_PI/4 and angle >= M_PI/4 and fabs(xr - xt) > c/2)
-		//~ return {xt + sign(xr - xt)*(c/2), yt + (c/2)};
-	//~ else if (fabs(angle) >= 3*M_PI/4 and fabs(yr - yt) <= c/2)
-		//~ return {xt - (c/2), yr};
-	//~ else if (fabs(angle) >= 3*M_PI/4 and fabs(yr - yt) > c/2)
-		//~ return {xt - (c/2), yt + sign(yr - yt)*(c/2)};
-	//~ else if (angle <= -M_PI/4 and angle >= -3*M_PI/4 and fabs(xr - xt) <= c/2)
-		//~ return {xr, yt - (c/2)};
-	//~ else 
-		//~ return {xt + sign(xr - xt)*(c/2), yt - (c/2)};
-//~ }
 	
 bool Robot::superposition_robots_sim() {
 	bool p(false);
@@ -852,8 +822,6 @@ double set_orientation(S2d robot, Carre target) {
     else if (fabs(xt - xr) <= c/2)
         return sign(yt - yr)*M_PI/2;
     else
-        //~ return atan2(yt - yr + sign(yr - yt + sign(yt - yr)*(c/2))*(c/2),
-                     //~ xt - xr + sign(xr - xt + sign(xt - xr)*(c/2))*(c/2));
          return atan2(yt - yr, xt - xr );
 }
 
@@ -918,3 +886,31 @@ void delete_robots()	{
 unsigned robots_left()	{
 	return tab_robot.size();
 }
+
+size_t neutra_near_spatial(){
+	double dist;
+	double dist_min(INFINI);
+	size_t k(0);
+	S2d vect;
+	S2d spatial(tab_robot[0]->getForme().centre);
+	for (size_t i(spatial_getnbRs()+1); i < tab_robot.size(); ++i){
+		if (!tab_robot[i]->get_data("panne")){
+			vect = {spatial.x - tab_robot[i]->getForme().centre.x , 
+					spatial.y - tab_robot[i]->getForme().centre.y };
+			dist = norme(vect);
+			if (dist < dist_min){
+				dist_min = dist;
+				k = i;
+			}
+		}
+	}
+	return k;
+} 
+
+void decision_retour_spatial(){
+	if (getnbP() <= 3*spatial_getnbNs()){
+		tab_robot[neutra_near_spatial()]->set_goal(tab_robot[0]->getForme().centre);
+	}
+	return;
+}
+		

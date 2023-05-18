@@ -53,10 +53,7 @@ void draw_square(double xc, double yc, double length) {
 	(*ptcr)->set_line_width(0.5);
 	(*ptcr)->set_source_rgb(1, 0., 0.);
     (*ptcr)->rectangle(xc - length/2, yc - length/2, length, length);
-	(*ptcr)->stroke();
-	(*ptcr)->rectangle(xc - length*risk_factor/2, yc - length*risk_factor/2, length*risk_factor, length*risk_factor);
-	(*ptcr)->stroke();
-	
+	(*ptcr)->stroke();	
 	return;
 }
 

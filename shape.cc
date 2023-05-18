@@ -4,6 +4,7 @@
 
 #include "shape.h"
 #include "graphic.h"
+#include <iostream>
 
 double distance(S2d p1, S2d p2) {
     return sqrt((p2.x-p1.x) * (p2.x-p1.x) + (p2.y-p1.y) * (p2.y-p1.y));
@@ -17,7 +18,7 @@ double prod_scalaire(S2d vect1, S2d vect2)	{
 	return vect1.x * vect2.x + vect1.y * vect2.y;
 }
 
-void add_scaled_vector(S2d& vect, S2d added_vect, double scalar)	{
+void add_scaled_vector(S2d& vect, S2d added_vect, double scalar){
 	vect.x += scalar * added_vect.x;
 	vect.y += scalar * added_vect.y;
 }
@@ -26,26 +27,12 @@ int sign(double value) {
 	return (( (value) < 0 ) ? -1 : ((value) > 0));
 }
 
-//~ void adjust_angle(double& d_angle){
-	//~ if (abs(d_angle) >= M_PI){
-		//~ while (d_angle <= -M_PI){
-			//~ d_angle = d_angle + M_PI;
-		//~ }
-		//~ while (d_angle > M_PI){
-			//~ d_angle = d_angle - M_PI;
-		//~ }
-	//~ }
-	//~ return;
-//~ }
-
 void adjust_angle(double& d_angle){
-	if (abs(d_angle) > M_PI){
-		if (d_angle < -M_PI){
-			d_angle = 2*M_PI + d_angle;
-		}
-		else if (d_angle > M_PI){
-			d_angle = 2*M_PI - d_angle;
-		}
+	if (d_angle < -M_PI){
+		d_angle = 2*M_PI + d_angle;
+	}
+	else if (d_angle > M_PI){
+		d_angle = 2*M_PI - d_angle;
 	}
 	return;
 }
@@ -93,3 +80,15 @@ void dessin_orientation(Cercle cercle, double orientation) {
 	draw_orientation(cercle.centre.x, cercle.centre.y, cercle.rayon, orientation);
 	return;
 }
+
+void mod_2pi(double& angle){
+	if (fabs(angle) >= M_PI){
+		while (angle > M_PI) {
+			angle -= 2*M_PI;
+		}
+		while (angle <= -M_PI){
+			angle += 2*M_PI;
+		}
+	}
+	return;
+} 
