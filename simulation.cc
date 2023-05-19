@@ -19,14 +19,14 @@ void decodage_ligne(std::string line, bool& file_success) {
 	enum ETAT{NBP, PARTICULE, SPATIAL, REPARATEUR, NEUTRALISEUR};
 	static int etat(NBP);
 	std::istringstream data(line);
-	static int compteur1(0);
-	static int compteur2(0);
-	static int i(0);
+	static int compteur1 = 0;
+	static int compteur2 = 0;
+	static int i = 0;
 	
 	switch (etat) {
 	case NBP : 
-		data>>compteur1;
-		if (compteur1==0) {
+		data >> compteur1;
+		if (compteur1 == 0) {
 			etat = SPATIAL;
 		} else {
 			etat = PARTICULE;
@@ -35,7 +35,7 @@ void decodage_ligne(std::string line, bool& file_success) {
 	case PARTICULE :
 		decodage_particule(data, file_success);
 		++i;
-		if (compteur1==i) {
+		if (compteur1 == i) {
 			etat = SPATIAL;
 			sort_particle_vector();
 		}
@@ -49,7 +49,7 @@ void decodage_ligne(std::string line, bool& file_success) {
 		} else {
 			etat = NBP;
 		}	
-		i=0;
+		i = 0;
 		break;
 	
 	case REPARATEUR :
@@ -61,7 +61,7 @@ void decodage_ligne(std::string line, bool& file_success) {
 			} else {
 				etat = NBP;
 			}
-			i=0;
+			i = 0;
 		}
 		break;
 	
@@ -70,7 +70,7 @@ void decodage_ligne(std::string line, bool& file_success) {
 		++i;
 		if (compteur1 == i) {
 			etat = NBP;
-			i=0;
+			i = 0;
 		}
 		break;
 	}
@@ -95,13 +95,13 @@ bool Simulation::getfile_success() {
 void Simulation::lecture(std::ifstream& file) {
 	std::string line;
 		while (getline(file>>std::ws,line)) {
-			if (line[0]=='#') {
+			if (line[0] == '#') {
 				continue;
 			}
 		decodage_ligne(line, file_success);
 	}
 	if (file_success) {
-		std::cout<<message::success();
+		std::cout << message::success();
 	}	
 	return;
 }
@@ -145,10 +145,9 @@ void Simulation::s_setnbUpdate(int value) {
 
 void Simulation::sauvegarde(std::string file) {
 	std::ofstream fichier(file);
-		sauvegarde_particules(fichier);
-		sauvegarde_robots(fichier);
-
-		return;
+	sauvegarde_particules(fichier);
+	sauvegarde_robots(fichier);
+	return;
 }
 
 void draw_world() {
@@ -194,7 +193,7 @@ void Simulation::mise_a_jour(){
 	decision_creation_robot();
 	decision_reparateur();
 	std::vector<bool> tab_neutra(spatial_getnbNs(), true);
-	for (size_t i(0); i < getnbP(); ++i) {
+	for (size_t i = 0; i < getnbP(); ++i) {
 		decision_neutraliseur(get_particle_shape(i), tab_neutra);
 	}
 	decision_neutra_restant(tab_neutra);
@@ -203,7 +202,7 @@ void Simulation::mise_a_jour(){
 	return;
 }
 	
-bool simulation_over()	{
+bool Simulation::simulation_over()	{
 	return ((robots_left() == 1 and getnbP() == 0) ? true : false);
 }
 	

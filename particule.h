@@ -10,8 +10,8 @@
 #include <string>
 #include "shape.h"
 
-constexpr double INFINI(9999999);
-constexpr S2d NON_EXISTENT_PARTICLE({INFINI, INFINI});
+constexpr double infini(9999999);
+constexpr S2d non_existent_particle({infini, infini});
 
 class Particule {
 public: 
@@ -20,8 +20,8 @@ public:
 	void detect_particle_outside(bool& file_success);
 	void detect_particle_too_small(bool& file_success);
 	void detect_particle_superposition(bool& file_success);
-	bool operator==(Particule const& prt2);
-	bool operator<(Particule const& prt2);
+	bool operator==(Particule const& prt2) const;
+	bool operator<(Particule const& prt2) const;
 	
 private:
 	Carre forme;

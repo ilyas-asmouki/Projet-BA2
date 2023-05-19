@@ -27,6 +27,7 @@ public :
 	void sauvegarde(std::string file);
 	void destroy_data();
 	void mise_a_jour();
+	bool simulation_over();
 	
 private : 
 	bool file_success=true;
@@ -35,6 +36,5 @@ private :
 };
 
 void draw_world();
-bool simulation_over();
 
 #endif

@@ -49,23 +49,28 @@ void Monde::draw() {
 }
 
 Fenetre::Fenetre(char* file, int argc) : 
- m_Box_All(Gtk::Orientation::HORIZONTAL,10), m_Box_Left(Gtk::Orientation::VERTICAL,3),
- m_Box_Right(Gtk::Orientation::VERTICAL,0),m_Box_maj(Gtk::Orientation::HORIZONTAL,200),
- m_Box_prt(Gtk::Orientation::HORIZONTAL,213), 
- m_Box_rrs(Gtk::Orientation::HORIZONTAL,82),m_Box_rrr(Gtk::Orientation::HORIZONTAL,79),
- m_Box_rns(Gtk::Orientation::HORIZONTAL,74),m_Box_rnp(Gtk::Orientation::HORIZONTAL,80),
- m_Box_rnd(Gtk::Orientation::HORIZONTAL,86),m_Box_rnr(Gtk::Orientation::HORIZONTAL,71),
- m_Label_general("General"), m_Label_info("Info : nombre de ..."), 
- m_Label_maj("mises à jour:"), m_Label_prt("particules:"), 
- m_Label_rrs("robots réparateurs en service:"), 
- m_Label_rrr("robots réparateurs en réserve:"), 
- m_Label_rns("robots neutraliseurs en service:"),
- m_Label_rnp("robots neutraliseurs en panne:"),
- m_Label_rnd("robots neutraliseurs détruits:"),
- m_Label_rnr("robots neutraliseurs en réserve:"),
- m_Button_exit("exit"), m_Button_open("open"), m_Button_save("save"), 
- m_Button_startstop("start"), m_Button_step("step"), timer_added(false), 
- disconnect(false), timeout_value(timer_update), dialogue(OPEN) {
+	m_Box_All(Gtk::Orientation::HORIZONTAL,10),
+	m_Box_Left(Gtk::Orientation::VERTICAL,3),
+	m_Box_Right(Gtk::Orientation::VERTICAL,0),
+	m_Box_maj(Gtk::Orientation::HORIZONTAL,200),
+	m_Box_prt(Gtk::Orientation::HORIZONTAL,213), 
+	m_Box_rrs(Gtk::Orientation::HORIZONTAL,82),
+	m_Box_rrr(Gtk::Orientation::HORIZONTAL,79),
+	m_Box_rns(Gtk::Orientation::HORIZONTAL,74),
+	m_Box_rnp(Gtk::Orientation::HORIZONTAL,80),
+	m_Box_rnd(Gtk::Orientation::HORIZONTAL,86),
+	m_Box_rnr(Gtk::Orientation::HORIZONTAL,71),
+	m_Label_general("General"), m_Label_info("Info : nombre de ..."), 
+	m_Label_maj("mises à jour:"), m_Label_prt("particules:"), 
+	m_Label_rrs("robots réparateurs en service:"), 
+	m_Label_rrr("robots réparateurs en réserve:"), 
+	m_Label_rns("robots neutraliseurs en service:"),
+	m_Label_rnp("robots neutraliseurs en panne:"),
+	m_Label_rnd("robots neutraliseurs détruits:"),
+	m_Label_rnr("robots neutraliseurs en réserve:"),
+	m_Button_exit("exit"), m_Button_open("open"), m_Button_save("save"), 
+	m_Button_startstop("start"), m_Button_step("step"), timer_added(false), 
+	disconnect(false), timeout_value(timer_update), dialogue(OPEN) {
 	reset_data();
 	if (argc == 1) {
 		Propre_en_Ordre = new Simulation(empty, false);
@@ -262,7 +267,7 @@ void Fenetre::on_button_clicked_step() {
 
 bool Fenetre::on_timeout() {
 	if (Propre_en_Ordre->getfile_success()) {
-		unsigned val(Propre_en_Ordre->s_getnbUpdate());
+		unsigned val = Propre_en_Ordre->s_getnbUpdate();
 		if(disconnect) {
 			disconnect = false;
 			return false;
@@ -272,7 +277,7 @@ bool Fenetre::on_timeout() {
 		Propre_en_Ordre->mise_a_jour();
 		monde.clear();
 		monde.draw();
-		if (simulation_over())	{
+		if (Propre_en_Ordre->simulation_over())	{
 			disconnect = true;
 			timer_added = false;
 			m_Button_startstop.set_label("start");
@@ -322,6 +327,6 @@ static void orthographic_projection(const Cairo::RefPtr<Cairo::Context>& cr,
 									const Frame& frame) {
 	cr->translate(frame.width/2, frame.height/2);
 	cr->scale(frame.width/(frame.xMax - frame.xMin),
-	-frame.height/(frame.yMax - frame.yMin));
+		-frame.height/(frame.yMax - frame.yMin));
 	cr->translate(-(frame.xMin + frame.xMax)/2, -(frame.yMin + frame.yMax)/2);
 }
