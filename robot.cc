@@ -66,19 +66,19 @@ S2d Neutra_1::find_goal(Carre target){
 	}
 	double delta_a(orientation - angle);
 	adjust_angle(delta_a); 
-	Carre risk_zone = {{xt, yt}, c*risk_factor +40*shape::epsil_zero};
+	Carre risk_zone = {{xt, yt}, c*risk_factor +20*shape::epsil_zero};
 	if ((xr != xt) and (yr != yt) and (!superposition_cerclecarre(risk_zone, forme, WITH_MARGIN))){ 
 		if (side == D){
-			return {xt, yt - risk_factor * c/2 - 40*shape::epsil_zero};
+			return {xt, yt - risk_factor * c/2 - 20*shape::epsil_zero};
 		}
 		else if (side == R){
-			return {xt + c/2 *risk_factor + 40*shape::epsil_zero, yt};
+			return {xt + c/2 *risk_factor + 20*shape::epsil_zero, yt};
 		}
 		else if (side == U){
-			return {xt, yt + risk_factor * c/2 + 40*shape::epsil_zero};
+			return {xt, yt + risk_factor * c/2 + 20*shape::epsil_zero};
 		}
 		else {
-			return {xt - c/2 *risk_factor - 40*shape::epsil_zero, yt};
+			return {xt - c/2 *risk_factor - 20*shape::epsil_zero, yt};
 		}
 	} else if (superposition_cerclecarre(risk_zone, forme, WITH_MARGIN) and (delta_a <=epsil_alignement)){ 
 		if (side == D)
@@ -451,20 +451,21 @@ void Reparateur::move(){
 	double norm(norme(pos_to_goal));
 	
 	S2d temp = forme.centre;
+	Cercle temp_cercle = forme;
 	if (norm <= max_delta_tr) {
 		forme.centre = goal;
 	} else {
 		add_scaled_vector(forme.centre, pos_to_goal, max_delta_tr/norm);
+		temp_cercle = forme;
 	}
 	if (superposition_particle_robot_sim(forme)){
 		forme.centre = temp;	
 	}
 	if (superposition_robots_sim()){
 		forme.centre = temp;
-		repair_neutra(goal);
 	}
-	//~ if (superposition_cercles(forme, {goal, r_neutraliseur + 2*shape::epsil_zero}, WITH_MARGIN))
-		//~ repair_neutra(goal);
+	if (superposition_cercles(temp_cercle, {goal, r_neutraliseur + 2*shape::epsil_zero}, WITH_MARGIN))
+		repair_neutra(goal);
 	return;
 }
 
@@ -484,10 +485,11 @@ void Neutraliseur::move(){
 		color = "orange";
 		return;
 	}
+	mod_2pi(orientation);
 	bool not_collision_robot(true);
 	S2d pos_to_goal = {goal.x - forme.centre.x, goal.y - forme.centre.y};
-	double goal_a(atan2(pos_to_goal.y ,pos_to_goal.x));
-	double delta_a(goal_a - orientation);
+	double goal_a = atan2(pos_to_goal.y ,pos_to_goal.x);
+	double delta_a = goal_a - orientation;
 	adjust_angle(delta_a);
 	if((fabs(delta_a) <= max_delta_rt) and (delta_a > epsil_alignement) and color != "purple"){
 		orientation = goal_a;
@@ -552,6 +554,7 @@ void Neutra_2::move(){
 		color = "orange";
 		return;
 	}
+	mod_2pi(orientation);
 	bool not_collision_robot(true);
 	S2d init_pos_to_goal = {goal.x - forme.centre.x, goal.y - forme.centre.y};
 	S2d travel_dir    = {cos(orientation), sin(orientation)}; 

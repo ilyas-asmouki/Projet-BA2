@@ -149,11 +149,11 @@ bool superposition_particle_robot_sim(Cercle robot){
 }
 
 S2d particle_to_destroy(S2d robot) {
-	S2d particle({0, 0});
+	S2d particle = NON_EXISTENT_PARTICLE;
 	for (size_t i = 0; i < tab_particule.size(); ++i)	{
 		if (superposition_cerclecarre(tab_particule[i].getForme(), {robot, r_neutraliseur}, WITH_MARGIN)) {
 			particle = tab_particule[i].getForme().centre;
-			break;
+			//~ break;
 		}
 	}
 	return particle;
@@ -179,4 +179,3 @@ Carre find_particule(S2d prt){
 	}
 	return carre;
 }
-	
