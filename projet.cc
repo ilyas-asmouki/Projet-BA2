@@ -4,6 +4,7 @@
 
 #include "simulation.h"
 #include "gui.h"
+#include "constantes.h"
 
 int main(int argc, char* argv[]) {		
 	auto app = Gtk::Application::create();

@@ -13,7 +13,6 @@
 
 enum {SPATIAL=2, REPARATEUR, NEUTRALISEUR};
 
-constexpr double INFINI(9999999);
 constexpr S2d LIMIT({INFINI, INFINI});
 
 constexpr double NULL_DATA(0);
@@ -490,7 +489,7 @@ void Neutraliseur::move(){
 	double goal_a(atan2(pos_to_goal.y ,pos_to_goal.x));
 	double delta_a(goal_a - orientation);
 	adjust_angle(delta_a);
-	if((fabs(delta_a) <= max_delta_rt) and (delta_a != 0) and color != "purple"){
+	if((fabs(delta_a) <= max_delta_rt) and (delta_a > epsil_alignement) and color != "purple"){
 		orientation = goal_a;
 	} else if (fabs(delta_a) > max_delta_rt and color != "purple") {
 		if (orientation < 0 and goal_a > 0){
@@ -501,7 +500,7 @@ void Neutraliseur::move(){
 		} else
 			orientation += ((delta_a > 0) ?  1. : -1.)*max_delta_rt;
 	} else {
-		S2d temp=forme.centre;
+		S2d temp = forme.centre;
 		S2d travel_dir = {cos(orientation), sin(orientation)}; 
 		add_scaled_vector(forme.centre, travel_dir, max_delta_tr);
 		if  (superposition_robots_sim()){
@@ -525,9 +524,14 @@ void Neutraliseur::move(){
 
 void Neutraliseur::decontaminate() { 
 	if (not panne)	{
-		Carre prt(find_particule(goal));
+		Carre prt;
+		if (goal.x == NON_EXISTENT_PARTICLE.x and goal.y == NON_EXISTENT_PARTICLE.y)
+			prt = find_particule(particle_to_destroy(forme.centre));
+		else
+			prt = find_particule(goal);
+		//~ Carre prt = find_particule(particle_to_destroy(forme.centre));
 		double angle = set_orientation(forme.centre, prt);
-		double delta_a(orientation - angle);
+		double delta_a = orientation - angle;
 		mod_2pi(orientation);
 		adjust_angle(delta_a);
 		if (fabs(delta_a) <= epsil_alignement){
@@ -630,8 +634,8 @@ unsigned find_indice(S2d temp){
 }
 
 void decision_reparateur(){
-	std::vector <double> tab_distance(spatial_getnbRs(), INFINI);
-	std::vector <S2d> tab_goal(spatial_getnbRs(), LIMIT);
+	std::vector<double> tab_distance(spatial_getnbRs(), INFINI);
+	std::vector<S2d> tab_goal(spatial_getnbRs(), LIMIT);
 	S2d vect;
 	double dist;
 	int k = NO_TARGET;
@@ -710,7 +714,7 @@ void find_first_neutraliser(Carre prt, std::vector<bool>& tab_neutra, double& t_
 					  tab_robot[spatial_getnbRs()+1+i]->get_data("orientation");
 			adjust_angle(d_angle);
 			t_min = dist/vtran_max + fabs(d_angle)/vrot_max;
-			k=i;
+			k = i;
 			return;
 		}
 	}
@@ -761,33 +765,40 @@ void decision_neutra_restant(std::vector<bool>& tab_neutra) {
 }
 			
 void decision_creation_robot(){
-	bool p(false);
-	if (spatial_getnbUpdate() % modulo_update ==0){
+	bool p = false, collision = false;
+	S2d centre = tab_robot[0]->getForme().centre;
+	for (size_t i = 1; i < tab_robot.size(); ++i)
+		if (superposition_cercles(tab_robot[i]->getForme(),
+		{centre, r_neutraliseur}, WITH_MARGIN)) {
+			collision = true;
+			break;
+		}
+	
+	if (spatial_getnbUpdate() % modulo_update ==0 and not collision){
 		if ((spatial_getnbNp() > spatial_getnbRs()) and (spatial_getnbRr() !=0)){
-			Reparateur* pt = new Reparateur(tab_robot[0]->getForme().centre.x, 
+			Reparateur* new_robot = new Reparateur(tab_robot[0]->getForme().centre.x, 
 											tab_robot[0]->getForme().centre.y, p);
-			tab_robot.insert(tab_robot.begin()+1,pt);
+			tab_robot.insert(tab_robot.begin()+1, new_robot);
 			tab_robot[0]->set_data("nbRs", spatial_getnbRs()+1);
 			tab_robot[0]->set_data("nbRr", spatial_getnbRr()-1);
 		} 
 		if ((getnbP() > 3*spatial_getnbNs() or spatial_getnbNs() < 3) 
 		and (spatial_getnbNr() != 0) and (getnbP() != 0)){
 			double type((spatial_getnbNd()+spatial_getnbNs())%3);
-			Neutraliseur* pt = nullptr;
-			bool p=false;
+			Neutraliseur* new_robot = nullptr;
+			bool p = false;
 			S2d centre(tab_robot[0]->getForme().centre);
-			double angle = set_orientation(centre, get_particle_shape(spatial_getnbNs()));
 				if (type == 0)	{
-					pt = new Neutra_0(centre.x, centre.y, angle ,type ,
-								"false", spatial_getnbUpdate(), default_k_update,p);
+					new_robot = new Neutra_0(centre.x, centre.y, default_orientation, type,
+								"false", spatial_getnbUpdate(), default_k_update, p);
 				} else if (type == 1) {
-					pt = new Neutra_1(centre.x, centre.y, angle ,type ,
-								"false", spatial_getnbUpdate(), default_k_update,p);
+					new_robot = new Neutra_1(centre.x, centre.y, default_orientation, type,
+								"false", spatial_getnbUpdate(), default_k_update, p);
 				} else if (type == 2) {
-					pt = new Neutra_2(centre.x, centre.y, angle-M_PI/6 ,type ,
-								"false", spatial_getnbUpdate(), default_k_update,p);
+					new_robot = new Neutra_2(centre.x, centre.y, default_orientation, type,
+								"false", spatial_getnbUpdate(), default_k_update, p);
 				}	
-			tab_robot.push_back(pt);
+			tab_robot.push_back(new_robot);
 			tab_robot[0]->set_data("nbNs", spatial_getnbNs()+1);
 			tab_robot[0]->set_data("nbNr", spatial_getnbNr()-1);
 		}

@@ -10,6 +10,9 @@
 #include <string>
 #include "shape.h"
 
+constexpr double INFINI(9999999);
+constexpr S2d NON_EXISTENT_PARTICLE({INFINI, INFINI});
+
 class Particule {
 public: 
 	Particule(double x, double y, double cote, bool& file_success);

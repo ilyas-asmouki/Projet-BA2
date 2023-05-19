@@ -7,8 +7,6 @@
 #include "shape.h"
 enum Etat_neutralisateur{EN_PANNE, EN_MARCHE};
 
-constexpr short unsigned maxF(25);
-
 constexpr double dmax(128.);
 constexpr double delta_t(0.125);  //seconde
 constexpr double r_spatial(16.);
