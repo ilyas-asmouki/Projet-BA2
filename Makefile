@@ -10,10 +10,10 @@ OFILES = projet.o simulation.o gui.o robot.o particule.o message.o shape.o graph
 
 all: $(OUT)
 
-projet.o: projet.cc gui.h simulation.h constantes.h
+projet.o: projet.cc gui.h simulation.h
 	$(CXX) $(CXXFLAGS) $(LINKING) -c $< -o $@ $(LINKING)
 	
-gui.o: gui.cc gui.h simulation.h graphic.h constantes.h
+gui.o: gui.cc gui.h simulation.h graphic.h
 	$(CXX) $(CXXFLAGS) $(LINKING) -c $< -o $@ $(LINKING)
 	
 simulation.o: simulation.cc simulation.h robot.h shape.h particule.h message.h constantes.h
@@ -31,7 +31,7 @@ message.o: message.cc message.h
 shape.o: shape.cc shape.h
 	$(CXX) $(CXXFLAGS) $(LINKING) -c $< -o $@ $(LINKING)
 	
-graphic.o: graphic.cc graphic.h constantes.h
+graphic.o: graphic.cc graphic.h
 	$(CXX) $(CXXFLAGS) $(LINKING) -c $< -o $@ $(LINKING)
 
 $(OUT): $(OFILES)

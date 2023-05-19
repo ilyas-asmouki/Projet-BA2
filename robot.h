@@ -83,6 +83,7 @@ protected :
 	unsigned type;
 	bool panne;
 	int k_update_panne;
+	bool decontaminating = false;
 	SIDE find_side(S2d particle);
 };
 
@@ -92,7 +93,6 @@ public :
 			 std::string bool_panne, int nbUpdate, int k_update_panne, 
 			 bool& file_success);
 	~Neutra_0(){}
-	//~ void move() override;
 };
 
 class Neutra_1 : public Neutraliseur {
@@ -101,7 +101,6 @@ public :
 			 std::string bool_panne, int nbUpdate, int k_update_panne, 
 			 bool& file_success);
 	~Neutra_1(){}
-	//~ void move() override;
 	virtual S2d find_goal(Carre target);
 };
 
@@ -142,7 +141,8 @@ S2d find_goal_if_inside_desintegration_area(double angle, double xt, double yt,
 											 double xr, double yr, double c);
 											
 void find_first_repairer(std::vector<double>& tab_distance, 
-						 std::vector<S2d>& tab_goal ,int& k, size_t i, S2d& temp);
+						 std::vector<S2d>& tab_goal ,
+						  std::vector<bool>& tab_reparateur ,int& k, size_t i, S2d& temp);
 void give_goal_repairer(std::vector<double>& tab_distance, std::vector<S2d>& tab_goal);
 unsigned find_indice(S2d temp);
 double set_orientation(S2d robot, Carre target);
