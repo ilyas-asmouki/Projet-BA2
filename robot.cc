@@ -542,7 +542,7 @@ void Neutraliseur::move(){
 void Neutraliseur::decontaminate() { 
 	decontaminating = true;
 	Carre prt;
-	if (goal.x == NON_EXISTENT_PARTICLE.x and goal.y == NON_EXISTENT_PARTICLE.y)
+	if (goal.x == non_existent_particle.x and goal.y == non_existent_particle.y)
 		prt = find_particule(particle_to_destroy(forme.centre));
 	else
 		prt = find_particule(goal);
@@ -636,7 +636,7 @@ unsigned find_indice(S2d temp){
 void decision_reparateur(){
 	std::vector<bool> tab_neutraliseur(spatial_getnbNs(), true);
 	for (size_t i(1); i <= spatial_getnbRs(); ++i){
-		double dist_min = INFINI;
+		double dist_min = infini;
 		int k(no_target);
 		for (size_t j(spatial_getnbRs()+1); j < tab_robot.size(); ++j){
 			if (tab_robot[j]->get_data("panne") 
@@ -834,4 +834,3 @@ void delete_robots()	{
 unsigned robots_left()	{
 	return tab_robot.size();
 }
-
