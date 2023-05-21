@@ -751,7 +751,7 @@ void decision_creation_robot(){
 			tab_robot[0]->set_data("nbRs", spatial_getnbRs()+1);
 			tab_robot[0]->set_data("nbRr", spatial_getnbRr()-1);
 		} 
-		if ((getnbP() > 3*spatial_getnbNs() or spatial_getnbNs() < 3) 
+		else if ((getnbP() > 3*spatial_getnbNs() or spatial_getnbNs() < 3) 
 		and (spatial_getnbNr() != 0) and (getnbP() != 0)){
 			double type((spatial_getnbNd()+spatial_getnbNs())%3);
 			Neutraliseur* new_robot = nullptr;
