@@ -73,7 +73,6 @@ public :
 	virtual double get_data(std::string data_type);
 	virtual void set_data(std:: string data_type, double value);
 	virtual void move();
-	virtual S2d find_goal(Carre target);
 
 protected :
 	double orientation;
@@ -139,8 +138,6 @@ void decision_creation_robot();
 void deplacement_robot();
 void decision_neutraliseur(Carre prt, std::vector<bool>& tab_neutra);
 void destroy_neutraliseurs();
-unsigned find_indice(S2d temp);
-double set_orientation(S2d robot, Carre target);
 void delete_robots();
 unsigned robots_left();
 
