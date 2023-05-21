@@ -125,10 +125,10 @@ void new_particules(unsigned i, bool file_success) {
 		Particule new_particle_2(carre.centre.x + d_particule / 4,
 								 carre.centre.y + d_particule / 4,
 								 d_particule/2 - 2*shape::epsil_zero, file_success);
-		Particule new_particle_3(carre.centre.x - d_particule / 4,
+		Particule new_particle_3(carre.centre.x + d_particule / 4,
 								 carre.centre.y - d_particule / 4,
 								 d_particule/2 - 2*shape::epsil_zero, file_success);
-		Particule new_particle_4(carre.centre.x + d_particule / 4,
+		Particule new_particle_4(carre.centre.x - d_particule / 4,
 								 carre.centre.y - d_particule / 4,
 								 d_particule/2 - 2*shape::epsil_zero, file_success);
 	}
@@ -153,18 +153,11 @@ bool superposition_particle_robot_sim(Cercle robot){
 }
 
 S2d particle_to_destroy(S2d robot) {
-	double xr = robot.x, yr = robot.y;
-	double dist_min = infini;
 	S2d particle = non_existent_particle;
 	for (size_t i = 0; i < tab_particule.size(); ++i)	{
 		if (superposition_cerclecarre(tab_particule[i].getForme(),
 			{robot, r_neutraliseur}, WITH_MARGIN)) {
-			S2d vect = {xr - tab_particule[i].getForme().centre.x, yr - 
-						tab_particule[i].getForme().centre.y}; 
-			if (norme(vect) < dist_min) {
 				particle = tab_particule[i].getForme().centre;
-				dist_min = norme(vect);
-			}
 		}
 	}
 	return particle;

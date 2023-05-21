@@ -43,10 +43,6 @@ S2d Robot::find_goal(Carre target) {
 	return target.centre;
 }
 
-S2d Neutraliseur::find_goal(Carre target) {
-	return target.centre;
-}
-
 S2d Neutra_1::find_goal(Carre target){
 	double xt = target.centre.x, yt = target.centre.y, c = target.cote;
 	double xr = forme.centre.x, yr = forme.centre.y;
@@ -71,8 +67,7 @@ S2d Neutra_1::find_goal(Carre target){
 		else {
 			return {xt - c/2 *risk_factor - 30*shape::epsil_zero, yt};
 		}
-	} else if (superposition_cerclecarre(risk_zone, forme, WITH_MARGIN) 
-		and (delta_a <=epsil_alignement)){ 
+	} else if (superposition_cerclecarre(risk_zone, forme, WITH_MARGIN)){ 
 		if (side == D)
 			return {xr, yt - c/2};
 		else if (side == R)
@@ -471,6 +466,7 @@ void Reparateur::repair_neutra(S2d goal){
 			and goal.y == tab_robot[i]->getForme().centre.y){
 			tab_robot[i]->set_data("panne", false);
 			tab_robot[i]->set_color("black");
+			tab_robot[i]->set_goal(goal);
 		}
 	}
 }
@@ -480,8 +476,6 @@ void Neutraliseur::determine_color(){
 		color = "orange";
 	else if (decontaminating)
 		color = "purple";
-	else 
-		color = "black";
 }
 
 void Neutraliseur::adjust_orientation(double goal_a, double delta_a){
@@ -502,15 +496,22 @@ void Neutraliseur::find_collision(Cercle temp_cercle, bool& not_collision_robot)
 	} else {
 		color = "black";
 	}
+	
 	if (superposition_particle_robot_sim(temp_cercle)){
-		goal = particle_to_destroy(forme.centre);
-		forme.centre = temp_cercle.centre;
 		color = "purple";
+		goal = particle_to_destroy(temp_cercle.centre);
+		decontaminate();
+		forme.centre = temp_cercle.centre;
+	} else if (superposition_particle_robot_sim(forme))	{
+		color = "purple";
+		goal = particle_to_destroy(forme.centre);
 		decontaminate();
 	} else if (not_collision_robot) {
 		color = "black";
 		decontaminating = false;
 	} else {
+		forme.centre = temp_cercle.centre;
+		color = "purple";
 		decontaminating = false;
 	}
 }
@@ -521,20 +522,25 @@ void Neutraliseur::move(){
 		return;
 	bool not_collision_robot(true);
 	S2d pos_to_goal = {goal.x - forme.centre.x, goal.y - forme.centre.y};
+	S2d travel_dir = {cos(orientation), sin(orientation)}; 
 	double goal_a(atan2(pos_to_goal.y ,pos_to_goal.x));
 	mod_2pi(orientation);
 	double delta_a(goal_a - orientation);
 	adjust_angle(delta_a);
-	if((fabs(delta_a) <= max_delta_rt) and 
-		(delta_a > epsil_alignement) and !decontaminating){
+	if((fabs(delta_a) <= max_delta_rt) and (fabs(delta_a) >= epsil_alignement) and 
+		!decontaminating){
 		orientation = goal_a;
 	} else if (fabs(delta_a) > max_delta_rt and !decontaminating) {
 		adjust_orientation(goal_a, delta_a);
 	} else {
 		Cercle temp_cercle = forme;
-		S2d travel_dir = {cos(orientation), sin(orientation)}; 
-		add_scaled_vector(forme.centre, travel_dir, max_delta_tr);
-		find_collision(temp_cercle, not_collision_robot);
+		if ((fabs(norme(pos_to_goal)) < max_delta_tr)){
+			add_scaled_vector(forme.centre, travel_dir,norme(pos_to_goal) );
+			find_collision(temp_cercle, not_collision_robot);
+		} else {
+			add_scaled_vector(forme.centre, travel_dir, max_delta_tr);
+			find_collision(temp_cercle, not_collision_robot);
+		}
 	}
 	return;
 }
@@ -542,25 +548,26 @@ void Neutraliseur::move(){
 void Neutraliseur::decontaminate() { 
 	decontaminating = true;
 	Carre prt;
-	if (goal.x == non_existent_particle.x and goal.y == non_existent_particle.y)
+	if (goal.x == non_existent_particle.x and goal.y == non_existent_particle.y){
 		prt = find_particule(particle_to_destroy(forme.centre));
+	}
 	else
 		prt = find_particule(goal);
 	double angle = set_orientation(forme.centre, prt);
-	double delta_a = orientation - angle;
 	mod_2pi(orientation);
+	double delta_a = angle - orientation;
 	adjust_angle(delta_a);
 	if (fabs(delta_a) <= epsil_alignement){
-		destroy_particle(goal);
+		destroy_particle(prt.centre);
 		color = "black";
 		decontaminating = false;
 	} else {
-		if((fabs(delta_a) <= max_delta_rt)) {
+		if ((fabs(delta_a) <= max_delta_rt)) {
 			orientation = angle;
 		} else if (fabs(delta_a) > max_delta_rt) {
-			orientation += ((delta_a > 0) ?  -1. : 1.)*max_delta_rt;	
+			adjust_orientation(angle, delta_a);
 		}
-	}		
+	}	
 }
 
 void Neutra_2::to_rotate(double goal_a, double delta_a){
@@ -582,14 +589,16 @@ void Neutra_2::move(){
 	if (panne)
 		return;
 	bool not_collision_robot(true);
+	Cercle temp_cercle = forme;
 	S2d init_pos_to_goal = {goal.x - forme.centre.x, goal.y - forme.centre.y};
+	mod_2pi(orientation);
 	S2d travel_dir = {cos(orientation), sin(orientation)}; 
 	double proj_goal = prod_scalaire(init_pos_to_goal, travel_dir);
 	double angle = atan2(goal.y - forme.centre.y , goal.x - forme.centre.x);
-	mod_2pi(orientation);
 	double delta_a = angle - orientation;
 	adjust_angle(delta_a);
-	if (fabs(delta_a) >= M_PI/3 + epsil_alignement and !decontaminating){
+	find_collision(temp_cercle, not_collision_robot);
+	if (fabs(delta_a) >= M_PI/3 and !decontaminating){
 		orientation += ((delta_a > 0) ?  1. : -1.)*max_delta_rt;
 		color = "black";
 		return;
@@ -600,11 +609,11 @@ void Neutra_2::move(){
 	if(fabs(proj_goal) > v_tran*delta_t){ 
 		proj_goal = ((proj_goal > 0) ? 1 : -1)*v_tran*delta_t;
 	}
-	Cercle temp_cercle = forme;
-	add_scaled_vector(forme.centre, travel_dir, proj_goal);
-	find_collision(temp_cercle, not_collision_robot);
-	to_rotate(angle, delta_a);
-	return;
+	if (!decontaminating){
+		add_scaled_vector(forme.centre, travel_dir, proj_goal);
+		find_collision(temp_cercle, not_collision_robot);
+		to_rotate(angle, delta_a);
+	}
 }
 
 void destroy_neutraliseurs(){
@@ -738,7 +747,7 @@ void decision_creation_robot(){
 		if ((spatial_getnbNp() > spatial_getnbRs()) and (spatial_getnbRr() !=0)){
 			Reparateur* new_robot = new Reparateur(tab_robot[0]->getForme().centre.x, 
 												tab_robot[0]->getForme().centre.y, p);
-			tab_robot.insert(tab_robot.begin()+1, new_robot);
+			tab_robot.insert(tab_robot.begin()+spatial_getnbRs()+1, new_robot);
 			tab_robot[0]->set_data("nbRs", spatial_getnbRs()+1);
 			tab_robot[0]->set_data("nbRr", spatial_getnbRr()-1);
 		} 
@@ -787,12 +796,13 @@ bool Robot::superposition_robots_sim() {
 double set_orientation(S2d robot, Carre target) {
     double xr = robot.x, yr = robot.y;
     double xt = target.centre.x, yt = target.centre.y, c = target.cote;
-    if (fabs(yt - yr) <= c/2){
+    if (fabs(yt - yr) < c/2 - shape::epsil_zero){
         return ((xr < xt) ? 0 : M_PI);
-    } else if (fabs(xt - xr) <= c/2)
+    } else if (fabs(xt - xr) < c/2 - shape::epsil_zero){
         return sign(yt - yr)*M_PI/2;
-    else
-         return atan2(yt - yr, xt - xr );
+    } else {
+         return atan2(yt - yr, xt - xr);
+    }
 }
 
 Side Neutraliseur::find_side(S2d particle){
@@ -807,7 +817,7 @@ Side Neutraliseur::find_side(S2d particle){
 		return D;
 }
 	
-void delete_robots()	{
+void delete_robots() {
 	S2d centre = tab_robot[0]->getForme().centre;
 	for (size_t i = 1; i < tab_robot.size(); ++i)	{
 		if (superposition_cercles(tab_robot[i]->getForme(),
